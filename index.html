@@ -15,7 +15,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: start;
-      padding-top: 20px;
+      padding: 10px;
       color: #2d3748;
       position: relative;
       overflow: hidden;
@@ -29,9 +29,10 @@
     }
 
     h1 {
-      font-size: 2.5em;
+      font-size: 2em;
       text-shadow: 0 2px 4px rgba(0,0,0,0.1);
       animation: logo-pulse 2s infinite ease-in-out;
+      margin: 10px 0;
     }
 
     @keyframes logo-pulse {
@@ -42,22 +43,24 @@
 
     #game-board {
       display: grid;
-      grid-gap: 15px;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 10px;
       justify-content: center;
-      margin: 30px auto;
+      margin: 20px auto;
       perspective: 1000px;
       position: relative;
       background: rgba(255,255,255,0.1);
-      padding: 20px;
+      padding: 15px;
       border-radius: 15px;
       box-shadow: 0 8px 16px rgba(0,0,0,0.15);
       transition: opacity 0.5s;
-      max-width: 90vw;
+      max-width: 100%;
+      width: 300px;
     }
 
     .card {
-      width: 120px;
-      height: 160px;
+      width: 80px;
+      height: 120px;
       position: relative;
       cursor: pointer;
       transform-style: preserve-3d;
@@ -91,7 +94,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 48px;
+      font-size: 32px;
     }
 
     .card .back {
@@ -128,7 +131,7 @@
     }
 
     #hearts {
-      font-size: 28px;
+      font-size: 24px;
       margin: 10px;
       transition: transform 0.3s;
     }
@@ -149,9 +152,9 @@
     }
 
     #message {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: bold;
-      margin-top: 10px;
+      margin: 10px;
       opacity: 0;
       transition: opacity 0.5s, transform 0.5s;
       z-index: 10;
@@ -164,7 +167,7 @@
     }
 
     #stage-indicator {
-      font-size: 24px;
+      font-size: 20px;
       margin: 10px;
       display: flex;
       justify-content: center;
@@ -173,14 +176,14 @@
     }
 
     .stage-dot {
-      width: 30px;
-      height: 30px;
+      width: 25px;
+      height: 25px;
       border-radius: 50%;
       background: rgba(255,255,255,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
       color: #718096;
       transition: background 0.3s, color 0.3s;
@@ -208,8 +211,8 @@
 
     .confetti {
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       background: var(--color);
       opacity: 0.8;
       pointer-events: none;
@@ -238,8 +241,8 @@
 
     .bg-particle {
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       background: rgba(255,255,255,0.3);
       border-radius: 50%;
       pointer-events: none;
@@ -299,8 +302,8 @@
     }
 
     #welcome-message {
-      font-size: 1.2em;
-      margin: 20px;
+      font-size: 1em;
+      margin: 15px;
       opacity: 0;
       animation: fade-in 1s forwards 0.5s;
     }
@@ -310,8 +313,8 @@
     }
 
     button {
-      padding: 15px 30px;
-      font-size: 18px;
+      padding: 10px 25px;
+      font-size: 16px;
       font-family: 'Noto Sans KR', sans-serif;
       background: #48bb78;
       color: white;
@@ -343,27 +346,26 @@
     }
 
     button:active::after {
-      width: 200px;
-      height: 200px;
+      width: 150px;
+      height: 150px;
     }
 
     #score, #timer {
-      font-size: 20px;
-      margin: 10px;
+      font-size: 18px;
+      margin: 5px;
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
     #hint-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
+      position: static;
+      margin: 10px auto;
+      padding: 8px 15px;
+      font-size: 14px;
     }
 
     #progress-bar {
-      width: 300px;
-      height: 10px;
+      width: 250px;
+      height: 8px;
       background: rgba(255,255,255,0.3);
       border-radius: 5px;
       margin: 10px auto;
@@ -378,14 +380,14 @@
 
     @media (max-width: 600px) {
       #game-board {
-        width: 320px;
+        width: 270px;
         grid-gap: 8px;
         padding: 10px;
         border-radius: 10px;
       }
       .card {
-        width: 60px;
-        height: 80px;
+        width: 70px;
+        height: 100px;
         font-size: 24px;
       }
       .card .front, .card .back {
@@ -394,9 +396,26 @@
       #progress-bar {
         width: 200px;
       }
+      h1 {
+        font-size: 1.8em;
+      }
       button {
-        padding: 10px 20px;
+        padding: 8px 20px;
+        font-size: 14px;
+      }
+      #message {
+        font-size: 24px;
+      }
+      #score, #timer {
         font-size: 16px;
+      }
+      #stage-indicator {
+        font-size: 18px;
+      }
+      .stage-dot {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
       }
     }
   </style>
@@ -458,15 +477,15 @@
     ];
 
     const audioFiles = {
-      flip: 'https://freesound.org/data/previews/418/418023_5864362-lq.mp3', // Water drop
-      match: 'https://freesound.org/data/previews/614/614095_11861866-lq.mp3', // Bubble pop
-      mismatch: 'https://freesound.org/data/previews/320/320934_5260872-lq.mp3', // Subtle error
-      stageClear: 'https://freesound.org/data/previews/387/387230_4062818-lq.mp3', // Chime
-      gameOver: 'https://freesound.org/data/previews/531/531981_10477364-lq.mp3', // Splash
-      victory: 'https://freesound.org/data/previews/503/503857_2354687-lq.mp3', // Sparkle
-      hint: 'https://freesound.org/data/previews/423/423275_6867652-lq.mp3', // Gentle click
-      bgm: 'https://freesound.org/data/previews/353/353954_6142149-lq.mp3', // Ambient
-      button: 'https://freesound.org/data/previews/336/336899_1676145-lq.mp3' // Click
+      flip: 'https://freesound.org/data/previews/485/485032_10113926-lq.mp3', // Card flip
+      match: 'https://freesound.org/data/previews/171/171671_2437358-lq.mp3', // Positive ding
+      mismatch: 'https://freesound.org/data/previews/476/476477_5663678-lq.mp3', // Error buzz
+      stageClear: 'https://freesound.org/data/previews/614/614087_11861866-lq.mp3', // Success chime
+      gameOver: 'https://freesound.org/data/previews/269/269705_5098388-lq.mp3', // Game over tone
+      victory: 'https://freesound.org/data/previews/612/612093_5678038-lq.mp3', // Victory fanfare
+      hint: 'https://freesound.org/data/previews/423/423271_6867652-lq.mp3', // Hint click
+      bgm: 'https://freesound.org/data/previews/614/614078_7037146-lq.mp3', // Calm ambient
+      button: 'https://freesound.org/data/previews/682/682252_13373712-lq.mp3' // Button click
     };
 
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -477,7 +496,7 @@
       if (audioContext.state === 'suspended') {
         try {
           await audioContext.resume();
-          console.log('AudioContext resumed');
+          console.log('AudioContext resumed successfully');
           isAudioUnlocked = true;
         } catch (err) {
           console.warn('Failed to resume AudioContext:', err);
@@ -487,20 +506,33 @@
       }
     }
 
-    Object.keys(audioFiles).forEach(key => {
-      const audio = new Audio(audioFiles[key]);
-      audio.preload = 'auto';
-      audio.volume = key === 'bgm' ? 0.3 : 0.7;
-      if (key === 'bgm') audio.loop = true;
-      audio.addEventListener('canplaythrough', () => {
-        console.log(`Sound ${key} loaded`);
+    function loadSound(key, url) {
+      return new Promise((resolve, reject) => {
+        const audio = new Audio(url);
+        audio.preload = 'auto';
+        audio.volume = key === 'bgm' ? 0.2 : 0.6;
+        if (key === 'bgm') audio.loop = true;
+        audio.addEventListener('canplaythrough', () => {
+          console.log(`Sound ${key} loaded successfully`);
+          resolve(audio);
+        }, { once: true });
+        audio.addEventListener('error', (e) => {
+          console.warn(`Error loading sound ${key}:`, e);
+          reject(e);
+        }, { once: true });
+        audio.load();
       });
-      audio.addEventListener('error', (e) => {
-        console.warn(`Error loading sound ${key}:`, e);
-      });
-      audio.load();
-      sounds[key] = audio;
-    });
+    }
+
+    async function initializeSounds() {
+      for (const [key, url] of Object.entries(audioFiles)) {
+        try {
+          sounds[key] = await loadSound(key, url);
+        } catch (err) {
+          console.warn(`Failed to initialize sound ${key}:`, err);
+        }
+      }
+    }
 
     async function playSound(key) {
       if (!sounds[key]) {
@@ -513,10 +545,10 @@
       try {
         if (sounds[key].readyState < 2) {
           console.log(`Sound ${key} not ready, waiting...`);
-          await new Promise(resolve => {
+          await new Promise((resolve) => {
             sounds[key].oncanplaythrough = () => resolve();
             sounds[key].onerror = () => resolve();
-            setTimeout(resolve, 2000);
+            setTimeout(resolve, 1500);
           });
         }
         sounds[key].currentTime = 0;
@@ -602,7 +634,7 @@
         board.innerHTML = "";
         cards = generateCards();
         shuffle(cards);
-        board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(cards.length))}, 120px)`;
+        board.style.gridTemplateColumns = `repeat(3, 1fr)`;
         cards.forEach(img => {
           const card = document.createElement("div");
           card.classList.add("card");
@@ -624,7 +656,7 @@
         board.style.opacity = "1";
         startTimer();
       }, 500);
-      sounds.bgm.volume = 0.3 + (stage - 1) * 0.05;
+      sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
     }
 
     function updateHearts(change = 0) {
@@ -752,7 +784,7 @@
       for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
         const particle = document.createElement('div');
         particle.classList.add('particle');
-        const size = Math.random() * 12 + 6;
+        const size = Math.random() * 10 + 5;
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         particle.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
@@ -773,8 +805,8 @@
       for (let i = 0; i < CONFIG.CONFETTI_COUNT; i++) {
         const confetti = document.createElement('div');
         confetti.classList.add('confetti');
-        confetti.style.width = `${Math.random() * 12 + 6}px`;
-        confetti.style.height = `${Math.random() * 12 + 6}px`;
+        confetti.style.width = `${Math.random() * 10 + 5}px`;
+        confetti.style.height = `${Math.random() * 10 + 5}px`;
         confetti.style.left = `${Math.random() * 100}vw`;
         confetti.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
         confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
@@ -789,7 +821,7 @@
       for (let i = 0; i < CONFIG.VICTORY_PARTICLE_COUNT; i++) {
         const particle = document.createElement('div');
         particle.classList.add('victory-particle');
-        const size = Math.random() * 20 + 10;
+        const size = Math.random() * 15 + 8;
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         particle.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
@@ -870,6 +902,11 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       console.log("DOM fully loaded");
+      initializeSounds().then(() => {
+        console.log("All sounds initialized");
+      }).catch(err => {
+        console.warn("Sound initialization failed:", err);
+      });
       startButton.removeEventListener('click', startGame);
       startButton.addEventListener('click', () => {
         console.log("Start button clicked");
