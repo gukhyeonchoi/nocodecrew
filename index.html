@@ -393,13 +393,21 @@
         padding: 8px;
         border-radius: 10px;
       }
+      #game-board.stage-5 {
+        width: 300px;
+      }
       .card {
         width: 64px;
         height: 96px;
         font-size: 20px;
       }
-      .card .front, .card .back {
-        font-size: 20px;
+      .stage-5 .card {
+        width: 60px;
+        height: 90px;
+        font-size: 18px;
+      }
+      .stage-5 .card .front, .stage-5 .card .back {
+        font-size: 18px;
       }
       #progress-bar {
         width: 200px;
@@ -459,9 +467,9 @@
   <script>
     const CONFIG = {
       MAX_STAGES: 5,
-      HEARTS_PER_STAGE: [10, 8, 5, 4, 4],
+      HEARTS_PER_STAGE: [10, 8, 6, 6, 5],
       TIME_LIMITS: [60, 50, 40, 35, 30],
-      CARD_PAIRS: [6, 6, 6, 6, 6],
+      CARD_PAIRS: [6, 6, 6, 8, 8],
       CARD_FLIP_DURATION: 400,
       WRONG_CARD_RESET_DELAY: 400,
       SHAKE_ANIMATION_DURATION: 300,
@@ -491,14 +499,14 @@
     ];
 
     const audioFiles = {
-      flip: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3', // Card flip
-      match: 'https://freesound.org/data/previews/276/276020_2731063-lq.mp3', // Positive chime
-      mismatch: 'https://freesound.org/data/previews/415/415209_5121236-lq.mp3', // Error buzz
-      stageClear: 'https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg', // Success jingle
-      gameOver: 'https://freesound.org/data/previews/331/331912_3248244-lq.mp3', // Failure tone
-      victory: 'https://freesound.org/data/previews/154/154976_2731063-lq.mp3', // Victory fanfare
-      hint: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3', // Soft click
-      bgm: 'https://cdn.pixabay.com/download/audio/2023/05/01/audio_32a3c268a7.mp3?filename=soft-ambient-piano-11894.mp3' // Ambient piano loop
+      flip: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3',
+      match: 'https://freesound.org/data/previews/171/171671_2437358-lq.mp3',
+      mismatch: 'https://freesound.org/data/previews/415/415209_5121236-lq.mp3',
+      stageClear: 'https://cdn.freesound.org/previews/171/171670_2437358-lq.mp3',
+      gameOver: 'https://cdn.freesound.org/previews/171/171673_2437358-lq.mp3',
+      victory: 'https://freesound.org/data/previews/154/154976_2731063-lq.mp3',
+      hint: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3',
+      bgm: 'https://cdn.pixabay.com/download/audio/2023/05/01/audio_32a3c268a7.mp3?filename=soft-ambient-piano-11894.mp3'
     };
 
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -643,6 +651,15 @@
         back.style.background = STAGE_THEMES[stage - 1].cardBack;
       });
       board.style.opacity = "0";
+      board.classList.remove('stage-5');
+      if (stage === 5) {
+        board.classList.add('stage-5');
+        board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        board.style.gridTemplateRows = 'repeat(4, 1fr)';
+      } else {
+        board.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        board.style.gridTemplateRows = 'repeat(4, 1fr)';
+      }
       setTimeout(() => {
         board.innerHTML = "";
         cards = generateCards();
@@ -745,7 +762,7 @@
     }
 
     function generateCards() {
-      const base = ["🍎","🍌","🍇","🍓","🍊","🍉","🍍","🥝","🍒","🍑"];
+      const base = ["🍎","🍌","🍇","🍓","🍊","🍉","🍍","🥝","🍒","🍑","🍋","🍈"];
       const pairCount = CONFIG.CARD_PAIRS[stage - 1];
       const selected = base.slice(0, pairCount);
       return [...selected, ...selected];
