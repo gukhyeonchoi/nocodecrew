@@ -16,6 +16,8 @@
       justify-content: start;
       padding-top: 20px;
       color: #333;
+      position: relative; /* For full-screen effects */
+      overflow: hidden;
     }
 
     #game-board {
@@ -25,6 +27,7 @@
       justify-content: center;
       margin: 30px auto;
       perspective: 1000px;
+      position: relative;
     }
 
     .card {
@@ -33,7 +36,7 @@
       position: relative;
       cursor: pointer;
       transform-style: preserve-3d;
-      transition: transform 0.6s;
+      transition: transform 0.4s;
     }
 
     .card.flipped {
@@ -64,11 +67,11 @@
 
     .card.matched .front {
       border: 3px solid limegreen;
-      animation: glow 1s infinite alternate;
+      animation: glow 0.8s infinite alternate;
     }
 
     .card.wrong {
-      animation: shake 0.5s;
+      animation: shake 0.3s;
     }
 
     @keyframes glow {
@@ -111,24 +114,133 @@
       margin-top: 10px;
       opacity: 0;
       transition: opacity 0.5s, transform 0.5s;
+      z-index: 10;
     }
 
     #message.show {
       opacity: 1;
       transform: scale(1.1);
     }
+
+    #stage-indicator {
+      font-size: 24px;
+      margin: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stage-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #666;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .stage-dot.active {
+      background: #4caf50;
+      color: white;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.9;
+      pointer-events: none;
+      animation: particle-burst 0.6s ease-out forwards;
+    }
+
+    @keyframes particle-burst {
+      0% {
+        transform: scale(0) translate(0, 0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) translate(var(--dx), var(--dy));
+        opacity: 0;
+      }
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: var(--color);
+      opacity: 0.8;
+      pointer-events: none;
+      animation: confetti-fall 2s ease-out forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .victory-particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.9;
+      pointer-events: none;
+      animation: victory-burst 1s ease-out forwards;
+    }
+
+    @keyframes victory-burst {
+      0% {
+        transform: scale(0) translate(0, 0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(2) translate(var(--dx), var(--dy));
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>Memory Card Game</h1>
+  <div id="stage-indicator"></div>
   <div id="hearts"></div>
   <div id="game-board"></div>
   <div id="message"></div>
 
   <script>
+    // Configuration object for easy balance adjustments
+    const CONFIG = {
+      MAX_STAGES: 5,
+      HEARTS_PER_STAGE: [10, 8, 5, 4, 3],
+      CARD_FLIP_DURATION: 400,
+      WRONG_CARD_RESET_DELAY: 400,
+      SHAKE_ANIMATION_DURATION: 300,
+      GLOW_ANIMATION_DURATION: 800,
+      MESSAGE_DISPLAY_DURATION: 1500,
+      STAGE_TRANSITION_DELAY: 2000,
+      HEART_GAIN_ANIMATION: 300,
+      HEART_LOSE_ANIMATION: 500,
+      PARTICLE_COUNT: 30, // Increased for more vibrant effect
+      PARTICLE_DISTANCE: { MIN: 20, MAX: 100 }, // Wider spread
+      CONFETTI_COUNT: 50, // For stage clear
+      VICTORY_PARTICLE_COUNT: 100, // For final victory
+      VICTORY_PARTICLE_DISTANCE: { MIN: 50, MAX: 200 } // For final victory
+    };
+
     const board = document.getElementById("game-board");
     const heartsDiv = document.getElementById("hearts");
     const messageDiv = document.getElementById("message");
+    const stageIndicator = document.getElementById("stage-indicator");
 
     let stage = 1;
     let hearts = 0;
@@ -136,13 +248,17 @@
     let lockBoard = false;
     let cards = [];
 
-    function startStage() {
-      // 스테이지별 하트 초기화
-      if (stage === 1) hearts = 10;
-      else if (stage === 2) hearts = 8;
-      else hearts = 5;
+    // Sound effects
+    const flipSound = new Audio('https://freesound.org/data/previews/191/191588_2436547-lq.mp3');
+    const matchSound = new Audio('https://freesound.org/data/previews/387/387179_7252659-lq.mp3');
+    const mismatchSound = new Audio('https://freesound.org/data/previews/342/342749_5760947-lq.mp3');
+    const stageClearSound = new Audio('https://freesound.org/data/previews/269/269026_4486188-lq.mp3');
+    const gameOverSound = new Audio('https://freesound.org/data/previews/531/531539_11435364-lq.mp3');
 
+    function startStage() {
+      hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
       updateHearts();
+      updateStageIndicator();
       showMessage(`Stage ${stage}`);
       board.innerHTML = "";
       cards = generateCards();
@@ -169,14 +285,15 @@
     }
 
     function updateHearts(change = 0) {
+      hearts += change;
       heartsDiv.textContent = "❤️".repeat(hearts);
 
       if (change > 0) {
         heartsDiv.classList.add("gain");
-        setTimeout(() => heartsDiv.classList.remove("gain"), 300);
+        setTimeout(() => heartsDiv.classList.remove("gain"), CONFIG.HEART_GAIN_ANIMATION);
       } else if (change < 0) {
         heartsDiv.classList.add("lose");
-        setTimeout(() => heartsDiv.classList.remove("lose"), 500);
+        setTimeout(() => heartsDiv.classList.remove("lose"), CONFIG.HEART_LOSE_ANIMATION);
       }
     }
 
@@ -185,14 +302,28 @@
       messageDiv.classList.add("show");
       setTimeout(() => {
         messageDiv.classList.remove("show");
-      }, 1500);
+      }, CONFIG.MESSAGE_DISPLAY_DURATION);
+    }
+
+    function updateStageIndicator() {
+      stageIndicator.innerHTML = '';
+      for (let i = 1; i <= CONFIG.MAX_STAGES; i++) {
+        if (i > 1) {
+          const connector = document.createTextNode('-');
+          stageIndicator.appendChild(connector);
+        }
+        const dot = document.createElement('div');
+        dot.classList.add('stage-dot');
+        dot.textContent = i;
+        if (i === stage) dot.classList.add('active');
+        stageIndicator.appendChild(dot);
+      }
     }
 
     function generateCards() {
-      // 카드 이미지 (이모지 활용)
       const base = ["🍎","🍌","🍇","🍓","🍊","🍉","🍍","🥝"];
-      const selected = base.slice(0, 8); 
-      return [...selected, ...selected]; // 짝 맞추기용
+      const selected = base.slice(0, 8);
+      return [...selected, ...selected];
     }
 
     function shuffle(array) {
@@ -206,6 +337,7 @@
       if (lockBoard || this.classList.contains("flipped")) return;
 
       this.classList.add("flipped");
+      flipSound.play();
 
       if (!firstCard) {
         firstCard = this;
@@ -214,49 +346,132 @@
       }
     }
 
+    function createMatchParticles(x, y) {
+      const colors = ['yellow', 'orange', 'red', 'limegreen', 'cyan', 'magenta'];
+      for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        const size = Math.random() * 10 + 5; // Random size between 5-15px
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * (CONFIG.PARTICLE_DISTANCE.MAX - CONFIG.PARTICLE_DISTANCE.MIN) + CONFIG.PARTICLE_DISTANCE.MIN;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        particle.style.setProperty('--dx', `${dx}px`);
+        particle.style.setProperty('--dy', `${dy}px`);
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        board.appendChild(particle);
+        setTimeout(() => particle.remove(), 600);
+      }
+    }
+
+    function createConfetti() {
+      const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'pink'];
+      for (let i = 0; i < CONFIG.CONFETTI_COUNT; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.width = `${Math.random() * 10 + 5}px`;
+        confetti.style.height = `${Math.random() * 10 + 5}px`;
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 2000);
+      }
+    }
+
+    function createVictoryParticles() {
+      const colors = ['gold', 'silver', 'red', 'blue', 'green', 'purple', 'cyan', 'magenta'];
+      for (let i = 0; i < CONFIG.VICTORY_PARTICLE_COUNT; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('victory-particle');
+        const size = Math.random() * 15 + 10; // Larger particles
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * (CONFIG.VICTORY_PARTICLE_DISTANCE.MAX - CONFIG.VICTORY_PARTICLE_DISTANCE.MIN) + CONFIG.VICTORY_PARTICLE_DISTANCE.MIN;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        particle.style.setProperty('--dx', `${dx}px`);
+        particle.style.setProperty('--dy', `${dy}px`);
+        particle.style.left = `${window.innerWidth / 2}px`;
+        particle.style.top = `${window.innerHeight / 2}px`;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 1000);
+      }
+    }
+
     function checkMatch(secondCard) {
+      lockBoard = true;
+
       if (firstCard.dataset.img === secondCard.dataset.img) {
-        // 매칭 성공
         firstCard.classList.add("matched");
         secondCard.classList.add("matched");
-        hearts++;
+        matchSound.play();
         updateHearts(+1);
-        firstCard = null;
-      } else {
-        // 매칭 실패
-        lockBoard = true;
-        hearts--;
-        updateHearts(-1);
 
+        const rect1 = firstCard.getBoundingClientRect();
+        const rect2 = secondCard.getBoundingClientRect();
+        const boardRect = board.getBoundingClientRect();
+        const centerX = (rect1.left + rect2.left + rect1.width) / 2 - boardRect.left;
+        const centerY = (rect1.top + rect2.top + rect1.height) / 2 - boardRect.top;
+        createMatchParticles(centerX, centerY);
+
+        firstCard = null;
+        lockBoard = false;
+      } else {
+        mismatchSound.play();
         firstCard.classList.add("wrong");
         secondCard.classList.add("wrong");
+        updateHearts(-1);
 
         setTimeout(() => {
-          firstCard.classList.remove("flipped","wrong");
-          secondCard.classList.remove("flipped","wrong");
+          firstCard.classList.remove("flipped", "wrong");
+          secondCard.classList.remove("flipped", "wrong");
           firstCard = null;
           lockBoard = false;
-        }, 1000);
+        }, CONFIG.WRONG_CARD_RESET_DELAY);
 
         if (hearts <= 0) {
+          gameOverSound.play();
           showMessage("Game Over!");
           setTimeout(() => {
             stage = 1;
             startStage();
-          }, 2000);
+          }, CONFIG.STAGE_TRANSITION_DELAY);
           return;
         }
       }
 
-      // 스테이지 클리어 체크
       if (document.querySelectorAll(".matched").length === cards.length) {
+        stageClearSound.play();
         showMessage(`Stage ${stage} Clear!`);
-        stage = stage === 3 ? 1 : stage + 1;
-        setTimeout(() => startStage(), 2000);
+        createConfetti();
+        if (stage === CONFIG.MAX_STAGES) {
+          setTimeout(() => {
+            showMessage("All Stages Cleared! Victory!");
+            createVictoryParticles();
+            stage = 1;
+            setTimeout(() => startStage(), CONFIG.STAGE_TRANSITION_DELAY);
+          }, CONFIG.STAGE_TRANSITION_DELAY);
+        } else {
+          stage += 1;
+          setTimeout(() => startStage(), CONFIG.STAGE_TRANSITION_DELAY);
+        }
       }
     }
 
-    // 초기 시작
+    // Apply CONFIG to CSS dynamically
+    const styleSheet = document.styleSheets[0];
+    styleSheet.insertRule(`.card { transition: transform ${CONFIG.CARD_FLIP_DURATION / 1000}s; }`, styleSheet.cssRules.length);
+    styleSheet.insertRule(`.card.wrong { animation: shake ${CONFIG.SHAKE_ANIMATION_DURATION / 1000}s; }`, styleSheet.cssRules.length);
+    styleSheet.insertRule(`.card.matched .front { animation: glow ${CONFIG.GLOW_ANIMATION_DURATION / 1000}s infinite alternate; }`, styleSheet.cssRules.length);
+
+    // Initial start
     startStage();
   </script>
 </body>
