@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>메모리 카드 게임</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1, minimum-scale=1">
+  <title>기억력 카드 게임</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -16,6 +16,7 @@
       align-items: center;
       justify-content: start;
       padding: 10px;
+      padding-bottom: 60px; /* 안드로이드 내비게이션 바를 위한 여백 */
       color: #2d3748;
       position: relative;
       overflow: hidden;
@@ -357,10 +358,13 @@
     }
 
     #hint-button {
-      position: static;
-      margin: 10px auto;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      margin: 0;
       padding: 8px 15px;
       font-size: 14px;
+      z-index: 15;
     }
 
     #progress-bar {
@@ -476,17 +480,20 @@
       { bg: 'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)', cardBack: 'linear-gradient(45deg, #6c5ce7, #a29bfe)' },
     ];
 
-    const audioFiles = {
-      flip: 'https://freesound.org/data/previews/485/485032_10113926-lq.mp3', // Card flip
-      match: 'https://freesound.org/data/previews/171/171671_2437358-lq.mp3', // Positive ding
-      mismatch: 'https://freesound.org/data/previews/476/476477_5663678-lq.mp3', // Error buzz
-      stageClear: 'https://freesound.org/data/previews/614/614087_11861866-lq.mp3', // Success chime
-      gameOver: 'https://freesound.org/data/previews/269/269705_5098388-lq.mp3', // Game over tone
-      victory: 'https://freesound.org/data/previews/612/612093_5678038-lq.mp3', // Victory fanfare
-      hint: 'https://freesound.org/data/previews/423/423271_6867652-lq.mp3', // Hint click
-      bgm: 'https://freesound.org/data/previews/614/614078_7037146-lq.mp3', // Calm ambient
-      button: 'https://freesound.org/data/previews/682/682252_13373712-lq.mp3' // Button click
-    };
+  const audioFiles = {
+  flip: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3',
+  match: 'https://freesound.org/data/previews/276/276020_2731063-lq.mp3',
+  mismatch: 'https://freesound.org/data/previews/415/415209_5121236-lq.mp3',
+  stageClear: 'https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg',
+  gameOver: 'https://freesound.org/data/previews/331/331912_3248244-lq.mp3',
+  victory: 'https://freesound.org/data/previews/154/154976_2731063-lq.mp3',
+  hint: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3',
+  bgm: 'https://cdn.pixabay.com/download/audio/2023/05/01/audio_32a3c268a7.mp3?filename=soft-ambient-piano-11894.mp3'
+};
+
+
+
+
 
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const sounds = {};
