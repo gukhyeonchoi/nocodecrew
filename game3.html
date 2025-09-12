@@ -1,0 +1,508 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evo2048 - 몬스터 합체 & 전투</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      background: linear-gradient(to bottom, #faf8ef, #e4dede);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #776e65;
+      margin-bottom: 10px;
+    }
+    #battle-container {
+      max-width: 400px;
+      width: 100%;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #battle-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .monster {
+      text-align: center;
+      width: 45%;
+    }
+    .monster-icon {
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+    .hp-bar {
+      height: 10px;
+      background: #ccc;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .hp-bar-fill {
+      height: 100%;
+      background: #2ecc71;
+      transition: width 0.3s ease;
+    }
+    #battle-log {
+      max-height: 100px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      color: #776e65;
+      text-align: left;
+      padding: 5px;
+      background: rgba(238, 228, 218, 0.5);
+      border-radius: 5px;
+    }
+    #game-container {
+      background: #bbada0;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+    #game {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      background: #bbada0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .tile {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: transform 0.2s ease, background 0.2s ease;
+      font-size: 2.5rem;
+      color: #fff;
+    }
+    .tile.empty {
+      background: rgba(238, 228, 218, 0.2);
+    }
+    .tile.slime.level-1 { background: #2ecc71; }
+    .tile.slime.level-2 { background: #27ae60; }
+    .tile.slime.level-3 { background: #1e8449; }
+    .tile.mushroom.level-1 { background: #e74c3c; }
+    .tile.mushroom.level-2 { background: #c0392b; }
+    .tile.mushroom.level-3 { background: #962d22; }
+    .tile.golem.level-1 { background: #7f8c8d; }
+    .tile.golem.level-2 { background: #6d7676; }
+    .tile.golem.level-3 { background: #5a6262; }
+    .tile.dragon.level-1 { background: #3498db; }
+    .tile.dragon.level-2 { background: #2980b9; }
+    .tile.dragon.level-3 { background: #1f618d; }
+    .tile-merged {
+      animation: pop 0.3s ease;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    #score, #high-score {
+      font-size: 1.2rem;
+      color: #776e65;
+      margin: 10px 0;
+    }
+    #instructions {
+      font-size: 0.9rem;
+      color: #776e65;
+      max-width: 400px;
+      margin: 10px auto;
+    }
+    #restart, #undo {
+      background: #8f7a66;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+      transition: background 0.2s ease;
+    }
+    #restart:hover {
+      background: #776e65;
+    }
+    #undo {
+      background: #3498db;
+    }
+    #undo:hover {
+      background: #2980b9;
+    }
+    @media (max-width: 400px) {
+      #game { gap: 8px; }
+      .tile { font-size: 2rem; }
+      .monster-icon { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Evo2048 - 몬스터 합체 & 전투</h1>
+  <div id="battle-container">
+    <div id="battle-field">
+      <div id="player-monsters" class="monster">
+        <div class="monster-icon"></div>
+        <div class="hp-bar"><div class="hp-bar-fill" style="width: 100%"></div></div>
+      </div>
+      <div id="enemy-monster" class="monster">
+        <div class="monster-icon"></div>
+        <div class="hp-bar"><div class="hp-bar-fill" style="width: 100%"></div></div>
+      </div>
+    </div>
+    <div id="battle-log"></div>
+  </div>
+  <p id="score">점수: 0</p>
+  <p id="high-score">최고 점수: 0</p>
+  <div id="game-container">
+    <div id="game"></div>
+  </div>
+  <p id="instructions">화살표 키나 스와이프로 2048을 플레이해 레벨 3 몬스터를 소환하세요! 소환된 몬스터는 전투에서 적과 싸웁니다!</p>
+  <button id="restart">게임 재시작</button>
+  <button id="undo">되돌리기</button>
+
+  <script>
+    const SIZE = 4;
+    let score = 0;
+    let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
+    let board = [];
+    let previousBoard = [];
+    let previousScore = 0;
+    let battleMonsters = [];
+    let enemyMonster = null;
+    let battleInterval = null;
+
+    const monsterSprites = {
+      slime: {
+        1: '🟢', // 작은 슬라임
+        2: '😺', // 중간 슬라임
+        3: '🐸'  // 왕 슬라임
+      },
+      mushroom: {
+        1: '🍄',     // 작은 버섯
+        2: '🍄‍🟫', // 독버섯
+        3: '🌵'      // 거대 버섯
+      },
+      golem: {
+        1: '🪨', // 돌덩이
+        2: '🗿', // 바위 골렘
+        3: '💎'  // 강철 골렘
+      },
+      dragon: {
+        1: '🦎', // 새끼 드래곤
+        2: '🐉', // 성체 드래곤
+        3: '🐲'  // 전설 드래곤
+      }
+    };
+    const monsterTypes = Object.keys(monsterSprites);
+
+    function playMergeSound() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      } catch (e) {
+        // 사운드 실패 시 무시
+      }
+    }
+
+    function initBoard() {
+      board = Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
+      battleMonsters = [];
+      enemyMonster = null;
+      if (battleInterval) clearInterval(battleInterval);
+      addRandomTile();
+      addRandomTile();
+      draw();
+      updateHighScore();
+      updateBattleField();
+    }
+
+    function addRandomTile() {
+      let empties = [];
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (!board[r][c]) empties.push([r, c]);
+        }
+      }
+      if (empties.length === 0) return;
+      let [r, c] = empties[Math.floor(Math.random() * empties.length)];
+      let type = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+      board[r][c] = { type: type, level: 1, merged: false };
+    }
+
+    function draw() {
+      const game = document.getElementById("game");
+      game.innerHTML = "";
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const div = document.createElement("div");
+          div.className = "tile";
+          if (board[r][c]) {
+            const m = board[r][c];
+            div.textContent = monsterSprites[m.type][m.level] || monsterSprites[m.type][Object.keys(monsterSprites[m.type]).length];
+            div.classList.add(m.type, `level-${m.level}`);
+            if (m.merged) {
+              div.classList.add("tile-merged");
+              setTimeout(() => div.classList.remove("tile-merged"), 300);
+              m.merged = false;
+            }
+          } else {
+            div.classList.add("empty");
+          }
+          game.appendChild(div);
+        }
+      }
+      document.getElementById("score").textContent = `점수: ${score}`;
+    }
+
+    function slideLeft(row) {
+      row = row.filter(x => x != null);
+      for (let i = 0; i < row.length - 1; i++) {
+        if (row[i] && row[i + 1] && row[i].type === row[i + 1].type && row[i].level === row[i + 1].level) {
+          const newLevel = row[i].level + 1;
+          row[i] = { type: row[i].type, level: newLevel, merged: true };
+          score += Math.pow(newLevel, 2) * 10;
+          if (newLevel === 3) {
+            battleMonsters.push({ type: row[i].type, level: 3, hp: 3 * 50 });
+            setTimeout(() => {
+              addBattleLog(`레벨 3 ${row[i].type} 소환!`);
+              if (!battleInterval) startBattle();
+            }, 100);
+          }
+          row[i + 1] = null;
+          i++;
+        }
+      }
+      row = row.filter(x => x != null);
+      while (row.length < SIZE) row.push(null);
+      return row;
+    }
+
+    function move(direction) {
+      previousBoard = JSON.parse(JSON.stringify(board));
+      previousScore = score;
+
+      let moved = false;
+      let newBoard;
+
+      if (direction === "left") {
+        newBoard = board.map(row => slideLeft([...row]));
+      } else if (direction === "right") {
+        newBoard = board.map(row => slideLeft([...row].reverse()).reverse());
+      } else if (direction === "up") {
+        newBoard = rotateLeft(board).map(row => slideLeft([...row]));
+        newBoard = rotateRight(newBoard);
+      } else if (direction === "down") {
+        newBoard = rotateRight(board).map(row => slideLeft([...row]));
+        newBoard = rotateLeft(newBoard);
+      }
+
+      if (JSON.stringify(newBoard) !== JSON.stringify(board)) {
+        board = newBoard;
+        addRandomTile();
+        moved = true;
+        updateHighScore();
+        playMergeSound();
+        if (isGameOver()) {
+          alert(`게임 오버! 점수: ${score}`);
+        }
+      }
+      if (moved) draw();
+      updateBattleField();
+    }
+
+    function rotateLeft(mat) {
+      let res = Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          res[SIZE - 1 - c][r] = mat[r][c] ? { ...mat[r][c] } : null;
+        }
+      }
+      return res;
+    }
+
+    function rotateRight(mat) {
+      let res = Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          res[c][SIZE - 1 - r] = mat[r][c] ? { ...mat[r][c] } : null;
+        }
+      }
+      return res;
+    }
+
+    function isGameOver() {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (!board[r][c]) return false;
+          if (c < SIZE - 1 && board[r][c].type === board[r][c + 1]?.type && board[r][c].level === board[r][c + 1]?.level) return false;
+          if (r < SIZE - 1 && board[r][c].type === board[r + 1][c]?.type && board[r][c].level === board[r + 1][c]?.level) return false;
+        }
+      }
+      return true;
+    }
+
+    function updateHighScore() {
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+      }
+      document.getElementById("high-score").textContent = `최고 점수: ${highScore}`;
+    }
+
+    function addBattleLog(message) {
+      const log = document.getElementById("battle-log");
+      const p = document.createElement("p");
+      p.textContent = message;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function createEnemy() {
+      const type = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+      const level = Math.floor(Math.random() * 3) + 1;
+      enemyMonster = { type, level, hp: level * 50 };
+      addBattleLog(`새로운 적 ${type} (레벨 ${level}) 등장!`);
+    }
+
+    function updateBattleField() {
+      const playerDiv = document.getElementById("player-monsters");
+      const enemyDiv = document.getElementById("enemy-monster");
+
+      // 플레이어 몬스터
+      if (battleMonsters.length > 0) {
+        const firstMonster = battleMonsters[0];
+        playerDiv.querySelector(".monster-icon").textContent = monsterSprites[firstMonster.type][firstMonster.level];
+        playerDiv.querySelector(".hp-bar-fill").style.width = `${(firstMonster.hp / (firstMonster.level * 50)) * 100}%`;
+      } else {
+        playerDiv.querySelector(".monster-icon").textContent = "없음";
+        playerDiv.querySelector(".hp-bar-fill").style.width = "0%";
+      }
+
+      // 적 몬스터
+      if (enemyMonster) {
+        enemyDiv.querySelector(".monster-icon").textContent = monsterSprites[enemyMonster.type][enemyMonster.level];
+        enemyDiv.querySelector(".hp-bar-fill").style.width = `${(enemyMonster.hp / (enemyMonster.level * 50)) * 100}%`;
+      } else {
+        enemyDiv.querySelector(".monster-icon").textContent = "없음";
+        enemyDiv.querySelector(".hp-bar-fill").style.width = "0%";
+      }
+    }
+
+    function startBattle() {
+      if (!enemyMonster) createEnemy();
+      battleInterval = setInterval(() => {
+        if (battleMonsters.length === 0) {
+          addBattleLog("플레이어 몬스터가 모두 전멸했습니다! 게임 오버!");
+          clearInterval(battleInterval);
+          battleInterval = null;
+          return;
+        }
+
+        const player = battleMonsters[0];
+        const playerAttack = player.level * 10;
+        const enemyAttack = enemyMonster.level * 10;
+
+        // 플레이어 공격
+        enemyMonster.hp -= playerAttack;
+        addBattleLog(`${player.type} (레벨 ${player.level})이(가) 적 ${enemyMonster.type}에게 ${playerAttack} 데미지!`);
+        if (enemyMonster.hp <= 0) {
+          addBattleLog(`적 ${enemyMonster.type} 처치! 점수 +100`);
+          score += 100;
+          updateHighScore();
+          enemyMonster = null;
+          createEnemy();
+          updateBattleField();
+          return;
+        }
+
+        // 적 공격
+        player.hp -= enemyAttack;
+        addBattleLog(`적 ${enemyMonster.type}이(가) ${player.type}에게 ${enemyAttack} 데미지!`);
+        if (player.hp <= 0) {
+          addBattleLog(`${player.type} (레벨 ${player.level}) 전멸!`);
+          battleMonsters.shift();
+        }
+
+        updateBattleField();
+      }, 1000);
+    }
+
+    function restartGame() {
+      score = 0;
+      initBoard();
+    }
+
+    function undoMove() {
+      if (previousBoard.length > 0) {
+        board = JSON.parse(JSON.stringify(previousBoard));
+        score = previousScore;
+        draw();
+        updateHighScore();
+      }
+    }
+
+    document.addEventListener("keydown", e => {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        e.preventDefault();
+        if (e.key === "ArrowLeft") move("left");
+        if (e.key === "ArrowRight") move("right");
+        if (e.key === "ArrowUp") move("up");
+        if (e.key === "ArrowDown") move("down");
+      }
+    });
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    document.addEventListener("touchstart", e => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    });
+    document.addEventListener("touchend", e => {
+      let touchEndX = e.changedTouches[0].screenX;
+      let touchEndY = e.changedTouches[0].screenY;
+      let dx = touchEndX - touchStartX;
+      let dy = touchEndY - touchStartY;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 30) move("right");
+        else if (dx < -30) move("left");
+      } else {
+        if (dy > 30) move("down");
+        else if (dy < -30) move("up");
+      }
+    });
+
+    document.getElementById("restart").addEventListener("click", restartGame);
+    document.getElementById("undo").addEventListener("click", undoMove);
+
+    initBoard();
+  </script>
+</body>
+</html>
