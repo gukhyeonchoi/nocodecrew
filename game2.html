@@ -1,0 +1,564 @@
+<!-- Taehyun -->
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>탕탕특공대 - 슈팅 게임 (아이템 + 랭킹)</title>
+  <style>
+    body{margin:0;padding:0;background:linear-gradient(to bottom,#000428,#004e92);color:#fff;font-family:'Courier New',monospace;overflow:hidden}
+    #gameContainer{position:relative;width:800px;height:600px;margin:20px auto;background:#001122;border:2px solid #00ff88;overflow:hidden}
+    canvas{display:block;background:transparent}
+    #ui{position:absolute;top:10px;left:10px;z-index:10;font-size:18px;font-weight:bold;text-shadow:2px 2px 4px rgba(0,0,0,.8)}
+    #gameOver{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:36px;color:#ff4444;text-shadow:3px 3px 6px rgba(0,0,0,.9);display:none;z-index:20}
+    #instructions{text-align:center;margin:10px 0;font-size:14px;color:#88ff88}
+
+    /* 리더보드 패널 */
+    #leaderboard{position:absolute;top:10px;right:10px;z-index:10;width:220px;background:rgba(0,0,0,.35);border:1px solid #00ff88;border-radius:8px;padding:8px 10px;font-size:12px}
+    #leaderboard h3{margin:0 0 6px 0;font-size:14px;color:#a8ffd9}
+    #leaderboard ol{margin:0;padding-left:20px;max-height:200px;overflow:auto}
+    #leaderboard li{line-height:1.4}
+    #leaderboard .empty{color:#84c7c7}
+
+    /* 게임오버 저장 영역 */
+    #saveArea{margin-top:16px;font-size:16px}
+    #playerName{width:160px;padding:6px 8px;border-radius:6px;border:1px solid #00ff88;background:#001a2e;color:#eafff7}
+    #saveScoreBtn{padding:6px 10px;margin-left:6px;border:1px solid #00ff88;background:#00384f;color:#eafff7;border-radius:6px;cursor:pointer}
+    #saveMsg{font-size:12px;color:#a8ffd9;margin-top:6px;height:14px}
+  </style>
+</head>
+<body>
+  <div id="instructions">
+    방향키로 이동 | <b>자동 발사</b> | P: 일시정지 | R: 재시작 | 적들이 사방에서 몰려옵니다! | 아이템을 수집하세요!
+  </div>
+
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div id="ui">
+      <div>점수: <span id="score">0</span></div>
+      <div>생명: <span id="lives">3</span></div>
+      <div>웨이브: <span id="wave">1</span></div>
+      <div>보호막: <span id="shield">0</span></div>
+      <div style="font-size: 12px; margin-top: 5px;">
+        <div>연사: <span id="fireRate">1.0</span>x</div>
+        <div>멀티: <span id="multiShot">1</span>발</div>
+      </div>
+    </div>
+
+    <!-- 리더보드 -->
+    <div id="leaderboard">
+      <h3>랭킹 TOP 10</h3>
+      <ol id="lbList"><li class="empty">플레이 후 점수를 저장해보세요.</li></ol>
+    </div>
+
+    <div id="gameOver">
+      <div>게임 오버!</div>
+      <div style="font-size:24px; margin-top:20px;">최종 점수: <span id="finalScore">0</span></div>
+
+      <!-- 점수 저장 영역 -->
+      <div id="saveArea">
+        <input id="playerName" type="text" maxlength="12" placeholder="닉네임(최대 12자)" />
+        <button id="saveScoreBtn">점수 저장</button>
+        <div id="saveMsg"></div>
+      </div>
+
+      <div style="font-size:18px; margin-top:15px;">R키를 눌러서 재시작</div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // ======== 랭킹 시스템 (localStorage) ========
+    const LB_KEY = 'tttg_leaderboard_v1';
+    const NAME_KEY = 'tttg_player_name';
+    let leaderboard = [];
+    let scoreSaved = false;
+
+    function loadHighScores(){
+      try{
+        const raw = localStorage.getItem(LB_KEY);
+        leaderboard = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(leaderboard)) leaderboard = [];
+      }catch(e){ leaderboard = []; }
+      renderLeaderboard();
+    }
+    function saveHighScore(name, score){
+      const entry = { name: (name||'Player').trim().slice(0,12) || 'Player', score: +score||0, date: new Date().toISOString() };
+      leaderboard.push(entry);
+      leaderboard.sort((a,b)=> b.score - a.score);
+      // 저장 용량 보호: 상위 50개만 유지 (표시는 TOP10)
+      leaderboard = leaderboard.slice(0,50);
+      localStorage.setItem(LB_KEY, JSON.stringify(leaderboard));
+      localStorage.setItem(NAME_KEY, entry.name);
+      renderLeaderboard();
+    }
+    function renderLeaderboard(){
+      const list = document.getElementById('lbList');
+      if (!list) return;
+      list.innerHTML = '';
+      if (leaderboard.length === 0){
+        const li = document.createElement('li');
+        li.className = 'empty';
+        li.textContent = '플레이 후 점수를 저장해보세요.';
+        list.appendChild(li);
+        return;
+      }
+      leaderboard.slice(0,10).forEach((row, idx)=>{
+        const li = document.createElement('li');
+        li.textContent = `${idx+1}. ${row.name} — ${row.score}`;
+        list.appendChild(li);
+      });
+    }
+
+    // ===== 게임 상태 =====
+    let gameState = {
+      score: 0,
+      lives: 3,
+      wave: 1,
+      gameOver: false,
+      paused: false,
+      keys: {},
+      enemyCount: 0,
+      maxEnemies: 15,
+      time: 0,               // 누적 시간(초)
+      shotTimer: 0,          // 자동 발사용 쿨다운 타이머(초)
+      baseFireRate: 0.22,    // 기본 자동 발사 간격(초)
+    };
+
+    // ===== 플레이어 =====
+    const player = {
+      x: 400, y: 300, width: 30, height: 30,
+      speed: 220,
+      color: '#00ff88',
+      lastDir: {x: 0, y: -1},
+      invuln: 0,
+      // 파워업
+      fireRate: 1.0,
+      bulletSpeed: 1.0,
+      multiShot: 1,
+      shield: 0,
+      powerUpTimer: 0
+    };
+
+    // ===== 객체 컨테이너 =====
+    let bullets = [];
+    let enemies = [];
+    let particles = [];
+    let items = [];
+
+    // ===== 유틸 =====
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    function vecNorm(x, y) {
+      const d = Math.hypot(x, y) || 1;
+      return {x: x/d, y: y/d};
+    }
+
+    // ===== 입력 =====
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+      gameState.keys[e.code] = true;
+
+      if (e.code === 'KeyR') restartGame();
+      if (e.code === 'KeyP') gameState.paused = !gameState.paused;
+      if (e.code === 'Space') manualShoot();
+    });
+    document.addEventListener('keyup', (e) => gameState.keys[e.code] = false);
+
+    // ===== 플레이어 이동 =====
+    function movePlayer(dt) {
+      let dx = 0, dy = 0;
+      if (gameState.keys['ArrowLeft'])  dx -= 1;
+      if (gameState.keys['ArrowRight']) dx += 1;
+      if (gameState.keys['ArrowUp'])    dy -= 1;
+      if (gameState.keys['ArrowDown'])  dy += 1;
+
+      if (dx || dy) {
+        const v = vecNorm(dx, dy);
+        player.x += v.x * player.speed * dt;
+        player.y += v.y * player.speed * dt;
+        player.lastDir = v;
+      }
+
+      player.x = clamp(player.x, 0, canvas.width - player.width);
+      player.y = clamp(player.y, 0, canvas.height - player.height);
+    }
+
+    // ===== 발사 =====
+    function fire(dir) {
+      if (gameState.gameOver) return;
+      const speed = 520 * player.bulletSpeed; // px/sec
+
+      for (let i = 0; i < player.multiShot; i++) {
+        const angle = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i/2) * 0.3;
+        const finalDir = {
+          x: dir.x * Math.cos(angle) - dir.y * Math.sin(angle),
+          y: dir.x * Math.sin(angle) + dir.y * Math.cos(angle)
+        };
+        bullets.push({
+          x: player.x + player.width/2 - 2,
+          y: player.y + player.height/2 - 2,
+          width: 4, height: 4,
+          vx: finalDir.x * speed, vy: finalDir.y * speed,
+          color: '#ffff00'
+        });
+      }
+    }
+    function manualShoot() { fire(player.lastDir); }
+
+    function autoFire(dt) {
+      gameState.shotTimer -= dt;
+      const curRate = Math.max(0.10, gameState.baseFireRate - (gameState.wave-1)*0.01) / player.fireRate;
+      if (gameState.shotTimer <= 0) {
+        // 자동 조준: 가장 가까운 적, 없으면 마지막 이동 방향
+        let target = null, bestD = Infinity;
+        for (const e of enemies) {
+          const cx = e.x + e.width/2, cy = e.y + e.height/2;
+          const dx = cx - (player.x + player.width/2);
+          const dy = cy - (player.y + player.height/2);
+          const d = dx*dx + dy*dy;
+          if (d < bestD) { bestD = d; target = {dx, dy}; }
+        }
+        const dir = target ? vecNorm(target.dx, target.dy) : player.lastDir;
+        fire(dir);
+        gameState.shotTimer = curRate;
+      }
+    }
+
+    // ===== 적 스폰 =====
+    function spawnEnemy(dt) {
+      if (gameState.enemyCount >= gameState.maxEnemies) return;
+      const spawnPerSecond = 1.2 + gameState.wave * 0.35;
+      const p = 1 - Math.exp(-spawnPerSecond * dt);
+      if (Math.random() < p) {
+        const enemy = { width: 25, height: 25, speed: 60 + gameState.wave * 30, color: '#ff4444', x: 0, y: 0, vx: 0, vy: 0 };
+        const side = Math.floor(Math.random() * 4);
+        if (side === 0) { enemy.x = Math.random()*canvas.width; enemy.y = -enemy.height; }
+        if (side === 1) { enemy.x = Math.random()*canvas.width; enemy.y = canvas.height; }
+        if (side === 2) { enemy.x = -enemy.width; enemy.y = Math.random()*canvas.height; }
+        if (side === 3) { enemy.x = canvas.width; enemy.y = Math.random()*canvas.height; }
+        enemies.push(enemy);
+        gameState.enemyCount++;
+      }
+    }
+
+    // ===== 아이템 시스템 =====
+    const itemTypes = {
+      FIRE_RATE: { color: '#ff6666', symbol: 'F', name: '연사력 강화' },
+      MULTI_SHOT: { color: '#6666ff', symbol: 'M', name: '멀티샷' },
+      SPEED_UP: { color: '#66ff66', symbol: 'S', name: '이동속도 증가' },
+      SHIELD: { color: '#ffff66', symbol: 'H', name: '보호막' },
+      BULLET_SPEED: { color: '#ff66ff', symbol: 'B', name: '총알 속도' }
+    };
+
+    function spawnItem(x, y) {
+      if (Math.random() < 0.3) { // 30% 확률로 아이템 드랍
+        const types = Object.keys(itemTypes);
+        const type = types[Math.floor(Math.random() * types.length)];
+        items.push({ x: x - 10, y: y - 10, width: 20, height: 20, type, life: 10, bob: Math.random() * Math.PI * 2 });
+      }
+    }
+
+    function collectItem(item) {
+      const type = item.type;
+      createExplosion(item.x + 10, item.y + 10, itemTypes[type].color, 8);
+      switch(type) {
+        case 'FIRE_RATE':   player.fireRate = Math.min(3.0, player.fireRate + 0.3); player.powerUpTimer = 15; break;
+        case 'MULTI_SHOT':  player.multiShot = Math.min(5, player.multiShot + 1);   player.powerUpTimer = 15; break;
+        case 'SPEED_UP':    player.speed = Math.min(350, player.speed + 30);        player.powerUpTimer = 15; break;
+        case 'SHIELD':      player.shield = Math.min(3, player.shield + 1); break;
+        case 'BULLET_SPEED':player.bulletSpeed = Math.min(2.0, player.bulletSpeed + 0.2); player.powerUpTimer = 15; break;
+      }
+    }
+
+    // ===== 파티클 =====
+    function createExplosion(x, y, color = '#ffff00', count = 12) {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI*2*i)/count, sp = 80 + Math.random()*120;
+        particles.push({ x, y, vx: Math.cos(angle)*sp, vy: Math.sin(angle)*sp, life: 0.4 + Math.random()*0.4, maxLife: 0.8, color, size: 2 + Math.random()*2 });
+      }
+    }
+
+    // ===== 충돌 =====
+    function rectHit(a, b) {
+      return a.x < b.x + b.width && a.x + a.width > b.x &&
+             a.y < b.y + b.height && a.y + a.height > b.y;
+    }
+
+    // ===== 업데이트 =====
+    function update(dt) {
+      if (gameState.gameOver || gameState.paused) return;
+
+      gameState.time += dt;
+      if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
+
+      // 파워업 타이머 감소 (보호막 제외)
+      if (player.powerUpTimer > 0) {
+        player.powerUpTimer = Math.max(0, player.powerUpTimer - dt);
+        if (player.powerUpTimer <= 0) {
+          player.fireRate = 1.0;
+          player.bulletSpeed = 1.0;
+          player.multiShot = 1;
+          player.speed = 220;
+        }
+      }
+
+      movePlayer(dt);
+      autoFire(dt);
+      spawnEnemy(dt);
+
+      // 총알
+      bullets = bullets.filter(b => {
+        b.x += b.vx * dt; b.y += b.vy * dt;
+        return b.x > -10 && b.x < canvas.width + 10 && b.y > -10 && b.y < canvas.height + 10;
+      });
+
+      // 적 AI
+      for (const e of enemies) {
+        const dx = (player.x + player.width/2) - (e.x + e.width/2);
+        const dy = (player.y + player.height/2) - (e.y + e.height/2);
+        const v = vecNorm(dx, dy);
+        e.vx = v.x * e.speed; e.vy = v.y * e.speed;
+        e.x += e.vx * dt; e.y += e.vy * dt;
+      }
+      enemies = enemies.filter(e => {
+        const inBounds = e.x > -60 && e.x < canvas.width + 60 && e.y > -60 && e.y < canvas.height + 60;
+        if (!inBounds) gameState.enemyCount--;
+        return inBounds;
+      });
+
+      // 아이템
+      items = items.filter(item => {
+        item.life -= dt; item.bob += dt * 3;
+        return item.life > 0;
+      });
+
+      // 파티클
+      particles = particles.filter(p => {
+        p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+        p.vx *= (1 - 1.5*dt); p.vy *= (1 - 1.5*dt);
+        return p.life > 0;
+      });
+
+      // 충돌: 총알 vs 적
+      outer:
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        for (let j = enemies.length - 1; j >= 0; j--) {
+          if (rectHit(bullets[i], enemies[j])) {
+            const ex = enemies[j].x + enemies[j].width/2;
+            const ey = enemies[j].y + enemies[j].height/2;
+            createExplosion(ex, ey, '#ff8844', 10);
+            spawnItem(ex, ey);
+            bullets.splice(i, 1);
+            enemies.splice(j, 1);
+            gameState.enemyCount--;
+            gameState.score += 50;
+
+            if (gameState.score > 0 && gameState.score % 500 === 0) {
+              gameState.wave++;
+              gameState.maxEnemies += 3;
+            }
+            continue outer;
+          }
+        }
+      }
+
+      // 충돌: 플레이어 vs 아이템
+      for (let i = items.length - 1; i >= 0; i--) {
+        if (rectHit(player, items[i])) {
+          collectItem(items[i]);
+          items.splice(i, 1);
+        }
+      }
+
+      // 충돌: 적 vs 플레이어
+      if (player.invuln <= 0) {
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          if (rectHit(enemies[i], player)) {
+            const ex = enemies[i].x + enemies[i].width/2;
+            const ey = enemies[i].y + enemies[i].height/2;
+
+            if (player.shield > 0) {
+              player.shield--;
+              createExplosion(ex, ey, '#ffff66', 15);
+              enemies.splice(i, 1);
+              gameState.enemyCount--;
+              player.invuln = 0.5;
+            } else {
+              createExplosion(ex, ey, '#ff4444', 12);
+              createExplosion(player.x + player.width/2, player.y + player.height/2, '#00ff88', 16);
+
+              enemies.splice(i, 1);
+              gameState.enemyCount--;
+              gameState.lives--;
+              player.invuln = 1.2;
+
+              // 넉백 (안전 가드)
+              const dkx = (player.x + player.width/2) - ex;
+              const dky = (player.y + player.height/2) - ey;
+              const len = Math.hypot(dkx, dky) || 1;
+              player.x = clamp(player.x + (dkx/len)*40, 0, canvas.width - player.width);
+              player.y = clamp(player.y + (dky/len)*40, 0, canvas.height - player.height);
+
+              if (gameState.lives <= 0) endGame();
+            }
+            break;
+          }
+        }
+      }
+
+      updateUI();
+    }
+
+    // ===== 그리기 =====
+    function draw() {
+      ctx.fillStyle = 'rgba(0,17,34,0.35)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const blink = player.invuln > 0 ? Math.floor(gameState.time*10)%2 === 0 : true;
+      if (blink) {
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x + 10, player.y, 10, 30);
+        ctx.fillRect(player.x, player.y + 10, 30, 10);
+        ctx.shadowColor = player.color; ctx.shadowBlur = 10;
+        ctx.fillRect(player.x + 12, player.y + 12, 6, 6);
+        ctx.shadowBlur = 0;
+
+        if (player.shield > 0) {
+          ctx.strokeStyle = '#ffff66';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(player.x + player.width/2, player.y + player.height/2, 25, 0, Math.PI*2);
+          ctx.stroke();
+        }
+      }
+
+      for (const b of bullets) {
+        ctx.fillStyle = b.color;
+        ctx.shadowColor = b.color; ctx.shadowBlur = 8;
+        ctx.fillRect(b.x, b.y, b.width, b.height);
+        ctx.shadowBlur = 0;
+      }
+
+      for (const e of enemies) {
+        const cx = e.x + e.width/2, cy = e.y + e.height/2;
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.moveTo(cx, e.y);
+        ctx.lineTo(e.x + e.width, cy);
+        ctx.lineTo(cx, e.y + e.height);
+        ctx.lineTo(e.x, cy);
+        ctx.closePath();
+        ctx.shadowColor = e.color; ctx.shadowBlur = 5;
+        ctx.fill(); ctx.shadowBlur = 0;
+      }
+
+      for (const item of items) {
+        const bobOffset = Math.sin(item.bob) * 3;
+        const alpha = item.life < 2 ? Math.sin(item.life * 5) * 0.5 + 0.5 : 1;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = itemTypes[item.type].color;
+        ctx.shadowColor = itemTypes[item.type].color; ctx.shadowBlur = 10;
+        ctx.fillRect(item.x, item.y + bobOffset, item.width, item.height);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#000000';
+        ctx.font = '14px bold monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(itemTypes[item.type].symbol, item.x + item.width/2, item.y + item.height/2 + 5 + bobOffset);
+        ctx.globalAlpha = 1;
+      }
+
+      for (const p of particles) {
+        const a = Math.max(0, p.life / p.maxLife);
+        ctx.globalAlpha = a;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // ===== UI =====
+    function updateUI() {
+      document.getElementById('score').textContent = gameState.score;
+      document.getElementById('lives').textContent = gameState.lives;
+      document.getElementById('wave').textContent = gameState.wave;
+      document.getElementById('shield').textContent = player.shield;
+      document.getElementById('fireRate').textContent = player.fireRate.toFixed(1);
+      document.getElementById('multiShot').textContent = player.multiShot;
+    }
+
+    // ===== 종료/재시작 & 랭킹 저장 UI =====
+    const nameInput = document.getElementById('playerName');
+    const saveBtn   = document.getElementById('saveScoreBtn');
+    const saveMsg   = document.getElementById('saveMsg');
+
+    if (saveBtn){
+      saveBtn.addEventListener('click', () => {
+        if (scoreSaved) return;
+        saveHighScore(nameInput.value, gameState.score);
+        scoreSaved = true;
+        saveBtn.disabled = true;
+        saveBtn.textContent = '저장됨';
+        saveMsg.textContent = '랭킹에 등록되었습니다!';
+      });
+    }
+    if (nameInput){
+      nameInput.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter') saveBtn.click();
+      });
+    }
+
+    function endGame() {
+      gameState.gameOver = true;
+      document.getElementById('finalScore').textContent = gameState.score;
+      document.getElementById('gameOver').style.display = 'block';
+      // 이름 프리필 & 버튼 초기화
+      if (nameInput){
+        nameInput.value = localStorage.getItem(NAME_KEY) || '';
+        nameInput.focus();
+      }
+      if (saveBtn){
+        saveBtn.disabled = false;
+        saveBtn.textContent = '점수 저장';
+      }
+      if (saveMsg){ saveMsg.textContent = ''; }
+      scoreSaved = false;
+    }
+
+    function restartGame() {
+      gameState = {
+        score: 0, lives: 3, wave: 1,
+        gameOver: false, paused: false, keys: {},
+        enemyCount: 0, maxEnemies: 15,
+        time: 0, shotTimer: 0, baseFireRate: 0.22
+      };
+      player.x = 400; player.y = 300; player.lastDir = {x:0, y:-1}; player.invuln = 0;
+      player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.shield = 0; player.powerUpTimer = 0; player.speed = 220;
+
+      bullets = []; enemies = []; particles = []; items = [];
+      document.getElementById('gameOver').style.display = 'none';
+      updateUI();
+    }
+
+    // ===== 루프(Δt) =====
+    let last = performance.now();
+    function loop(now) {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      update(dt);
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    // 시작
+    loadHighScores();        // ✅ 이제 정의됨
+    // 닉네임 프리필(처음 로드 시)
+    if (nameInput) nameInput.value = localStorage.getItem(NAME_KEY) || '';
+    updateUI();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
