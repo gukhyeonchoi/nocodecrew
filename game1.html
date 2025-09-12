@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>컬러 슈터 - 스테이지 버전</title>
+    <title>컬러 슈터</title>
     <style>
         body {
             margin: 0;
@@ -147,7 +147,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.5vmin;
+            gap: 1.5vmin;
             justify-content: center;
             align-items: center;
             width: 100%;
@@ -159,10 +159,11 @@
             border: 0.3vmin solid #dee2e6;
             border-radius: 1vmin;
             padding: 0.5vmin;
-            height: 35vh;
+            height: 33vh;
             width: 100%;
             position: relative;
             overflow: hidden;
+            margin-bottom: 1vmin;
         }
 
         .target-title {
@@ -178,8 +179,8 @@
             gap: 1vmin;
             justify-content: center;
             align-items: flex-end;
-            height: calc(100% - 3.5vmin);
-            max-height: 35vh;
+            height: calc(100% - 4vmin);
+            max-height: calc(33vh - 4vmin);
             overflow: hidden;
             position: relative;
         }
@@ -191,7 +192,7 @@
             left: 0;
             right: 0;
             height: 10vmin;
-            background: linear-gradient(to bottom, #f8f9fa 0%, #f8f9fa 70%, transparent 100%);
+            background: linear-gradient(to bottom, #f8f9fa 0%, #f8f9fa 50%, transparent 100%);
             pointer-events: none;
             z-index: 10;
         }
@@ -203,7 +204,7 @@
             gap: 0.5vmin;
             height: 100%;
             align-items: center;
-            max-height: 35vh;
+            max-height: calc(33vh - 4vmin);
             overflow: visible;
         }
 
@@ -257,7 +258,7 @@
             height: 15vh;
             width: 100%;
             position: relative;
-            z-index: 20;
+            z-index: 30;
         }
 
         .queue-slot {
@@ -374,13 +375,13 @@
 
         .stack-block.top-block {
             border-color: #2ecc71;
-            box-shadow: 0 0 1.2vmin rgba(46, 204, 113, 0.6);
+            box-shadow: 0 0 1.2vmin rgba(46,204,113,0.6);
             cursor: pointer;
             padding: 0.5vmin;
         }
 
         .stack-block.top-block:active {
-            box-shadow: 0 0 1.5vmin rgba(46, 204, 113, 0.8);
+            box-shadow: 0 0 1.5vmin rgba(46,204,113,0.8);
             transform: scale(0.9);
         }
 
@@ -515,7 +516,6 @@
             justify-content: center;
         }
 
-        /* 모바일 환경 (768px 이하) */
         @media (max-width: 768px) {
             #intro {
                 padding: 2.5vmin;
@@ -537,7 +537,7 @@
                 justify-content: space-evenly;
             }
             .game-area {
-                gap: 0.3vmin;
+                gap: 2vmin;
             }
             .score-board {
                 font-size: 3.5vmin;
@@ -559,17 +559,18 @@
                 font-size: 2vmin;
             }
             .target-area {
-                height: 40vh;
+                height: 38vh;
                 padding: 0.3vmin;
+                margin-bottom: 1.5vmin;
             }
             .target-lanes {
-                max-height: 40vh;
+                max-height: calc(38vh - 4.5vmin);
                 gap: 1.5vmin;
             }
             .target-lane {
                 width: 14vw;
                 min-width: 48px;
-                max-height: 40vh;
+                max-height: calc(38vh - 4.5vmin);
             }
             .target-block {
                 width: 14vw;
@@ -582,6 +583,7 @@
                 height: 20vh;
                 padding: 0.3vmin;
                 gap: 1.5vmin;
+                z-index: 30;
             }
             .queue-slot, .queue-block {
                 width: 14vw;
@@ -591,15 +593,15 @@
                 border: 0.2vmin solid rgba(0,0,0,0.28);
             }
             .selection-area {
-                height: 40vh;
+                height: 38vh;
                 padding: 0.3vmin;
             }
             .stacks-container {
-                max-height: 40vh;
+                max-height: calc(38vh - 4.5vmin);
                 gap: 1.5vmin;
             }
             .stack {
-                max-height: 40vh;
+                max-height: calc(38vh - 4.5vmin);
                 width: 14vw;
                 min-width: 48px;
             }
@@ -651,7 +653,6 @@
             }
         }
 
-        /* 낮은 높이 화면 (600px 이하) */
         @media (max-height: 600px) {
             .game-container {
                 padding: 0.2vmin;
@@ -659,27 +660,29 @@
                 justify-content: space-evenly;
             }
             .game-area {
-                gap: 0.3vmin;
+                gap: 1.8vmin;
             }
             .target-area {
-                height: 38vh;
+                height: 35vh;
                 padding: 0.3vmin;
+                margin-bottom: 1.2vmin;
             }
             .selection-area {
-                height: 38vh;
+                height: 35vh;
                 padding: 0.3vmin;
             }
             .queue-area {
                 height: 18vh;
                 padding: 0.3vmin;
                 gap: 1.2vmin;
+                z-index: 30;
             }
             .target-lanes, .stacks-container {
-                max-height: 38vh;
+                max-height: calc(35vh - 4.5vmin);
                 gap: 1.2vmin;
             }
             .target-lane, .stack {
-                max-height: 38vh;
+                max-height: calc(35vh - 4.5vmin);
                 width: 12vw;
                 min-width: 44px;
             }
@@ -759,33 +762,34 @@
             }
         }
 
-        /* 가로 모드, 낮은 높이 (500px 이하) */
         @media (orientation: landscape) and (max-height: 500px) {
             .game-container {
                 padding: 0.2vmin;
                 justify-content: space-evenly;
             }
             .game-area {
-                gap: 0.3vmin;
+                gap: 1.5vmin;
             }
             .target-area {
-                height: 35vh;
+                height: 32vh;
                 padding: 0.3vmin;
+                margin-bottom: 1vmin;
             }
             .selection-area {
-                height: 35vh;
+                height: 32vh;
                 padding: 0.3vmin;
             }
             .queue-area {
                 height: 16vh;
                 padding: 0.3vmin;
                 gap: 1vmin;
+                z-index: 30;
             }
             .target-lanes, .stacks-container {
-                max-height: 35vh;
+                max-height: calc(32vh - 4.5vmin);
             }
             .target-lane, .stack {
-                max-height: 35vh;
+                max-height: calc(32vh - 4.5vmin);
             }
         }
     </style>
@@ -836,16 +840,16 @@
                 this.score = 0;
                 this.clearedStages = new Set();
                 this.stageConfig = {
-                    1: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
+                    1: { colors: 2, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
                     2: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
-                    3: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45] },
-                    4: { colors: 4, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
+                    3: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
+                    4: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
                     5: { colors: 4, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
-                    6: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
-                    7: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 4, numberRange: [15, 30, 45, 60, 75] },
-                    8: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 4, numberRange: [15, 30, 45, 60, 75] },
-                    9: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
-                    10: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75, 90] }
+                    6: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60] },
+                    7: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
+                    8: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
+                    9: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75] },
+                    10: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] }
                 };
                 this.colors = [];
                 this.targetNumbers = [];
@@ -857,8 +861,20 @@
                 this._queueScanTimer = null;
                 this._pendingUpdate = false;
                 this._particleCount = 0;
-                this._maxParticles = 30;
+                this._maxParticles = 50;
                 this.handleBlockTouch = this.handleBlockTouch.bind(this);
+            }
+
+            clearAllParticles() {
+                const particles = document.querySelectorAll('.shooting-particle');
+                particles.forEach(p => {
+                    if (p.parentNode) {
+                        p.parentNode.removeChild(p);
+                        this._particleCount = Math.max(0, this._particleCount - 1);
+                    }
+                });
+                this._particleCount = 0;
+                console.log(`All particles cleared, count: ${this._particleCount}`);
             }
 
             initGame() {
@@ -867,10 +883,11 @@
                 this.score = 0;
                 this.clearedStages.clear();
                 this._pendingUpdate = false;
-                this._particleCount = 0;
+                this.clearAllParticles();
                 this.initStage();
                 this.updateDisplay();
                 this.updateStageProgress();
+                console.log(`Game initialized, stage: ${this.stage}`);
             }
 
             initStage() {
@@ -881,9 +898,11 @@
                 this.targetLanes = Array(config.lanes).fill().map(() => []);
                 this.stacks = Array(config.lanes).fill().map(() => []);
                 this.attackQueue = Array(config.queueSlots).fill(null);
+                this.clearAllParticles();
                 this.generateStageBlocks(config);
                 this.updateQueueUI();
                 this.updateStageProgress();
+                console.log(`Stage ${this.stage} initialized, lanes: ${config.lanes}, slots: ${config.queueSlots}`);
             }
 
             generateStageBlocks(config) {
@@ -918,12 +937,13 @@
                 for (let s = 0; s < config.lanes; s++) {
                     this.stacks[s] = stackBlocks.slice(s * blocksPerStack, (s + 1) * blocksPerStack);
                 }
+                console.log(`Blocks generated, colors: ${this.colors}, targetLanes: ${JSON.stringify(this.targetLanes.map(lane => lane.map(b => b.color)))}`);
             }
 
             startGame() {
                 this.gameRunning = true;
-                this._particleCount = 0;
-                this.showMessage(`스테이지 ${this.stage} 시작!`, 'success');
+                this.clearAllParticles();
+                console.log(`스테이지 ${this.stage} 시작!`);
                 this.updateDisplay();
                 this.updateStageProgress();
                 this.startQueueScanLoop();
@@ -933,9 +953,10 @@
                 this.stopQueueScanLoop();
                 this.gameRunning = false;
                 this._pendingUpdate = false;
-                this._particleCount = 0;
+                this.clearAllParticles();
                 this.initGame();
                 this.startGame();
+                console.log(`Game reset`);
             }
 
             getAvailableQueueSlot() {
@@ -944,24 +965,24 @@
 
             selectBlock(stackIndex) {
                 if (!this.gameRunning) {
-                    this.showMessage('게임이 시작되지 않았습니다!', 'error');
+                    console.log('게임이 시작되지 않았습니다!');
                     return false;
                 }
 
                 if (stackIndex < 0 || stackIndex >= this.stacks.length) {
-                    this.showMessage(`잘못된 스택: ${stackIndex + 1}`, 'error');
+                    console.log(`잘못된 스택: ${stackIndex + 1}`);
                     return false;
                 }
 
                 const slotIndex = this.getAvailableQueueSlot();
                 if (slotIndex === -1) {
-                    this.showMessage('대기열이 가득 찼습니다!', 'warning');
+                    console.log('대기열이 가득 찼습니다!');
                     return false;
                 }
 
                 const stack = this.stacks[stackIndex];
                 if (!stack || stack.length === 0) {
-                    this.showMessage(`스택 ${stackIndex + 1}이 비었습니다!`, 'error');
+                    console.log(`스택 ${stackIndex + 1}이 비었습니다!`);
                     return false;
                 }
 
@@ -976,7 +997,7 @@
                 this.attackQueue[slotIndex] = queueBlock;
                 this.stacks[stackIndex].shift();
 
-                this.showMessage(`블록(${topBlock.color}, ${topBlock.number}) 추가`, 'success');
+                console.log(`블록(${topBlock.color}, ${topBlock.number}) 추가`);
                 this.updateQueue();
                 this.scheduleUpdate(() => {
                     this.scanAndFireOnce();
@@ -1005,6 +1026,7 @@
                     clearInterval(this._queueScanTimer);
                     this._queueScanTimer = null;
                 }
+                this.clearAllParticles();
             }
 
             scanAndFireOnce() {
@@ -1108,7 +1130,7 @@
                     } else {
                         this.score += shotsFired;
                         if (queued.number > 0) {
-                            this.showMessage(`잔여값 ${queued.number} 남음`, 'warning');
+                            console.log(`잔여값 ${queued.number} 남음`);
                         } else {
                             this.attackQueue[queueIndex] = null;
                         }
@@ -1117,7 +1139,7 @@
                         this.updateTargetLanes();
                         this.scheduleUpdate(() => {
                             this.showDamageText(laneIndex, shotsFired);
-                            this.showMessage(`매칭 성공! +${shotsFired}점`, 'success');
+                            console.log(`매칭 성공! +${shotsFired}점`);
                             this.checkStageClear();
                         });
                     }
@@ -1131,17 +1153,29 @@
                 const targetLanes = document.getElementById('targetLanes');
 
                 const slotEl = queueArea.children[queueIndex];
-                if (!slotEl) return;
+                if (!slotEl) {
+                    console.warn(`Queue slot ${queueIndex} not found`);
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
 
                 const slotRect = slotEl.getBoundingClientRect();
                 const startX = slotRect.left + slotRect.width / 2;
                 const startY = slotRect.top + slotRect.height / 2;
 
                 const laneEl = targetLanes.children[laneIndex];
-                if (!laneEl) return;
+                if (!laneEl) {
+                    console.warn(`Lane ${laneIndex} not found`);
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
 
                 const bottomBlock = laneEl.children[0];
-                if (!bottomBlock) return;
+                if (!bottomBlock) {
+                    console.warn(`Bottom block in lane ${laneIndex} not found`);
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
 
                 const targetRect = bottomBlock.getBoundingClientRect();
                 const targetX = targetRect.left + targetRect.width / 2;
@@ -1155,6 +1189,7 @@
                 p.style.opacity = '1';
 
                 document.body.appendChild(p);
+                console.log(`Particle created, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
 
                 const duration = 150;
                 const start = performance.now();
@@ -1163,7 +1198,7 @@
                     return t * (2 - t);
                 }
 
-                function frame(now) {
+                const frame = (now) => {
                     const t = Math.min(1, (now - start) / duration);
                     const eased = easeOutQuad(t);
                     const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 1;
@@ -1177,12 +1212,23 @@
                     if (t < 1) {
                         requestAnimationFrame(frame);
                     } else {
-                        if (p.parentNode) p.parentNode.removeChild(p);
-                        this._particleCount = Math.max(0, this._particleCount - 1);
+                        if (p.parentNode) {
+                            p.parentNode.removeChild(p);
+                            this._particleCount = Math.max(0, this._particleCount - 1);
+                            console.log(`Particle removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+                        }
                     }
-                }
+                };
 
                 requestAnimationFrame(frame.bind(this));
+
+                setTimeout(() => {
+                    if (p.parentNode) {
+                        p.parentNode.removeChild(p);
+                        this._particleCount = Math.max(0, this._particleCount - 1);
+                        console.log(`Particle force-removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+                    }
+                }, duration + 50);
             }
 
             showDamageText(laneIndex, damage) {
@@ -1226,10 +1272,11 @@
             advanceStage() {
                 this.stage++;
                 this.gameRunning = false;
-                this._particleCount = 0;
+                this.clearAllParticles();
                 this.stopQueueScanLoop();
                 this.initStage();
                 this.startGame();
+                console.log(`Advanced to stage: ${this.stage}`);
             }
 
             checkQueueStuck() {
@@ -1269,7 +1316,7 @@
 
                 const retry = document.createElement('button');
                 retry.className = 'btn btn-retry';
-                retry.textContent = '다시 플레이';
+                retry.textContent = '그만하기';
                 retry.onclick = () => {
                     root.innerHTML = '';
                     this.resetGame();
@@ -1353,6 +1400,7 @@
                 this.updateTargetLanes();
                 this.updateStageProgress();
                 this.scheduleUpdate();
+                console.log(`Display updated, target-area: ${document.querySelector('.target-area')?.offsetWidth}px, queue-area: ${document.querySelector('.queue-area')?.offsetWidth}px, selection-area: ${document.querySelector('.selection-area')?.offsetWidth}px`);
             }
 
             updateTargetLanes() {
@@ -1362,7 +1410,6 @@
                 this.targetLanes.forEach((lane, laneIndex) => {
                     const laneEl = document.createElement('div');
                     laneEl.className = 'target-lane';
-                    
                     lane.forEach((block, idx) => {
                         const blockEl = document.createElement('div');
                         blockEl.className = `target-block ${block.color}`;
@@ -1374,6 +1421,7 @@
                     });
                     targetContainer.appendChild(laneEl);
                 });
+                console.log(`Target lanes updated, offsetLeft: ${targetContainer.offsetLeft}px, width: ${targetContainer.offsetWidth}px, lanes: ${this.targetLanes.length}`);
             }
 
             updateQueueUI() {
@@ -1388,6 +1436,7 @@
                     queueArea.appendChild(slot);
                 }
                 this.updateQueue();
+                console.log(`Queue UI initialized, offsetLeft: ${queueArea.offsetLeft}px, width: ${queueArea.offsetWidth}px, slots: ${config.queueSlots}`);
             }
 
             scheduleUpdate(callback = null) {
@@ -1408,14 +1457,12 @@
                 this.stacks.forEach((stack, stackIndex) => {
                     const stackEl = document.createElement('div');
                     stackEl.className = 'stack';
-                    
                     for (let blockIndex = 0; blockIndex < stack.length; blockIndex++) {
                         const block = stack[blockIndex];
                         const blockEl = document.createElement('div');
                         blockEl.className = `stack-block ${block.color}`;
                         blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
                         blockEl.dataset.stackIndex = stackIndex;
-
                         if (blockIndex === 0 && this.gameRunning && this.getAvailableQueueSlot() !== -1) {
                             blockEl.classList.add('top-block');
                             blockEl.addEventListener('pointerdown', (e) => {
@@ -1425,12 +1472,12 @@
                         } else {
                             blockEl.style.cursor = 'not-allowed';
                         }
-
                         stackEl.appendChild(blockEl);
                     }
                     stacksContainer.appendChild(stackEl);
                 });
                 this.updateQueue();
+                console.log(`Stacks updated, offsetLeft: ${stacksContainer.offsetLeft}px, width: ${stacksContainer.offsetWidth}px, stacks: ${this.stacks.length}`);
             }
 
             updateQueue() {
@@ -1438,10 +1485,8 @@
                 for (let i = 0; i < this.attackQueue.length; i++) {
                     const slot = queueArea.children[i];
                     if (!slot) continue;
-                    
                     slot.innerHTML = '';
                     slot.className = 'queue-slot';
-                    
                     if (this.attackQueue[i] && this.attackQueue[i].number > 0) {
                         const block = this.attackQueue[i];
                         slot.className = `queue-block ${block.color} ${!block.isFiring ? 'added' : ''}`;
@@ -1453,23 +1498,12 @@
                         }
                     }
                 }
+                console.log(`Queue updated, offsetLeft: ${queueArea.offsetLeft}px, width: ${queueArea.offsetWidth}px, slots rendered: ${queueArea.children.length}`);
             }
 
             handleBlockTouch(stackIndex) {
-                console.log('Touched block in stack:', stackIndex, 'Block size:', document.querySelector('.stack-block')?.offsetWidth);
+                console.log(`Block touched, stack: ${stackIndex}, size: ${document.querySelector('.stack-block')?.offsetWidth}px`);
                 this.selectBlock(stackIndex);
-            }
-
-            showMessage(text, type = '') {
-                const messageEl = document.getElementById('message');
-                messageEl.textContent = text;
-                messageEl.className = `message ${type}`;
-                setTimeout(() => {
-                    if (messageEl) {
-                        messageEl.textContent = '';
-                        messageEl.className = 'message';
-                    }
-                }, 2000);
             }
         }
 
