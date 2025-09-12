@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=yes" />
+    <title>컬러 슈터 - 스테이지 버전</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow: hidden;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #intro {
+            background: rgba(255,255,255,0.95);
+            border-radius: 2vmin;
+            padding: 3vmin;
+            box-shadow: 0 1vmin 2vmin rgba(0,0,0,0.2);
+            max-width: 90vw;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2vmin;
+        }
+
+        #intro h1 {
+            margin: 0;
+            font-size: 4vmin;
+            color: #333;
+        }
+
+        #intro p {
+            margin: 0;
+            font-size: 2.4vmin;
+            color: #495057;
+        }
+
+        .intro-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 2vmin 4vmin;
+            border-radius: 1vmin;
+            cursor: pointer;
+            font-size: 2.6vmin;
+            font-weight: bold;
+            transition: transform 0.15s ease, filter 0.15s ease;
+            touch-action: manipulation;
+        }
+
+        .intro-btn:active {
+            transform: scale(0.95);
+            filter: brightness(0.9);
+        }
+
+        .game-container {
+            display: none;
+            background: white;
+            border-radius: 2vmin;
+            padding: 1vmin; /* 수정: 패딩 감소 */
+            box-shadow: 0 1vmin 2.5vmin rgba(0,0,0,0.3);
+            width: 100vw;
+            max-width: 95vw;
+            height: 100vh;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around; /* 수정: 요소들 중앙/균등 배치 */
+            align-items: center;
+            overflow: hidden;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
+        .score-board {
+            text-align: center;
+            margin-bottom: 0.5vmin; /* 수정: 마진 감소 */
+            font-size: 2.4vmin;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stage-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.7vmin;
+            margin-bottom: 0.5vmin; /* 수정: 마진 감소 */
+            font-size: 1.4vmin;
+            color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: white;
+            padding: 0.5vmin 0;
+        }
+
+        .stage-indicator {
+            width: 2.2vmin;
+            height: 2.2vmin;
+            border-radius: 50%;
+            border: 0.2vmin solid #6c757d;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4vmin;
+            font-weight: bold;
+            color: #333;
+            position: relative;
+        }
+
+        .stage-indicator.cleared {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #fff;
+        }
+
+        .stage-indicator.current {
+            background: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+
+        .stage-indicator:not(:last-child)::after {
+            content: '-';
+            position: absolute;
+            right: -1vmin;
+            color: #dee2e6;
+            font-size: 1.4vmin;
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1vmin; /* 수정: 간격 감소 */
+            justify-content: center; /* 수정: 세로 중앙 정렬 */
+            align-items: center;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .target-area {
+            background: #f8f9fa;
+            border: 0.3vmin solid #dee2e6;
+            border-radius: 1vmin;
+            padding: 1vmin; /* 수정: 패딩 감소 */
+            height: 25vh; /* 수정: vmin → vh로 동적 조정 */
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .target-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0.5vmin; /* 수정: 마진 감소 */
+            color: #495057;
+            font-size: 2.4vmin;
+        }
+
+        .target-lanes {
+            display: flex;
+            gap: 0.6vmin;
+            justify-content: center;
+            align-items: flex-end;
+            height: calc(100% - 2.8vmin);
+            max-height: 25vh; /* 수정: 높이 조정 */
+            overflow: hidden;
+            position: relative;
+        }
+
+        .target-lanes::after {
+            content: '';
+            position: absolute;
+            top: -10vmin;
+            left: 0;
+            right: 0;
+            height: 10vmin;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #f8f9fa 70%, transparent 100%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .target-lane {
+            width: 6.5vmin;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 0.4vmin;
+            height: 100%;
+            align-items: center;
+            max-height: 25vh; /* 수정: 높이 조정 */
+            overflow: visible;
+        }
+
+        .target-block {
+            width: 6.5vmin;
+            height: 6.5vmin;
+            border-radius: 1vmin;
+            border: 0.2vmin solid rgba(0,0,0,0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.5);
+            position: relative;
+            box-sizing: border-box;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .target-block.attackable {
+            border-color: #ffeb3b;
+            box-shadow: 0 0 1vmin rgba(255,235,59,0.5);
+        }
+
+        .target-block.attackable:active {
+            box-shadow: 0 0 1.2vmin rgba(255,235,59,0.7);
+        }
+
+        .block-number {
+            font-size: 2.4vmin;
+            line-height: 1;
+        }
+
+        .block-label {
+            font-size: 1.4vmin;
+            opacity: 0.85;
+        }
+
+        .queue-area {
+            background: #f8f9fa;
+            border: 0.3vmin solid #dee2e6;
+            border-radius: 1vmin;
+            padding: 1vmin;
+            display: flex;
+            justify-content: center;
+            gap: 1vmin; /* 수정: 간격 감소 */
+            align-items: center;
+            height: 10vh; /* 수정: vmin → vh로 조정 */
+            width: 100%;
+            position: relative;
+            z-index: 20;
+        }
+
+        .queue-slot {
+            width: 6.5vmin;
+            height: 6.5vmin;
+            border-radius: 0.8vmin;
+            border: 0.2vmin dashed rgba(0,0,0,0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8vmin;
+            color: #6c757d;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .queue-block {
+            width: 6.5vmin;
+            height: 6.5vmin;
+            border-radius: 0.8vmin;
+            border: 0.2vmin solid rgba(0,0,0,0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.5);
+            position: relative;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .queue-block.added {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .selection-area {
+            background: #343a40;
+            border-radius: 1vmin;
+            padding: 1vmin; /* 수정: 패딩 감소 */
+            color: white;
+            height: 25vh; /* 수정: vmin → vh로 조정 */
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .selection-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 0.5vmin; /* 수정: 마진 감소 */
+            font-size: 2.4vmin;
+        }
+
+        .stacks-container {
+            display: flex;
+            gap: 1vmin; /* 수정: 간격 감소 */
+            justify-content: center;
+            align-items: flex-start;
+            height: calc(100% - 2.8vmin);
+            max-height: 25vh; /* 수정: 높이 조정 */
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stacks-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10vmin;
+            background: linear-gradient(to bottom, #343a40 0%, #343a40 70%, transparent 100%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4vmin;
+            align-items: center;
+            height: 100%;
+            max-height: 25vh; /* 수정: 높이 조정 */
+            overflow: visible;
+        }
+
+        .stack-block {
+            width: 6.5vmin;
+            height: 6.5vmin;
+            border-radius: 0.8vmin;
+            border: 0.2vmin solid rgba(255,255,255,0.25);
+            transition: box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.45);
+            position: relative;
+            box-sizing: border-box;
+            z-index: 10;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+
+        .stack-block.top-block {
+            border-color: #2ecc71;
+            box-shadow: 0 0 1vmin rgba(46, 204, 113, 0.5);
+            cursor: pointer;
+            padding: 0.5vmin;
+        }
+
+        .stack-block.top-block:active {
+            box-shadow: 0 0 1.2vmin rgba(46, 204, 113, 0.7);
+            transform: scale(0.95);
+        }
+
+        .stack-block:not(.top-block) {
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
+
+        .red { background: #e74c3c; }
+        .blue { background: #3498db; }
+        .green { background: #2ecc71; }
+        .yellow { background: #f1c40f; color: #333; }
+        .purple { background: #9b59b6; }
+
+        .shooting-particle {
+            position: fixed;
+            width: 1.4vmin;
+            height: 1.4vmin;
+            border-radius: 50%;
+            z-index: 2000;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0.5vmin rgba(0,0,0,0.2);
+        }
+
+        .damage-text {
+            position: fixed;
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 2vmin;
+            z-index: 2001;
+            pointer-events: none;
+            animation: damageFloat 0.8s ease-out forwards;
+        }
+
+        @keyframes damageFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-5vmin) scale(1.1); }
+        }
+
+        .game-controls {
+            text-align: center;
+            padding: 0.5vmin; /* 수정: 패딩 감소 */
+            background: white;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+            width: 100%;
+        }
+
+        .btn {
+            color: white;
+            border: none;
+            padding: 1.8vmin 3.5vmin;
+            border-radius: 1vmin;
+            cursor: pointer;
+            font-size: 2.4vmin;
+            margin: 0 1vmin;
+            transition: transform 0.15s ease, filter 0.15s ease;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-next {
+            background: #28a745;
+        }
+
+        .btn-retry {
+            background: #007bff;
+        }
+
+        .btn-close {
+            background: #6c757d;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 0.5vmin; /* 수정: 마진 감소 */
+            font-weight: bold;
+            font-size: 2.4vmin;
+            min-height: 3vmin;
+            width: 100%;
+        }
+
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .error { color: #dc3545; }
+
+        .modal-backdrop {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .modal {
+            background: white;
+            padding: 2vmin;
+            border-radius: 1vmin;
+            width: 80vw;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 1vmin 2.5vmin rgba(0,0,0,0.35);
+        }
+
+        .modal h2 {
+            margin: 0.5vmin 0 1vmin 0;
+            font-size: 3vmin;
+        }
+
+        .modal p {
+            margin: 0.8vmin 0 1.5vmin 0;
+            font-size: 2.4vmin;
+        }
+
+        .modal .modal-actions {
+            display: flex;
+            gap: 1vmin;
+            justify-content: center;
+        }
+
+        @media (max-width: 360px) {
+            #intro {
+                padding: 2.5vmin;
+            }
+            #intro h1 {
+                font-size: 4.2vmin;
+            }
+            #intro p {
+                font-size: 2.6vmin;
+            }
+            .intro-btn {
+                font-size: 2.8vmin;
+                padding: 2.2vmin 4.2vmin;
+            }
+            .game-container {
+                padding: 0.5vmin; /* 수정: 패딩 더 감소 */
+                justify-content: space-evenly; /* 수정: 모바일에서 균등 배치 */
+            }
+            .game-area {
+                gap: 0.5vmin; /* 수정: 간격 더 감소 */
+            }
+            .stage-progress {
+                gap: 0.8vmin;
+                margin-bottom: 0.3vmin; /* 수정: 마진 감소 */
+            }
+            .stage-indicator {
+                width: 2.4vmin;
+                height: 2.4vmin;
+                font-size: 1.6vmin;
+            }
+            .stage-indicator:not(:last-child)::after {
+                right: -1.1vmin;
+                font-size: 1.6vmin;
+            }
+            .target-area {
+                height: 30vh; /* 수정: 더 큰 높이 */
+                padding: 0.5vmin;
+            }
+            .target-lanes {
+                max-height: 30vh;
+            }
+            .target-lane {
+                width: 7vmin;
+                max-height: 30vh;
+            }
+            .target-block {
+                width: 7vmin;
+                height: 7vmin;
+                border: 0.2vmin solid rgba(0,0,0,0.12);
+            }
+            .queue-area {
+                height: 12vh; /* 수정: 더 큰 높이 */
+                padding: 0.5vmin;
+                gap: 0.5vmin;
+            }
+            .queue-slot, .queue-block {
+                width: 7vmin;
+                height: 7vmin;
+                border: 0.2vmin solid rgba(0,0,0,0.28);
+            }
+            .selection-area {
+                height: 30vh; /* 수정: 더 큰 높이 */
+                padding: 0.5vmin;
+            }
+            .stacks-container {
+                max-height: 30vh;
+                gap: 0.5vmin;
+            }
+            .stack {
+                max-height: 30vh;
+            }
+            .stack-block {
+                width: 7vmin;
+                height: 7vmin;
+                border: 0.2vmin solid rgba(255,255,255,0.25);
+            }
+            .block-number {
+                font-size: 2.6vmin;
+            }
+            .block-label {
+                font-size: 1.5vmin;
+            }
+            .target-title, .selection-title {
+                font-size: 2.6vmin;
+                margin-bottom: 0.3vmin;
+            }
+            .btn, .intro-btn {
+                font-size: 2.6vmin;
+                padding: 2vmin 4vmin;
+            }
+            .score-board {
+                font-size: 2.6vmin;
+                margin-bottom: 0.3vmin;
+            }
+            .message {
+                font-size: 2.6vmin;
+            }
+            .damage-text {
+                font-size: 2.2vmin;
+            }
+            .modal h2 {
+                font-size: 3.2vmin;
+            }
+            .modal p {
+                font-size: 2.6vmin;
+            }
+            .shooting-particle {
+                width: 1.6vmin;
+                height: 1.6vmin;
+            }
+            .game-controls {
+                padding: 0.3vmin;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .game-container {
+                max-height: 100vh;
+                padding: 0.5vmin; /* 수정: 패딩 감소 */
+                justify-content: space-evenly; /* 수정: 균등 배치 */
+            }
+            .game-area {
+                gap: 0.5vmin; /* 수정: 간격 감소 */
+            }
+            .target-area {
+                height: 28vh; /* 수정: 높이 조정 */
+                padding: 0.5vmin;
+            }
+            .selection-area {
+                height: 28vh; /* 수정: 높이 조정 */
+                padding: 0.5vmin;
+            }
+            .queue-area {
+                height: 10vh; /* 수정: 높이 조정 */
+                padding: 0.5vmin;
+                gap: 0.5vmin;
+            }
+            .target-lanes, .stacks-container {
+                max-height: 28vh;
+            }
+            .target-lane, .stack {
+                max-height: 28vh;
+            }
+            .target-block {
+                width: 6vmin;
+                height: 6vmin;
+                border: 0.2vmin solid rgba(0,0,0,0.12);
+            }
+            .queue-slot, .queue-block {
+                width: 6vmin;
+                height: 6vmin;
+                border: 0.2vmin solid rgba(0,0,0,0.28);
+            }
+            .stack-block {
+                width: 6vmin;
+                height: 6vmin;
+                border: 0.2vmin solid rgba(255,255,255,0.25);
+            }
+            .block-number {
+                font-size: 2.2vmin;
+            }
+            .block-label {
+                font-size: 1.3vmin;
+            }
+            .target-title, .selection-title {
+                font-size: 2.2vmin;
+                margin-bottom: 0.3vmin;
+            }
+            .btn, .intro-btn {
+                font-size: 2.2vmin;
+                padding: 1.5vmin 3vmin;
+            }
+            .score-board {
+                font-size: 2.2vmin;
+                margin-bottom: 0.3vmin;
+            }
+            .message {
+                font-size: 2.2vmin;
+            }
+            .modal h2 {
+                font-size: 2.8vmin;
+            }
+            .modal p {
+                font-size: 2.2vmin;
+            }
+            .damage-text {
+                font-size: 1.8vmin;
+            }
+            .stage-progress {
+                gap: 0.6vmin;
+                margin-bottom: 0.3vmin;
+            }
+            .stage-indicator {
+                width: 2vmin;
+                height: 2vmin;
+                font-size: 1.4vmin;
+            }
+            .stage-indicator:not(:last-child)::after {
+                right: -0.9vmin;
+                font-size: 1.4vmin;
+            }
+            .shooting-particle {
+                width: 1.4vmin;
+                height: 1.4vmin;
+            }
+            .game-controls {
+                padding: 0.3vmin;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .game-container {
+                padding: 0.5vmin;
+                justify-content: space-evenly; /* 수정: 균등 배치 */
+            }
+            .game-area {
+                gap: 0.5vmin;
+            }
+            .target-area {
+                height: 25vh; /* 수정: 높이 조정 */
+                padding: 0.5vmin;
+            }
+            .selection-area {
+                height: 25vh;
+                padding: 0.5vmin;
+            }
+            .queue-area {
+                height: 10vh;
+                padding: 0.5vmin;
+                gap: 0.5vmin;
+            }
+            .target-lanes, .stacks-container {
+                max-height: 25vh;
+            }
+            .target-lane, .stack {
+                max-height: 25vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="intro">
+        <h1>컬러 슈터</h1>
+        <p>색상 블록을 활용해 타겟을 모두 제거하세요!</p>
+        <button class="intro-btn" onclick="startIntroGame()">게임 시작</button>
+    </div>
+
+    <div class="game-container" id="gameContainer">
+        <div class="score-board">
+            <span>스테이지: <span id="stage">1</span></span>
+            <span style="margin-left: 3vmin;">점수: <span id="score">0</span></span>
+            <span style="margin-left: 3vmin;">색상: <span id="colorCount">3</span></span>
+        </div>
+        <div class="stage-progress" id="stageProgress"></div>
+
+        <div class="game-area">
+            <div class="target-area">
+                <div class="target-title">목표 블록(하단 부터 공격 가능)</div>
+                <div class="target-lanes" id="targetLanes"></div>
+            </div>
+
+            <div class="queue-area" id="queueArea"></div>
+
+            <div class="selection-area">
+                <div class="selection-title">블록 선택(상단만 터치 가능)</div>
+                <div class="stacks-container" id="stacksContainer"></div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="btn btn-retry" onclick="resetGame()">다시 시작</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <div id="modalRoot"></div>
+
+    <script>
+        class ColorShooterGame {
+            constructor() {
+                this.fullColorPool = ['red', 'blue', 'green', 'yellow', 'purple'];
+                this.stage = 1;
+                this.score = 0;
+                this.clearedStages = new Set();
+                this.stageConfig = {
+                    1: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
+                    2: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
+                    3: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45] },
+                    4: { colors: 4, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
+                    5: { colors: 4, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
+                    6: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
+                    7: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 4, numberRange: [15, 30, 45, 60, 75] },
+                    8: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 4, numberRange: [15, 30, 45, 60, 75] },
+                    9: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
+                    10: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75, 90] }
+                };
+                this.colors = [];
+                this.targetNumbers = [];
+                this.stackNumbers = [];
+                this.targetLanes = [];
+                this.stacks = [];
+                this.attackQueue = [];
+                this.gameRunning = false;
+                this._queueScanTimer = null;
+                this._pendingUpdate = false;
+                this._particleCount = 0;
+                this._maxParticles = 30;
+                this.handleBlockTouch = this.handleBlockTouch.bind(this);
+            }
+
+            initGame() {
+                this.stopQueueScanLoop();
+                this.stage = 1;
+                this.score = 0;
+                this.clearedStages.clear();
+                this._pendingUpdate = false;
+                this._particleCount = 0;
+                this.initStage();
+                this.updateDisplay();
+                this.updateStageProgress();
+            }
+
+            initStage() {
+                const config = this.stageConfig[this.stage];
+                this.colors = this.fullColorPool.slice(0, config.colors);
+                this.targetNumbers = config.numberRange;
+                this.stackNumbers = config.numberRange;
+                this.targetLanes = Array(config.lanes).fill().map(() => []);
+                this.stacks = Array(config.lanes).fill().map(() => []);
+                this.attackQueue = Array(config.queueSlots).fill(null);
+                this.generateStageBlocks(config);
+                this.updateQueueUI();
+                this.updateStageProgress();
+            }
+
+            generateStageBlocks(config) {
+                const colorTotals = {};
+                this.colors.forEach(color => colorTotals[color] = 0);
+
+                for (let lane = 0; lane < config.lanes; lane++) {
+                    this.targetLanes[lane] = [];
+                    for (let i = 0; i < config.blocksPerLane; i++) {
+                        const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                        const number = this.targetNumbers[Math.floor(Math.random() * this.targetNumbers.length)];
+                        this.targetLanes[lane].push({ color, number, id: Date.now() + lane * 1000 + i });
+                        colorTotals[color] += number;
+                    }
+                }
+
+                const stackBlocks = [];
+                this.colors.forEach(color => {
+                    let remaining = colorTotals[color];
+                    while (remaining > 0) {
+                        const number = Math.min(
+                            this.stackNumbers[Math.floor(Math.random() * this.stackNumbers.length)],
+                            remaining
+                        );
+                        stackBlocks.push({ color, number, id: Date.now() + Math.random() });
+                        remaining -= number;
+                    }
+                });
+
+                stackBlocks.sort(() => Math.random() - 0.5);
+                const blocksPerStack = Math.ceil(stackBlocks.length / config.lanes);
+                for (let s = 0; s < config.lanes; s++) {
+                    this.stacks[s] = stackBlocks.slice(s * blocksPerStack, (s + 1) * blocksPerStack);
+                }
+            }
+
+            startGame() {
+                this.gameRunning = true;
+                this._particleCount = 0;
+                this.showMessage(`스테이지 ${this.stage} 시작!`, 'success');
+                this.updateDisplay();
+                this.updateStageProgress();
+                this.startQueueScanLoop();
+            }
+
+            resetGame() {
+                this.stopQueueScanLoop();
+                this.gameRunning = false;
+                this._pendingUpdate = false;
+                this._particleCount = 0;
+                this.initGame();
+                this.startGame();
+            }
+
+            getAvailableQueueSlot() {
+                return this.attackQueue.findIndex(slot => slot === null || slot.number <= 0);
+            }
+
+            selectBlock(stackIndex) {
+                if (!this.gameRunning) {
+                    this.showMessage('게임이 시작되지 않았습니다!', 'error');
+                    return false;
+                }
+
+                if (stackIndex < 0 || stackIndex >= this.stacks.length) {
+                    this.showMessage(`잘못된 스택: ${stackIndex + 1}`, 'error');
+                    return false;
+                }
+
+                const slotIndex = this.getAvailableQueueSlot();
+                if (slotIndex === -1) {
+                    this.showMessage('대기열이 가득 찼습니다!', 'warning');
+                    return false;
+                }
+
+                const stack = this.stacks[stackIndex];
+                if (!stack || stack.length === 0) {
+                    this.showMessage(`스택 ${stackIndex + 1}이 비었습니다!`, 'error');
+                    return false;
+                }
+
+                const topBlock = stack[0];
+                const queueBlock = { 
+                    ...topBlock, 
+                    stackIndex, 
+                    id: Date.now() + Math.random(), 
+                    isFiring: false,
+                    queuePosition: slotIndex 
+                };
+                this.attackQueue[slotIndex] = queueBlock;
+                this.stacks[stackIndex].shift();
+
+                this.showMessage(`블록(${topBlock.color}, ${topBlock.number}) 추가`, 'success');
+                this.updateQueue();
+                this.scheduleUpdate(() => {
+                    this.scanAndFireOnce();
+                    this.checkStageClear();
+                });
+
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+                return true;
+            }
+
+            startQueueScanLoop() {
+                if (this._queueScanTimer) {
+                    clearInterval(this._queueScanTimer);
+                    this._queueScanTimer = null;
+                }
+                this._queueScanTimer = setInterval(() => {
+                    if (!this.gameRunning) return;
+                    this.scanAndFireOnce();
+                }, 150);
+            }
+
+            stopQueueScanLoop() {
+                if (this._queueScanTimer) {
+                    clearInterval(this._queueScanTimer);
+                    this._queueScanTimer = null;
+                }
+            }
+
+            scanAndFireOnce() {
+                if (!this.gameRunning) return;
+
+                const firingColors = new Set();
+                for (let qIndex = 0; qIndex < this.attackQueue.length; qIndex++) {
+                    const q = this.attackQueue[qIndex];
+                    if (!q || q.isFiring || q.number <= 0) {
+                        if (q && q.isFiring) firingColors.add(q.color);
+                        continue;
+                    }
+
+                    if (firingColors.has(q.color)) continue;
+
+                    let foundLane = -1;
+                    for (let laneIndex = 0; laneIndex < this.targetLanes.length; laneIndex++) {
+                        const lane = this.targetLanes[laneIndex];
+                        if (lane.length > 0 && lane[0].color === q.color) {
+                            foundLane = laneIndex;
+                            break;
+                        }
+                    }
+
+                    if (foundLane !== -1) {
+                        this.attackQueue[qIndex].isFiring = true;
+                        firingColors.add(q.color);
+                        this.fireFromQueueIndex(qIndex, foundLane);
+                    }
+                }
+
+                this.checkQueueStuck();
+            }
+
+            fireFromQueueIndex(queueIndex, laneIndex) {
+                const queued = this.attackQueue[queueIndex];
+                if (!queued || queued.number <= 0) {
+                    this.attackQueue[queueIndex] = null;
+                    this.scheduleUpdate();
+                    return;
+                }
+
+                const lane = this.targetLanes[laneIndex];
+                if (!lane || lane.length === 0) {
+                    this.attackQueue[queueIndex].isFiring = false;
+                    this.scheduleUpdate();
+                    return;
+                }
+
+                const shotInterval = 1000 / 30;
+                let shotsFired = 0;
+                let lastShotTime = performance.now();
+
+                const fireLoop = (now) => {
+                    if (!this.gameRunning) {
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+                        this.scheduleUpdate();
+                        return;
+                    }
+
+                    const lane = this.targetLanes[laneIndex];
+                    if (!lane || lane.length === 0 || lane[0].color !== queued.color) {
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+                        this.scheduleUpdate();
+                        return;
+                    }
+
+                    const currentBottom = lane[0];
+                    if (!currentBottom) {
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+                        this.scheduleUpdate();
+                        return;
+                    }
+
+                    if (now - lastShotTime >= shotInterval) {
+                        if (this._particleCount < this._maxParticles) {
+                            this.createSingleParticle(queueIndex, laneIndex, queued.color);
+                            this._particleCount++;
+                        }
+                        currentBottom.number -= 1;
+                        queued.number -= 1;
+                        shotsFired++;
+                        lastShotTime = now;
+
+                        this.updateTargetLanes();
+                        this.updateQueue();
+
+                        if (currentBottom.number <= 0) {
+                            this.targetLanes[laneIndex].shift();
+                            if (lane.length > 0 && lane[0].color === queued.color) {
+                                this.updateTargetLanes();
+                            }
+                        }
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(50);
+                        }
+                    }
+
+                    if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
+                        requestAnimationFrame(fireLoop);
+                    } else {
+                        this.score += shotsFired;
+                        if (queued.number > 0) {
+                            this.showMessage(`잔여값 ${queued.number} 남음`, 'warning');
+                        } else {
+                            this.attackQueue[queueIndex] = null;
+                        }
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+
+                        this.updateTargetLanes();
+                        this.scheduleUpdate(() => {
+                            this.showDamageText(laneIndex, shotsFired);
+                            this.showMessage(`매칭 성공! +${shotsFired}점`, 'success');
+                            this.checkStageClear();
+                        });
+                    }
+                };
+
+                requestAnimationFrame(fireLoop);
+            }
+
+            createSingleParticle(queueIndex, laneIndex, color) {
+                const queueArea = document.getElementById('queueArea');
+                const targetLanes = document.getElementById('targetLanes');
+
+                const slotEl = queueArea.children[queueIndex];
+                if (!slotEl) return;
+
+                const slotRect = slotEl.getBoundingClientRect();
+                const startX = slotRect.left + slotRect.width / 2;
+                const startY = slotRect.top + slotRect.height / 2;
+
+                const laneEl = targetLanes.children[laneIndex];
+                if (!laneEl) return;
+
+                const bottomBlock = laneEl.children[0];
+                if (!bottomBlock) return;
+
+                const targetRect = bottomBlock.getBoundingClientRect();
+                const targetX = targetRect.left + targetRect.width / 2;
+                const targetY = targetRect.top + targetRect.height / 2;
+
+                const p = document.createElement('div');
+                p.className = 'shooting-particle';
+                p.style.background = window.getComputedStyle(document.querySelector('.' + color))?.backgroundColor || color;
+                p.style.left = startX + 'px';
+                p.style.top = startY + 'px';
+                p.style.opacity = '1';
+
+                document.body.appendChild(p);
+
+                const duration = 150;
+                const start = performance.now();
+
+                function easeOutQuad(t) {
+                    return t * (2 - t);
+                }
+
+                function frame(now) {
+                    const t = Math.min(1, (now - start) / duration);
+                    const eased = easeOutQuad(t);
+                    const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 1;
+                    const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 1;
+                    p.style.left = curX + 'px';
+                    p.style.top = curY + 'px';
+                    p.style.opacity = String(1 - eased);
+                    const scale = 1 - 0.35 * eased;
+                    p.style.transform = `translate(-50%,-50%) scale(${scale})`;
+
+                    if (t < 1) {
+                        requestAnimationFrame(frame);
+                    } else {
+                        if (p.parentNode) p.parentNode.removeChild(p);
+                        this._particleCount = Math.max(0, this._particleCount - 1);
+                    }
+                }
+
+                requestAnimationFrame(frame.bind(this));
+            }
+
+            showDamageText(laneIndex, damage) {
+                const targetLanesEl = document.getElementById('targetLanes');
+                const laneEl = targetLanesEl.children[laneIndex];
+                if (!laneEl) return;
+
+                const bottomBlock = laneEl.children[0];
+                if (!bottomBlock) return;
+
+                const rect = bottomBlock.getBoundingClientRect();
+                const tx = rect.left + rect.width / 2;
+                const ty = rect.top + rect.height / 2;
+
+                const d = document.createElement('div');
+                d.className = 'damage-text';
+                d.textContent = `-${damage}`;
+                d.style.left = tx + 'px';
+                d.style.top = ty + 'px';
+                document.body.appendChild(d);
+
+                setTimeout(() => {
+                    if (d.parentNode) d.parentNode.removeChild(d);
+                }, 800);
+            }
+
+            checkStageClear() {
+                const allCleared = this.targetLanes.every(lane => lane.length === 0);
+                if (allCleared) {
+                    this.clearedStages.add(this.stage);
+                    this.gameRunning = false;
+                    this.stopQueueScanLoop();
+                    if (this.stage < 10) {
+                        this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
+                    } else {
+                        this.showGameOverModal(`모든 스테이지 완료! 최종 점수: ${this.score}`);
+                    }
+                }
+            }
+
+            advanceStage() {
+                this.stage++;
+                this.gameRunning = false;
+                this._particleCount = 0;
+                this.stopQueueScanLoop();
+                this.initStage();
+                this.startGame();
+            }
+
+            checkQueueStuck() {
+                if (this.getAvailableQueueSlot() !== -1) {
+                    this.scheduleUpdate();
+                    return;
+                }
+
+                for (let q of this.attackQueue) {
+                    if (!q || q.number <= 0) continue;
+                    for (let lane of this.targetLanes) {
+                        if (lane.length > 0 && lane[0].color === q.color) {
+                            this.scheduleUpdate();
+                            return;
+                        }
+                    }
+                }
+
+                this.gameRunning = false;
+                this.stopQueueScanLoop();
+                this.showGameOverModal(`대기열이 가득 차 매칭 불가! 점수: ${this.score}`);
+            }
+
+            showStageClearModal(message) {
+                const root = document.getElementById('modalRoot');
+                root.innerHTML = '';
+
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `<h2>스테이지 클리어!</h2><p>${message}</p>`;
+
+                const actions = document.createElement('div');
+                actions.className = 'modal-actions';
+
+                const retry = document.createElement('button');
+                retry.className = 'btn btn-retry';
+                retry.textContent = '다시 플레이';
+                retry.onclick = () => {
+                    root.innerHTML = '';
+                    this.resetGame();
+                };
+
+                const next = document.createElement('button');
+                next.className = 'btn btn-next';
+                next.textContent = '다음 스테이지';
+                next.onclick = () => {
+                    root.innerHTML = '';
+                    this.advanceStage();
+                };
+
+                actions.appendChild(retry);
+                actions.appendChild(next);
+                modal.appendChild(actions);
+                backdrop.appendChild(modal);
+                root.appendChild(backdrop);
+
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+            }
+
+            showGameOverModal(message) {
+                const root = document.getElementById('modalRoot');
+                root.innerHTML = '';
+
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `<h2>게임 오버</h2><p>${message}</p>`;
+
+                const actions = document.createElement('div');
+                actions.className = 'modal-actions';
+
+                const close = document.createElement('button');
+                close.className = 'btn btn-close';
+                close.textContent = '나가기';
+                close.onclick = () => {
+                    root.innerHTML = '';
+                    document.getElementById('gameContainer').style.display = 'none';
+                    document.getElementById('intro').style.display = 'block';
+                };
+
+                const retry = document.createElement('button');
+                retry.className = 'btn btn-retry';
+                retry.textContent = '다시 플레이';
+                retry.onclick = () => {
+                    root.innerHTML = '';
+                    this.resetGame();
+                };
+
+                actions.appendChild(close);
+                actions.appendChild(retry);
+                modal.appendChild(actions);
+                backdrop.appendChild(modal);
+                root.appendChild(backdrop);
+            }
+
+            updateStageProgress() {
+                const stageProgress = document.getElementById('stageProgress');
+                stageProgress.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = `stage-indicator ${
+                        i === this.stage ? 'current' : this.clearedStages.has(i) ? 'cleared' : ''
+                    }`;
+                    indicator.dataset.stage = i;
+                    indicator.textContent = i;
+                    stageProgress.appendChild(indicator);
+                }
+            }
+
+            updateDisplay() {
+                document.getElementById('stage').textContent = this.stage;
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('colorCount').textContent = this.stageConfig[this.stage].colors;
+                this.updateTargetLanes();
+                this.updateStageProgress();
+                this.scheduleUpdate();
+            }
+
+            updateTargetLanes() {
+                const targetContainer = document.getElementById('targetLanes');
+                targetContainer.innerHTML = '';
+                
+                this.targetLanes.forEach((lane, laneIndex) => {
+                    const laneEl = document.createElement('div');
+                    laneEl.className = 'target-lane';
+                    
+                    lane.forEach((block, idx) => {
+                        const blockEl = document.createElement('div');
+                        blockEl.className = `target-block ${block.color}`;
+                        blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
+                        if (idx === 0) {
+                            blockEl.classList.add('attackable');
+                        }
+                        laneEl.appendChild(blockEl);
+                    });
+                    targetContainer.appendChild(laneEl);
+                });
+            }
+
+            updateQueueUI() {
+                const queueArea = document.getElementById('queueArea');
+                queueArea.innerHTML = '';
+                const config = this.stageConfig[this.stage];
+                for (let i = 0; i < config.queueSlots; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'queue-slot';
+                    slot.id = `queue${i}`;
+                    slot.textContent = 'Empty';
+                    queueArea.appendChild(slot);
+                }
+                this.updateQueue();
+            }
+
+            scheduleUpdate(callback = null) {
+                if (this._pendingUpdate) return;
+                this._pendingUpdate = true;
+                requestAnimationFrame(() => {
+                    this.updateStacksAndQueue();
+                    this._pendingUpdate = false;
+                    if (callback) callback();
+                    this.checkStageClear();
+                });
+            }
+
+            updateStacksAndQueue() {
+                const stacksContainer = document.getElementById('stacksContainer');
+                stacksContainer.innerHTML = '';
+                
+                this.stacks.forEach((stack, stackIndex) => {
+                    const stackEl = document.createElement('div');
+                    stackEl.className = 'stack';
+                    
+                    for (let blockIndex = 0; blockIndex < stack.length; blockIndex++) {
+                        const block = stack[blockIndex];
+                        const blockEl = document.createElement('div');
+                        blockEl.className = `stack-block ${block.color}`;
+                        blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
+                        blockEl.dataset.stackIndex = stackIndex;
+
+                        if (blockIndex === 0 && this.gameRunning && this.getAvailableQueueSlot() !== -1) {
+                            blockEl.classList.add('top-block');
+                            blockEl.addEventListener('pointerdown', (e) => {
+                                e.preventDefault();
+                                this.handleBlockTouch(stackIndex);
+                            }, { passive: false, once: true });
+                        } else {
+                            blockEl.style.cursor = 'not-allowed';
+                        }
+
+                        stackEl.appendChild(blockEl);
+                    }
+                    stacksContainer.appendChild(stackEl);
+                });
+                this.updateQueue();
+            }
+
+            updateQueue() {
+                const queueArea = document.getElementById('queueArea');
+                for (let i = 0; i < this.attackQueue.length; i++) {
+                    const slot = queueArea.children[i];
+                    if (!slot) continue;
+                    
+                    slot.innerHTML = '';
+                    slot.className = 'queue-slot';
+                    
+                    if (this.attackQueue[i] && this.attackQueue[i].number > 0) {
+                        const block = this.attackQueue[i];
+                        slot.className = `queue-block ${block.color} ${!block.isFiring ? 'added' : ''}`;
+                        slot.innerHTML = `<div class="block-number">${block.number}</div>`;
+                    } else {
+                        slot.innerHTML = 'Empty';
+                        if (this.attackQueue[i]) {
+                            this.attackQueue[i] = null;
+                        }
+                    }
+                }
+            }
+
+            handleBlockTouch(stackIndex) {
+                this.selectBlock(stackIndex);
+            }
+
+            showMessage(text, type = '') {
+                const messageEl = document.getElementById('message');
+                messageEl.textContent = text;
+                messageEl.className = `message ${type}`;
+                setTimeout(() => {
+                    if (messageEl) {
+                        messageEl.textContent = '';
+                        messageEl.className = 'message';
+                    }
+                }, 2000);
+            }
+        }
+
+        let game;
+
+        function startIntroGame() {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'flex';
+            if (!game) {
+                game = new ColorShooterGame();
+                game.initGame();
+            }
+            game.startGame();
+        }
+
+        function resetGame() {
+            if (game) game.resetGame();
+        }
+
+        window.onload = function() {
+            document.getElementById('intro').style.display = 'flex';
+            document.getElementById('gameContainer').style.display = 'none';
+            console.log('Game loaded');
+        };
+    </script>
+</body>
+</html>
