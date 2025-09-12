@@ -1,47 +1,51 @@
-<!-- Taehyun -->
-
+<!-- Taehyun | 400 x 736 + Virtual Joystick -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>탕탕특공대 - 슈팅 게임 (아이템 + 랭킹)</title>
+  <meta name="viewport" content="width=400, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>탕탕특공대 - 슈팅 게임 (모바일 400x736 + 조이스틱)</title>
   <style>
     body{margin:0;padding:0;background:linear-gradient(to bottom,#000428,#004e92);color:#fff;font-family:'Courier New',monospace;overflow:hidden}
-    #gameContainer{position:relative;width:800px;height:600px;margin:20px auto;background:#001122;border:2px solid #00ff88;overflow:hidden}
-    canvas{display:block;background:transparent}
-    #ui{position:absolute;top:10px;left:10px;z-index:10;font-size:18px;font-weight:bold;text-shadow:2px 2px 4px rgba(0,0,0,.8)}
-    #gameOver{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:36px;color:#ff4444;text-shadow:3px 3px 6px rgba(0,0,0,.9);display:none;z-index:20}
-    #instructions{text-align:center;margin:10px 0;font-size:14px;color:#88ff88}
+    #gameContainer{position:relative;width:400px;height:736px;margin:8px auto;background:#001122;border:2px solid #00ff88;overflow:hidden;touch-action:none;}
+    canvas{display:block;background:transparent;width:400px;height:736px}
+    #ui{position:absolute;top:6px;left:6px;z-index:10;font-size:14px;font-weight:bold;text-shadow:2px 2px 4px rgba(0,0,0,.8)}
+    #gameOver{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:28px;color:#ff4444;text-shadow:3px 3px 6px rgba(0,0,0,.9);display:none;z-index:20;width:90%}
+    #instructions{text-align:center;margin:6px 0 0;font-size:12px;color:#88ff88}
 
-    /* 리더보드 패널 */
-    #leaderboard{position:absolute;top:10px;right:10px;z-index:10;width:220px;background:rgba(0,0,0,.35);border:1px solid #00ff88;border-radius:8px;padding:8px 10px;font-size:12px}
-    #leaderboard h3{margin:0 0 6px 0;font-size:14px;color:#a8ffd9}
-    #leaderboard ol{margin:0;padding-left:20px;max-height:200px;overflow:auto}
-    #leaderboard li{line-height:1.4}
+    /* 리더보드 패널(모바일 폭 축소) */
+    #leaderboard{position:absolute;top:6px;right:6px;z-index:10;width:160px;background:rgba(0,0,0,.35);border:1px solid #00ff88;border-radius:8px;padding:6px 8px;font-size:11px}
+    #leaderboard h3{margin:0 0 4px 0;font-size:12px;color:#a8ffd9}
+    #leaderboard ol{margin:0;padding-left:18px;max-height:140px;overflow:auto}
+    #leaderboard li{line-height:1.3}
     #leaderboard .empty{color:#84c7c7}
 
     /* 게임오버 저장 영역 */
-    #saveArea{margin-top:16px;font-size:16px}
-    #playerName{width:160px;padding:6px 8px;border-radius:6px;border:1px solid #00ff88;background:#001a2e;color:#eafff7}
-    #saveScoreBtn{padding:6px 10px;margin-left:6px;border:1px solid #00ff88;background:#00384f;color:#eafff7;border-radius:6px;cursor:pointer}
+    #saveArea{margin-top:12px;font-size:14px}
+    #playerName{width:140px;padding:6px 8px;border-radius:6px;border:1px solid #00ff88;background:#001a2e;color:#eafff7}
+    #saveScoreBtn{padding:6px 8px;margin-left:6px;border:1px solid #00ff88;background:#00384f;color:#eafff7;border-radius:6px;cursor:pointer}
     #saveMsg{font-size:12px;color:#a8ffd9;margin-top:6px;height:14px}
+
+    /* ★ 가상 조이스틱 */
+    #joystick{position:absolute;bottom:12px;left:12px;width:140px;height:140px;z-index:12;touch-action:none;}
+    #joyBase{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.05);border:2px solid #00ff88;box-shadow:0 0 12px rgba(0,255,136,.25) inset}
+    #joyStick{position:absolute;width:68px;height:68px;border-radius:50%;left:36px;top:36px;background:rgba(0,255,136,.75);border:2px solid #00ff88;box-shadow:0 0 12px rgba(0,255,136,.6);touch-action:none;}
   </style>
 </head>
 <body>
   <div id="instructions">
-    방향키로 이동 | <b>자동 발사</b> | P: 일시정지 | R: 재시작 | 적들이 사방에서 몰려옵니다! | 아이템을 수집하세요!
+    조이스틱 이동 · 자동 발사 · P: 일시정지 · R: 재시작 · 아이템 수집!
   </div>
 
   <div id="gameContainer">
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas" width="400" height="736"></canvas>
 
     <div id="ui">
       <div>점수: <span id="score">0</span></div>
       <div>생명: <span id="lives">3</span></div>
       <div>웨이브: <span id="wave">1</span></div>
       <div>보호막: <span id="shield">0</span></div>
-      <div style="font-size: 12px; margin-top: 5px;">
+      <div style="font-size: 11px; margin-top: 4px;">
         <div>연사: <span id="fireRate">1.0</span>x</div>
         <div>멀티: <span id="multiShot">1</span>발</div>
       </div>
@@ -53,18 +57,21 @@
       <ol id="lbList"><li class="empty">플레이 후 점수를 저장해보세요.</li></ol>
     </div>
 
+    <!-- ★ 가상 조이스틱 -->
+    <div id="joystick">
+      <div id="joyBase"></div>
+      <div id="joyStick"></div>
+    </div>
+
     <div id="gameOver">
       <div>게임 오버!</div>
-      <div style="font-size:24px; margin-top:20px;">최종 점수: <span id="finalScore">0</span></div>
-
-      <!-- 점수 저장 영역 -->
+      <div style="font-size:18px; margin-top:14px;">최종 점수: <span id="finalScore">0</span></div>
       <div id="saveArea">
         <input id="playerName" type="text" maxlength="12" placeholder="닉네임(최대 12자)" />
         <button id="saveScoreBtn">점수 저장</button>
         <div id="saveMsg"></div>
       </div>
-
-      <div style="font-size:18px; margin-top:15px;">R키를 눌러서 재시작</div>
+      <div style="font-size:14px; margin-top:12px;">R키를 눌러서 재시작</div>
     </div>
   </div>
 
@@ -90,7 +97,6 @@
       const entry = { name: (name||'Player').trim().slice(0,12) || 'Player', score: +score||0, date: new Date().toISOString() };
       leaderboard.push(entry);
       leaderboard.sort((a,b)=> b.score - a.score);
-      // 저장 용량 보호: 상위 50개만 유지 (표시는 TOP10)
       leaderboard = leaderboard.slice(0,50);
       localStorage.setItem(LB_KEY, JSON.stringify(leaderboard));
       localStorage.setItem(NAME_KEY, entry.name);
@@ -124,19 +130,18 @@
       keys: {},
       enemyCount: 0,
       maxEnemies: 15,
-      time: 0,               // 누적 시간(초)
-      shotTimer: 0,          // 자동 발사용 쿨다운 타이머(초)
-      baseFireRate: 0.22,    // 기본 자동 발사 간격(초)
+      time: 0,
+      shotTimer: 0,
+      baseFireRate: 0.22,
     };
 
     // ===== 플레이어 =====
     const player = {
-      x: 400, y: 300, width: 30, height: 30,
+      x: 200, y: 368, width: 30, height: 30,
       speed: 220,
       color: '#00ff88',
       lastDir: {x: 0, y: -1},
       invuln: 0,
-      // 파워업
       fireRate: 1.0,
       bulletSpeed: 1.0,
       multiShot: 1,
@@ -144,7 +149,7 @@
       powerUpTimer: 0
     };
 
-    // ===== 객체 컨테이너 =====
+    // ===== 컨테이너 =====
     let bullets = [];
     let enemies = [];
     let particles = [];
@@ -152,46 +157,141 @@
 
     // ===== 유틸 =====
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-    function vecNorm(x, y) {
-      const d = Math.hypot(x, y) || 1;
-      return {x: x/d, y: y/d};
-    }
+    function vecNorm(x, y) { const d = Math.hypot(x, y) || 1; return {x: x/d, y: y/d}; }
 
-    // ===== 입력 =====
+    // ===== 입력(키보드 유지) =====
     document.addEventListener('keydown', (e) => {
       if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
       gameState.keys[e.code] = true;
-
       if (e.code === 'KeyR') restartGame();
       if (e.code === 'KeyP') gameState.paused = !gameState.paused;
+      // 자동 사격이므로 Space 수동사격은 생략 가능(테스트용 남김)
       if (e.code === 'Space') manualShoot();
     });
     document.addEventListener('keyup', (e) => gameState.keys[e.code] = false);
 
+    /* ===== ★ 가상 조이스틱 로직 ===== */
+    const joyBase = document.getElementById('joyBase');
+    const joyStick = document.getElementById('joyStick');
+    const joyWrap = document.getElementById('joystick');
+
+    const joystick = {
+      active:false,
+      id:null,
+      dx:0, dy:0, // -1..1
+      amp:0      // 0..1 (거리 비율)
+    };
+
+    const DEADZONE = 0.15; // 15%
+
+    function centerStick(){
+      // center to middle (base 140, stick 68 => offset 36)
+      joyStick.style.left = '36px';
+      joyStick.style.top  = '36px';
+    }
+    centerStick();
+
+    function updateFromPoint(clientX, clientY){
+      const rect = joyWrap.getBoundingClientRect();
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top  + rect.height/2;
+      let dx = clientX - cx;
+      let dy = clientY - cy;
+
+      const max = (rect.width/2) - 4; // padding
+      const dist = Math.hypot(dx,dy);
+      const amp = Math.min(dist / max, 1);
+
+      // 방향 단위 벡터
+      const nx = (dist ? dx/dist : 0);
+      const ny = (dist ? dy/dist : 0);
+
+      // 스틱 위치 (클램프)
+      const clampedX = nx * amp * max;
+      const clampedY = ny * amp * max;
+
+      joyStick.style.left = `${rect.width/2 - joyStick.offsetWidth/2 + clampedX}px`;
+      joyStick.style.top  = `${rect.height/2 - joyStick.offsetHeight/2 + clampedY}px`;
+
+      joystick.dx = nx;
+      joystick.dy = ny;
+      joystick.amp = amp;
+      joystick.active = amp > DEADZONE;
+    }
+
+    // Touch events
+    joyWrap.addEventListener('touchstart', (e)=>{
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      joystick.id = t.identifier;
+      updateFromPoint(t.clientX, t.clientY);
+    }, {passive:false});
+
+    joyWrap.addEventListener('touchmove', (e)=>{
+      for (const t of e.changedTouches){
+        if (t.identifier === joystick.id){
+          e.preventDefault();
+          updateFromPoint(t.clientX, t.clientY);
+        }
+      }
+    }, {passive:false});
+
+    function endTouch(e){
+      for (const t of e.changedTouches){
+        if (t.identifier === joystick.id){
+          joystick.id = null;
+          joystick.active = false;
+          joystick.dx = joystick.dy = joystick.amp = 0;
+          centerStick();
+        }
+      }
+    }
+    joyWrap.addEventListener('touchend', endTouch, {passive:false});
+    joyWrap.addEventListener('touchcancel', endTouch, {passive:false});
+
+    // Mouse (PC 테스트용)
+    let mouseDown = false;
+    joyWrap.addEventListener('mousedown', (e)=>{ mouseDown=true; updateFromPoint(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', (e)=>{ if(mouseDown) updateFromPoint(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', ()=>{ if(mouseDown){ mouseDown=false; joystick.active=false; joystick.dx=joystick.dy=joystick.amp=0; centerStick(); }});
+
     // ===== 플레이어 이동 =====
     function movePlayer(dt) {
-      let dx = 0, dy = 0;
-      if (gameState.keys['ArrowLeft'])  dx -= 1;
-      if (gameState.keys['ArrowRight']) dx += 1;
-      if (gameState.keys['ArrowUp'])    dy -= 1;
-      if (gameState.keys['ArrowDown'])  dy += 1;
+      // 1) 조이스틱 우선
+      if (joystick.active){
+        // 아날로그 속도 (거리 비율 반영)
+        const speed = player.speed * joystick.amp;
+        player.x += joystick.dx * speed * dt;
+        player.y += joystick.dy * speed * dt;
 
-      if (dx || dy) {
-        const v = vecNorm(dx, dy);
-        player.x += v.x * player.speed * dt;
-        player.y += v.y * player.speed * dt;
-        player.lastDir = v;
+        // 마지막 방향 업데이트(미세 드래그 방지)
+        if (joystick.amp > DEADZONE + 0.02){
+          player.lastDir = vecNorm(joystick.dx, joystick.dy);
+        }
+      } else {
+        // 2) 키보드 폴백
+        let dx = 0, dy = 0;
+        if (gameState.keys['ArrowLeft'])  dx -= 1;
+        if (gameState.keys['ArrowRight']) dx += 1;
+        if (gameState.keys['ArrowUp'])    dy -= 1;
+        if (gameState.keys['ArrowDown'])  dy += 1;
+
+        if (dx || dy) {
+          const v = vecNorm(dx, dy);
+          player.x += v.x * player.speed * dt;
+          player.y += v.y * player.speed * dt;
+          player.lastDir = v;
+        }
       }
 
       player.x = clamp(player.x, 0, canvas.width - player.width);
       player.y = clamp(player.y, 0, canvas.height - player.height);
     }
 
-    // ===== 발사 =====
+    // ===== 발사 (자동) =====
     function fire(dir) {
       if (gameState.gameOver) return;
-      const speed = 520 * player.bulletSpeed; // px/sec
-
+      const speed = 520 * player.bulletSpeed;
       for (let i = 0; i < player.multiShot; i++) {
         const angle = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i/2) * 0.3;
         const finalDir = {
@@ -207,13 +307,12 @@
         });
       }
     }
-    function manualShoot() { fire(player.lastDir); }
+    function manualShoot(){ /* 테스트용 남김 */ fire(player.lastDir); }
 
     function autoFire(dt) {
       gameState.shotTimer -= dt;
       const curRate = Math.max(0.10, gameState.baseFireRate - (gameState.wave-1)*0.01) / player.fireRate;
       if (gameState.shotTimer <= 0) {
-        // 자동 조준: 가장 가까운 적, 없으면 마지막 이동 방향
         let target = null, bestD = Infinity;
         for (const e of enemies) {
           const cx = e.x + e.width/2, cy = e.y + e.height/2;
@@ -245,23 +344,21 @@
       }
     }
 
-    // ===== 아이템 시스템 =====
+    // ===== 아이템 =====
     const itemTypes = {
-      FIRE_RATE: { color: '#ff6666', symbol: 'F', name: '연사력 강화' },
-      MULTI_SHOT: { color: '#6666ff', symbol: 'M', name: '멀티샷' },
-      SPEED_UP: { color: '#66ff66', symbol: 'S', name: '이동속도 증가' },
-      SHIELD: { color: '#ffff66', symbol: 'H', name: '보호막' },
-      BULLET_SPEED: { color: '#ff66ff', symbol: 'B', name: '총알 속도' }
+      FIRE_RATE:   { color: '#ff6666', symbol: 'F', name: '연사력 강화' },
+      MULTI_SHOT:  { color: '#6666ff', symbol: 'M', name: '멀티샷' },
+      SPEED_UP:    { color: '#66ff66', symbol: 'S', name: '이동속도 증가' },
+      SHIELD:      { color: '#ffff66', symbol: 'H', name: '보호막' },
+      BULLET_SPEED:{ color: '#ff66ff', symbol: 'B', name: '총알 속도' }
     };
-
     function spawnItem(x, y) {
-      if (Math.random() < 0.3) { // 30% 확률로 아이템 드랍
+      if (Math.random() < 0.3) {
         const types = Object.keys(itemTypes);
         const type = types[Math.floor(Math.random() * types.length)];
         items.push({ x: x - 10, y: y - 10, width: 20, height: 20, type, life: 10, bob: Math.random() * Math.PI * 2 });
       }
     }
-
     function collectItem(item) {
       const type = item.type;
       createExplosion(item.x + 10, item.y + 10, itemTypes[type].color, 8);
@@ -295,14 +392,10 @@
       gameState.time += dt;
       if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
 
-      // 파워업 타이머 감소 (보호막 제외)
       if (player.powerUpTimer > 0) {
         player.powerUpTimer = Math.max(0, player.powerUpTimer - dt);
         if (player.powerUpTimer <= 0) {
-          player.fireRate = 1.0;
-          player.bulletSpeed = 1.0;
-          player.multiShot = 1;
-          player.speed = 220;
+          player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.speed = 220;
         }
       }
 
@@ -310,13 +403,11 @@
       autoFire(dt);
       spawnEnemy(dt);
 
-      // 총알
       bullets = bullets.filter(b => {
         b.x += b.vx * dt; b.y += b.vy * dt;
         return b.x > -10 && b.x < canvas.width + 10 && b.y > -10 && b.y < canvas.height + 10;
       });
 
-      // 적 AI
       for (const e of enemies) {
         const dx = (player.x + player.width/2) - (e.x + e.width/2);
         const dy = (player.y + player.height/2) - (e.y + e.height/2);
@@ -330,20 +421,14 @@
         return inBounds;
       });
 
-      // 아이템
-      items = items.filter(item => {
-        item.life -= dt; item.bob += dt * 3;
-        return item.life > 0;
-      });
+      items = items.filter(item => { item.life -= dt; item.bob += dt * 3; return item.life > 0; });
 
-      // 파티클
       particles = particles.filter(p => {
         p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
         p.vx *= (1 - 1.5*dt); p.vy *= (1 - 1.5*dt);
         return p.life > 0;
       });
 
-      // 충돌: 총알 vs 적
       outer:
       for (let i = bullets.length - 1; i >= 0; i--) {
         for (let j = enemies.length - 1; j >= 0; j--) {
@@ -356,31 +441,21 @@
             enemies.splice(j, 1);
             gameState.enemyCount--;
             gameState.score += 50;
-
-            if (gameState.score > 0 && gameState.score % 500 === 0) {
-              gameState.wave++;
-              gameState.maxEnemies += 3;
-            }
+            if (gameState.score > 0 && gameState.score % 500 === 0) { gameState.wave++; gameState.maxEnemies += 3; }
             continue outer;
           }
         }
       }
 
-      // 충돌: 플레이어 vs 아이템
       for (let i = items.length - 1; i >= 0; i--) {
-        if (rectHit(player, items[i])) {
-          collectItem(items[i]);
-          items.splice(i, 1);
-        }
+        if (rectHit(player, items[i])) { collectItem(items[i]); items.splice(i, 1); }
       }
 
-      // 충돌: 적 vs 플레이어
       if (player.invuln <= 0) {
         for (let i = enemies.length - 1; i >= 0; i--) {
           if (rectHit(enemies[i], player)) {
             const ex = enemies[i].x + enemies[i].width/2;
             const ey = enemies[i].y + enemies[i].height/2;
-
             if (player.shield > 0) {
               player.shield--;
               createExplosion(ex, ey, '#ffff66', 15);
@@ -390,19 +465,15 @@
             } else {
               createExplosion(ex, ey, '#ff4444', 12);
               createExplosion(player.x + player.width/2, player.y + player.height/2, '#00ff88', 16);
-
               enemies.splice(i, 1);
               gameState.enemyCount--;
               gameState.lives--;
               player.invuln = 1.2;
-
-              // 넉백 (안전 가드)
               const dkx = (player.x + player.width/2) - ex;
               const dky = (player.y + player.height/2) - ey;
               const len = Math.hypot(dkx, dky) || 1;
               player.x = clamp(player.x + (dkx/len)*40, 0, canvas.width - player.width);
               player.y = clamp(player.y + (dky/len)*40, 0, canvas.height - player.height);
-
               if (gameState.lives <= 0) endGame();
             }
             break;
@@ -426,7 +497,6 @@
         ctx.shadowColor = player.color; ctx.shadowBlur = 10;
         ctx.fillRect(player.x + 12, player.y + 12, 6, 6);
         ctx.shadowBlur = 0;
-
         if (player.shield > 0) {
           ctx.strokeStyle = '#ffff66';
           ctx.lineWidth = 2;
@@ -465,9 +535,9 @@
         ctx.fillRect(item.x, item.y + bobOffset, item.width, item.height);
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#000000';
-        ctx.font = '14px bold monospace';
+        ctx.font = '12px bold monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(itemTypes[item.type].symbol, item.x + item.width/2, item.y + item.height/2 + 5 + bobOffset);
+        ctx.fillText(itemTypes[item.type].symbol, item.x + item.width/2, item.y + item.height/2 + 4 + bobOffset);
         ctx.globalAlpha = 1;
       }
 
@@ -515,29 +585,16 @@
       gameState.gameOver = true;
       document.getElementById('finalScore').textContent = gameState.score;
       document.getElementById('gameOver').style.display = 'block';
-      // 이름 프리필 & 버튼 초기화
-      if (nameInput){
-        nameInput.value = localStorage.getItem(NAME_KEY) || '';
-        nameInput.focus();
-      }
-      if (saveBtn){
-        saveBtn.disabled = false;
-        saveBtn.textContent = '점수 저장';
-      }
+      if (nameInput){ nameInput.value = localStorage.getItem(NAME_KEY) || ''; nameInput.focus(); }
+      if (saveBtn){ saveBtn.disabled = false; saveBtn.textContent = '점수 저장'; }
       if (saveMsg){ saveMsg.textContent = ''; }
       scoreSaved = false;
     }
 
     function restartGame() {
-      gameState = {
-        score: 0, lives: 3, wave: 1,
-        gameOver: false, paused: false, keys: {},
-        enemyCount: 0, maxEnemies: 15,
-        time: 0, shotTimer: 0, baseFireRate: 0.22
-      };
-      player.x = 400; player.y = 300; player.lastDir = {x:0, y:-1}; player.invuln = 0;
+      gameState = { score: 0, lives: 3, wave: 1, gameOver: false, paused: false, keys: {}, enemyCount: 0, maxEnemies: 15, time: 0, shotTimer: 0, baseFireRate: 0.22 };
+      player.x = 200; player.y = 368; player.lastDir = {x:0, y:-1}; player.invuln = 0;
       player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.shield = 0; player.powerUpTimer = 0; player.speed = 220;
-
       bullets = []; enemies = []; particles = []; items = [];
       document.getElementById('gameOver').style.display = 'none';
       updateUI();
@@ -554,8 +611,7 @@
     }
 
     // 시작
-    loadHighScores();        // ✅ 이제 정의됨
-    // 닉네임 프리필(처음 로드 시)
+    loadHighScores();
     if (nameInput) nameInput.value = localStorage.getItem(NAME_KEY) || '';
     updateUI();
     requestAnimationFrame(loop);
