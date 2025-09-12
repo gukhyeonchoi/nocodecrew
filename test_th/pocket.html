@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pokémon TCG Pocket — 핵심 기능 데모</title>
+  <style>
+    :root{
+      --bg:#0b1020;--card:#131a33;--ink:#e8ecff;--muted:#a6b2ff;--accent:#5cc8ff;--good:#73ff9d;--bad:#ff7a7a;--warn:#ffd166;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0b1020,#0f1a3a);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Apple Color Emoji,Noto Color Emoji,Apple SD Gothic Neo,Noto Sans KR,Malgun Gothic,sans-serif}
+    header{position:sticky;top:0;background:#0d1430aa;backdrop-filter:blur(8px);border-bottom:1px solid #1e2a5a}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    h1{margin:0;font-size:20px;letter-spacing:.3px}
+    .tabs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .tab{padding:10px 14px;border:1px solid #25306b;background:#0f1840;border-radius:12px;cursor:pointer;color:var(--muted)}
+    .tab.active{color:var(--ink);background:#182359;border-color:#3846a3}
+
+    main{padding:20px 0}
+    section{display:none}
+    section.active{display:block}
+
+    .panel{background:var(--card);border:1px solid #1e2a5a;border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+    .row{display:flex;gap:14px;flex-wrap:wrap}
+    .col{flex:1 1 260px}
+
+    button{background:#1c2a64;color:var(--ink);border:1px solid #3a4bb3;padding:10px 14px;border-radius:10px;cursor:pointer}
+    button:hover{transform:translateY(-1px)}
+    button:disabled{opacity:.6;cursor:not-allowed}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+    .card{background:linear-gradient(180deg,#1b255b,#0f1433);border:1px solid #3242a0;border-radius:14px;padding:10px;position:relative;min-height:150px}
+    .card .name{font-weight:700}
+    .badge{position:absolute;top:8px;right:8px;font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid #4457d8;color:#bcd1ff;background:#0e1440}
+    .rarity{position:absolute;bottom:8px;left:8px;font-size:12px;color:#ffd166}
+    .power{position:absolute;bottom:8px;right:8px;font-weight:700}
+    .tiny{font-size:12px;color:#98a4ff}
+    .hint{font-size:12px;color:#aab2ff}
+
+    .pill{display:inline-flex;gap:6px;padding:6px 10px;background:#11205a;border:1px solid #2f3f9b;border-radius:999px;color:#d2d9ff}
+    .list{display:flex;flex-direction:column;gap:10px}
+
+    .deck-slot{border:1px dashed #3b4ab0;border-radius:12px;min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#0f1944}
+
+    .notif{margin-top:10px;padding:10px 12px;border-radius:12px;background:#12204a;border:1px solid #2a3a8f}
+    .notif.good{border-color:#2f8f5a;background:#0f2b20;color:#ccffdd}
+    .notif.bad{border-color:#8f2f2f;background:#2b0f0f;color:#ffcccc}
+
+    .flex-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .center{display:flex;align-items:center;justify-content:center}
+    .num{font-family:ui-monospace,Menlo,Consolas,monospace}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Pokémon TCG Pocket — 핵심 기능 HTML 데모</h1>
+      <div class="tabs">
+        <div class="tab active" data-tab="packs">팩 개봉</div>
+        <div class="tab" data-tab="collection">컬렉션</div>
+        <div class="tab" data-tab="deck">덱 편성</div>
+        <div class="tab" data-tab="trade">트레이드(모의)</div>
+        <div class="tab" data-tab="battle">배틀(간이)</div>
+        <div class="tab" data-tab="settings">설정/데이터</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- PACKS -->
+    <section id="packs" class="active">
+      <div class="panel">
+        <div class="flex-between">
+          <div>
+            <h2 style="margin:0 0 6px">일일 무료 팩</h2>
+            <div class="hint">매일 <b>2팩</b> 개봉 가능. (로컬 저장소에 날짜 기준으로 저장)</div>
+          </div>
+          <div class="pill">오늘 남은 무료팩: <span id="packsLeft" class="num">0</span> / 2</div>
+        </div>
+        <div style="margin:12px 0 16px" class="row">
+          <div class="col">
+            <button id="openPackBtn">무료 팩 개봉</button>
+            <button id="buyPackBtn">코인 100으로 1팩 구매</button>
+            <div class="tiny" style="margin-top:6px">※ 코인: <span id="coins" class="num">0</span></div>
+          </div>
+          <div class="col">
+            <div id="packResult" class="grid"></div>
+          </div>
+        </div>
+        <div id="packMsg" class="notif" style="display:none"></div>
+      </div>
+    </section>
+
+    <!-- COLLECTION -->
+    <section id="collection">
+      <div class="panel">
+        <div class="flex-between">
+          <h2 style="margin:0">내 컬렉션</h2>
+          <div class="pill">카드 수: <span id="collectionCount" class="num">0</span></div>
+        </div>
+        <div style="margin:10px 0" class="flex-between">
+          <input id="search" placeholder="이름/타입/희귀도 검색" style="flex:1;padding:10px;border-radius:10px;border:1px solid #304099;background:#0f173f;color:var(--ink)" />
+          <button id="clearSearch">초기화</button>
+        </div>
+        <div id="collectionGrid" class="grid"></div>
+      </div>
+    </section>
+
+    <!-- DECK -->
+    <section id="deck">
+      <div class="panel">
+        <div class="flex-between">
+          <h2 style="margin:0">덱 편성 (최대 10장)</h2>
+          <div class="pill">덱 파워: <span id="deckPower" class="num">0</span></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <h3 style="margin:0 0 8px">보유 카드</h3>
+            <div id="deckCollection" class="grid"></div>
+          </div>
+          <div class="col">
+            <h3 style="margin:0 0 8px">내 덱</h3>
+            <div id="deckList" class="list"></div>
+            <div style="margin-top:10px" class="flex-between">
+              <button id="clearDeck">덱 비우기</button>
+              <button id="saveDeck">덱 저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRADE -->
+    <section id="trade">
+      <div class="panel">
+        <h2 style="margin-top:0">트레이드 (모의 교환)</h2>
+        <div class="hint">중복 카드로 NPC와 교환 제안을 받아보세요.</div>
+        <div class="row" style="margin-top:10px">
+          <div class="col">
+            <h3 style="margin:4px 0">내 중복 리스트</h3>
+            <div id="dupeList" class="list"></div>
+          </div>
+          <div class="col">
+            <h3 style="margin:4px 0">교환 제안</h3>
+            <div id="tradeOffer" class="panel" style="padding:12px"></div>
+            <div style="margin-top:10px" class="flex-between">
+              <button id="genOffer">제안 생성</button>
+              <button id="acceptOffer" disabled>수락</button>
+            </div>
+          </div>
+        </div>
+        <div id="tradeMsg" class="notif" style="display:none"></div>
+      </div>
+    </section>
+
+    <!-- BATTLE -->
+    <section id="battle">
+      <div class="panel">
+        <div class="flex-between">
+          <h2 style="margin:0">배틀 (간이 자동결과)</h2>
+          <div class="pill">내 덱 파워: <span id="battleDeckPower" class="num">0</span></div>
+        </div>
+        <div class="hint">덱 총 파워 + 소량의 랜덤 보정으로 승패 결정 (턴/에너지는 생략)</div>
+        <div class="row" style="margin-top:12px">
+          <div class="col">
+            <button id="fightBtn">랭크 매치 시작</button>
+            <div id="battleLog" class="notif" style="margin-top:10px;display:none"></div>
+          </div>
+          <div class="col">
+            <div class="panel" style="padding:12px">
+              <div>최근 전적: <span id="record" class="num">0승 0무 0패</span></div>
+              <div style="margin-top:8px">랭크 포인트(RP): <span id="rp" class="num">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings">
+      <div class="panel">
+        <h2 style="margin-top:0">설정 / 데이터</h2>
+        <div class="row">
+          <div class="col">
+            <button id="giveCoins">코인 +500</button>
+            <button id="resetDaily">일일 팩 초기화</button>
+          </div>
+          <div class="col">
+            <button id="exportBtn">데이터 내보내기(JSON)</button>
+            <button id="importBtn">데이터 가져오기(JSON)</button>
+            <input type="file" id="fileInput" accept="application/json" style="display:none"/>
+          </div>
+        </div>
+        <div id="settingsMsg" class="notif" style="display:none;margin-top:10px"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // -----------------------------
+    // 유틸 & 데이터 스키마
+    // -----------------------------
+    const RARITIES = [
+      { k: 'C', label:'Common', weight: 62 },
+      { k: 'U', label:'Uncommon', weight: 25 },
+      { k: 'R', label:'Rare', weight: 10 },
+      { k: 'SR', label:'Super Rare', weight: 3 },
+    ];
+    const TYPES = ['불','물','풀','전기','에스퍼','악','격투','바위','강철','드래곤','노말'];
+
+    // 간이 카드 풀 (이름/타입/기초 파워 범위는 희귀도별로 다르게)
+    function genCardTemplate(rarity){
+      const type = pick(TYPES);
+      const base = { C:[10,40], U:[30,70], R:[60,100], SR:[90,140] }[rarity];
+      const pow = randInt(base[0], base[1]);
+      const name = `${type}몬 ${randInt(1,999)}`;
+      return { id: crypto.randomUUID(), name, type, rarity, power: pow };
+    }
+
+    function weightedPick(items){
+      const total = items.reduce((s,x)=>s+x.weight,0);
+      let r = Math.random()*total; 
+      for(const x of items){ r -= x.weight; if(r<=0) return x; }
+      return items[0];
+    }
+    const pick = (arr)=>arr[Math.floor(Math.random()*arr.length)];
+    const randInt = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+    // -----------------------------
+    // 상태 & 저장
+    // -----------------------------
+    const LS_KEY = 'ptcgp_demo_state_v1';
+    const initState = {
+      coins: 200,
+      collection: [],        // [{id,name,type,rarity,power}]
+      deck: [],              // [id]
+      record: { w:0, d:0, l:0, rp:0 },
+      daily: { date: null, opened: 0, limit: 2 },
+    };
+    let S = load();
+
+    function load(){
+      try{ const raw = localStorage.getItem(LS_KEY); if(!raw) return {...initState}; return {...initState, ...JSON.parse(raw)}; }catch(e){ return {...initState}; }
+    }
+    function save(){ localStorage.setItem(LS_KEY, JSON.stringify(S)); renderAll(); }
+
+    // 일일 초기화(현지 날짜 문자열 기준)
+    function ensureDaily(){
+      const today = new Date().toISOString().slice(0,10); // yyyy-mm-dd
+      if(S.daily.date !== today){ S.daily.date = today; S.daily.opened = 0; save(); }
+    }
+
+    // -----------------------------
+    // 렌더 공통
+    // -----------------------------
+    const $ = (q)=>document.querySelector(q);
+    const $$ = (q)=>Array.from(document.querySelectorAll(q));
+
+    function msg(el, text, kind='info'){
+      el.textContent = text; el.style.display='block';
+      el.classList.remove('good','bad');
+      if(kind==='good') el.classList.add('good');
+      if(kind==='bad') el.classList.add('bad');
+    }
+
+    // 카드 DOM
+    function cardNode(card, {showAdd, showRemove, badge}={}){
+      const div = document.createElement('div');
+      div.className='card';
+      div.innerHTML = `
+        <div class="name">${card.name}</div>
+        <div class="tiny">타입: ${card.type}</div>
+        ${badge?`<div class="badge">${badge}</div>`:''}
+        <div class="rarity">★ ${card.rarity}</div>
+        <div class="power">${card.power}</div>
+      `;
+      if(showAdd){
+        const b = document.createElement('button');
+        b.textContent = '덱에 담기';
+        b.style.position='absolute'; b.style.left='8px'; b.style.top='68px';
+        b.onclick = ()=> addToDeck(card.id);
+        div.appendChild(b);
+      }
+      if(showRemove){
+        const b = document.createElement('button');
+        b.textContent = '삭제';
+        b.style.position='absolute'; b.style.left='8px'; b.style.top='68px';
+        b.onclick = ()=> removeFromDeck(card.id);
+        div.appendChild(b);
+      }
+      return div;
+    }
+
+    // -----------------------------
+    // 팩 개봉
+    // -----------------------------
+    function openPack(free=false){
+      ensureDaily();
+      if(free){
+        if(S.daily.opened>=S.daily.limit){ msg($('#packMsg'),'오늘 무료팩을 모두 사용했어요.', 'bad'); return; }
+        S.daily.opened++;
+      }else{
+        if(S.coins<100){ msg($('#packMsg'),'코인이 부족합니다. (필요:100)', 'bad'); return; }
+        S.coins -= 100;
+      }
+      const cards = Array.from({length:5}).map(()=>{
+        const rar = weightedPick(RARITIES).k;
+        return genCardTemplate(rar);
+      });
+      S.collection.push(...cards);
+      save();
+      const grid=$('#packResult'); grid.innerHTML='';
+      cards.forEach(c=> grid.appendChild(cardNode(c,{badge:'NEW'})) );
+      msg($('#packMsg'), `${free?'무료':'구매'} 팩에서 ${cards.length}장을 획득했습니다!`, 'good');
+    }
+
+    // -----------------------------
+    // 컬렉션 뷰
+    // -----------------------------
+    function renderCollection(list){
+      const grid = $('#collectionGrid');
+      grid.innerHTML='';
+      list.forEach(c=> grid.appendChild(cardNode(c)) );
+      $('#collectionCount').textContent = list.length;
+    }
+
+    function searchCollection(){
+      const q = $('#search').value.trim().toLowerCase();
+      if(!q){ renderCollection(S.collection); return; }
+      const res = S.collection.filter(c=>
+        c.name.toLowerCase().includes(q)||
+        c.type.toLowerCase().includes(q)||
+        c.rarity.toLowerCase().includes(q)
+      );
+      renderCollection(res);
+    }
+
+    // -----------------------------
+    // 덱 편성
+    // -----------------------------
+    function addToDeck(cardId){
+      if(S.deck.length>=10){ alert('덱은 최대 10장입니다.'); return; }
+      if(!S.deck.includes(cardId)) S.deck.push(cardId);
+      save();
+    }
+    function removeFromDeck(cardId){
+      S.deck = S.deck.filter(id=>id!==cardId); save();
+    }
+    function clearDeck(){ S.deck=[]; save(); }
+
+    function deckPower(){
+      const map = new Map(S.collection.map(c=>[c.id,c]));
+      return S.deck.reduce((s,id)=> s + (map.get(id)?.power||0), 0);
+    }
+
+    function renderDeck(){
+      // 보유 카드 (덱에 없는 것만)
+      const grid = $('#deckCollection'); grid.innerHTML='';
+      const inDeck = new Set(S.deck);
+      S.collection.filter(c=>!inDeck.has(c.id)).forEach(c=> grid.appendChild(cardNode(c,{showAdd:true})) );
+
+      // 덱 리스트
+      const list = $('#deckList'); list.innerHTML='';
+      const map = new Map(S.collection.map(c=>[c.id,c]));
+      S.deck.forEach(id=>{
+        const c = map.get(id); if(!c) return;
+        const row = document.createElement('div'); row.className='deck-slot';
+        row.innerHTML = `<div>${c.name} <span class="tiny">(${c.rarity} / ${c.type})</span></div><div class="num">${c.power}</div>`;
+        const btn = document.createElement('button'); btn.textContent='제거'; btn.onclick=()=>removeFromDeck(id);
+        row.appendChild(btn);
+        list.appendChild(row);
+      });
+      $('#deckPower').textContent = deckPower();
+      $('#battleDeckPower').textContent = deckPower();
+    }
+
+    // 저장 (실제로는 자동 저장이지만 명시 버튼 유지)
+    function saveDeck(){ save(); msg($('#settingsMsg'),'덱이 저장되었습니다.','good'); setTimeout(()=>$('#settingsMsg').style.display='none',1500); }
+
+    // -----------------------------
+    // 트레이드(모의)
+    // -----------------------------
+    function duplicates(){
+      const count = {};
+      for(const c of S.collection){ count[c.name] = (count[c.name]||0)+1; }
+      const dupeNames = Object.keys(count).filter(k=>count[k]>1);
+      const map = new Map();
+      for(const c of S.collection){ if(dupeNames.includes(c.name)){ if(!map.has(c.name)) map.set(c.name,[]); map.get(c.name).push(c); } }
+      return map; // name -> [cards]
+    }
+
+    function renderDupes(){
+      const box = $('#dupeList'); box.innerHTML='';
+      const d = duplicates();
+      if(d.size===0){ box.innerHTML = '<div class="hint">중복 카드가 없습니다.</div>'; return; }
+      for(const [name, arr] of d.entries()){
+        const row = document.createElement('div'); row.className='deck-slot';
+        row.innerHTML = `<div>${name} <span class="tiny">x${arr.length}</span></div>`;
+        box.appendChild(row);
+      }
+    }
+
+    let pendingOffer = null;
+    function generateOffer(){
+      // 내 중복 중 1장을 제시하고, NPC가 동일 희귀도 또는 상위 희귀도 1장을 제안
+      const d = duplicates();
+      const pools = Array.from(d.values()).flat();
+      if(pools.length===0){ msg($('#tradeMsg'),'중복 카드가 없어 제안을 만들 수 없습니다.','bad'); return; }
+      const give = pick(pools);
+      // NPC가 원하는 희귀도
+      const rarOrder = ['C','U','R','SR'];
+      const idx = rarOrder.indexOf(give.rarity);
+      const wantIdx = Math.min(rarOrder.length-1, idx + (Math.random()<0.33?1:0));
+      // NPC 카드 생성
+      const receive = genCardTemplate(rarOrder[wantIdx]);
+      pendingOffer = { giveId: give.id, giveName: give.name, receive };
+      const div = $('#tradeOffer');
+      div.innerHTML = '';
+      const top = document.createElement('div');
+      top.className='flex-between';
+      top.innerHTML = `<div>내가 내는 카드</div><div class="tiny">(중복 중 임의)</div>`;
+      div.appendChild(top);
+      div.appendChild(cardNode(give,{badge:'GIVE'}));
+      const mid = document.createElement('div'); mid.style.margin='6px 0'; mid.className='center'; mid.innerHTML='⇄'; div.appendChild(mid);
+      div.appendChild(cardNode(receive,{badge:'RECEIVE'}));
+      $('#acceptOffer').disabled = false;
+      $('#tradeMsg').style.display='none';
+    }
+
+    function acceptOffer(){
+      if(!pendingOffer) return;
+      // 내 카드 제거, 새 카드 추가
+      S.collection = S.collection.filter(c=>c.id!==pendingOffer.giveId);
+      S.collection.push(pendingOffer.receive);
+      save();
+      msg($('#tradeMsg'),'교환이 완료되었습니다!','good');
+      $('#acceptOffer').disabled = true; pendingOffer=null; renderDupes();
+    }
+
+    // -----------------------------
+    // 배틀(간이)
+    // -----------------------------
+    function fight(){
+      if(S.deck.length===0){ msg($('#battleLog'),'덱이 비어 있어요. 덱을 구성해주세요.','bad'); return; }
+      // 내 전투력
+      const my = deckPower();
+      // 상대 덱은 내 덱 파워를 기준으로 약±20% 범위에서 랜덤
+      const enemy = Math.max(10, Math.round(my * (0.8 + Math.random()*0.4)));
+      const myScore = my + randInt(-15,15);
+      const enScore = enemy + randInt(-15,15);
+      let result, delta=0;
+      if(Math.abs(myScore - enScore) <= 5){ result = '무승부'; delta = 0; S.record.d += 1; }
+      else if(myScore > enScore){ result = '승리'; delta = 20; S.record.w += 1; }
+      else { result = '패배'; delta = -12; S.record.l += 1; }
+      S.record.rp = Math.max(0, S.record.rp + delta);
+      save();
+      const log = `내 전투력 ${my} (보정 ${myScore}), 상대 ${enemy} (보정 ${enScore}) → 결과: ${result} (RP ${delta>0?'+':''}${delta})`;
+      const el = $('#battleLog'); el.style.display='block'; el.textContent = log; el.classList.remove('good','bad');
+      if(result==='승리') el.classList.add('good');
+      if(result==='패배') el.classList.add('bad');
+    }
+
+    function renderRecord(){
+      $('#record').textContent = `${S.record.w}승 ${S.record.d}무 ${S.record.l}패`;
+      $('#rp').textContent = S.record.rp;
+    }
+
+    // -----------------------------
+    // 설정
+    // -----------------------------
+    function exportData(){
+      const blob = new Blob([JSON.stringify(S,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='ptcgp_demo_data.json'; a.click(); URL.revokeObjectURL(url);
+      msg($('#settingsMsg'),'JSON으로 내보냈습니다.','good');
+    }
+    function importData(file){
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        try{
+          const obj = JSON.parse(e.target.result);
+          S = {...initState, ...obj}; save(); msg($('#settingsMsg'),'가져오기가 완료되었습니다.','good');
+        }catch(err){ msg($('#settingsMsg'),'가져오기에 실패했습니다.','bad'); }
+      };
+      reader.readAsText(file);
+    }
+
+    // -----------------------------
+    // 렌더 종합
+    // -----------------------------
+    function renderPacks(){
+      ensureDaily();
+      $('#packsLeft').textContent = (S.daily.limit - S.daily.opened);
+      $('#coins').textContent = S.coins;
+    }
+
+    function renderAll(){
+      renderPacks();
+      renderCollection(S.collection);
+      renderDeck();
+      renderDupes();
+      renderRecord();
+    }
+
+    // -----------------------------
+    // 이벤트 바인딩
+    // -----------------------------
+    $$('.tab').forEach(t=> t.addEventListener('click',()=>{
+      $$('.tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const id = t.dataset.tab;
+      $$('main section').forEach(s=> s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }));
+
+    $('#openPackBtn').onclick = ()=> openPack(true);
+    $('#buyPackBtn').onclick  = ()=> openPack(false);
+
+    $('#search').addEventListener('input', searchCollection);
+    $('#clearSearch').onclick = ()=>{ $('#search').value=''; searchCollection(); };
+
+    $('#clearDeck').onclick = clearDeck;
+    $('#saveDeck').onclick  = saveDeck;
+
+    $('#genOffer').onclick = generateOffer;
+    $('#acceptOffer').onclick = acceptOffer;
+
+    $('#fightBtn').onclick = fight;
+
+    $('#giveCoins').onclick = ()=>{ S.coins+=500; save(); msg($('#settingsMsg'),'코인 500을 받았습니다.','good'); };
+    $('#resetDaily').onclick = ()=>{ S.daily.opened=0; S.daily.date=null; save(); msg($('#settingsMsg'),'일일 팩 카운트를 초기화했습니다.','good'); };
+
+    $('#exportBtn').onclick = exportData;
+    $('#importBtn').onclick = ()=> $('#fileInput').click();
+    $('#fileInput').addEventListener('change', (e)=>{ if(e.target.files[0]) importData(e.target.files[0]); });
+
+    // 초기 랜더
+    ensureDaily();
+    renderAll();
+  </script>
+</body>
+</html>
