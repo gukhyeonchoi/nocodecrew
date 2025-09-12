@@ -2,30 +2,85 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
   <title>게임 선택 화면</title>
   <style>
-    body { background: #f0f4f8; font-family: Arial, sans-serif; text-align: center; padding-top: 80px;}
-    h1 { color: #2368a4; margin-bottom: 32px;}
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      min-height: 100vh;
+      padding-top: 46px;
+    }
+    h1 {
+      color: #2368a4;
+      font-size: 2.1rem;
+      font-weight: 700;
+      margin-bottom: 14vw;
+      margin-top: 0;
+      text-align: center;
+      letter-spacing: -.5px;
+    }
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 5vw;
+      width: 92vw;
+      max-width: 420px;
+    }
     .game-btn {
-      margin: 18px;
-      padding: 28px 60px;
-      font-size: 22px;
-      border-radius: 10px;
+      padding: 5vw 0;
+      font-size: 1.25rem;
+      border-radius: 12px;
       background: #67b5fa;
       color: #fff;
       border: none;
       font-weight: bold;
       cursor: pointer;
-      box-shadow:0 3px 12px rgba(70,120,170,0.16);
-      transition: background 0.2s;
+      box-shadow: 0 3px 14px rgba(70,120,170,0.15);
+      width: 100%;
+      transition: background 0.19s;
+      outline: none;
     }
-    .game-btn:hover { background: #3a7bc1; }
-    .note { margin-top: 42px; color: #666; font-size: 17px; }
+    .game-btn:active, .game-btn:focus { background: #3694e9; }
+    .note {
+      margin-top: 9vw;
+      color: #636363;
+      font-size: 1rem;
+      text-align: center;
+      word-break: keep-all;
+      padding: 3vw;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.23rem;
+        margin-bottom: 10vw;
+      }
+      .game-btn {
+        font-size: 1.09rem;
+        padding: 4vw 0;
+      }
+      .btn-container {
+        gap: 3vw;
+        max-width: 96vw;
+      }
+      .note { font-size: 0.94rem; }
+    }
   </style>
 </head>
 <body>
   <h1>우리 팀 게임 선택</h1>
-  <div>
+  <div class="btn-container">
     <button class="game-btn" onclick="location.href='game1.html'">게임 1번</button>
     <button class="game-btn" onclick="location.href='game2.html'">게임 2번</button>
     <button class="game-btn" onclick="location.href='game3.html'">게임 3번</button>
@@ -34,7 +89,7 @@
     <button class="game-btn" onclick="location.href='game6.html'">게임 6번</button>
   </div>
   <div class="note">
-    각 게임은 <b>이 폴더의 game1.html ~ game6.html</b> 파일로 올려주세요.<br>
+    각 게임은 <b>game1.html ~ game6.html</b> 파일로 올려주세요.<br>
     버튼을 누르면 해당 게임이 열립니다.<br>
     (처음엔 빈 화면일 수 있지만, 나중에 각자 필요한 게임 html을 넣으면 됩니다)
   </div>
