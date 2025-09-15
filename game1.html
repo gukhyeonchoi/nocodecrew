@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
     <title>컬러 슈터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Pretendard', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -56,7 +57,7 @@
             border-radius: 1vmin;
             cursor: pointer;
             font-size: 2.8vmin;
-            font-weight: bold;
+            font-weight: 600;
             transition: transform 0.15s ease, filter 0.15s ease;
             touch-action: manipulation;
         }
@@ -89,7 +90,7 @@
             text-align: center;
             margin-bottom: 0.5vmin;
             font-size: 2.8vmin;
-            font-weight: bold;
+            font-weight: 600;
             color: #333;
         }
 
@@ -118,7 +119,7 @@
             align-items: center;
             justify-content: center;
             font-size: 1.6vmin;
-            font-weight: bold;
+            font-weight: 600;
             color: #333;
             position: relative;
         }
@@ -168,7 +169,7 @@
 
         .target-title {
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 0.5vmin;
             color: #495057;
             font-size: 2.8vmin;
@@ -217,7 +218,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 600;
             color: white;
             text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.5);
             position: relative;
@@ -284,7 +285,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 600;
             color: white;
             text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.5);
             position: relative;
@@ -314,7 +315,7 @@
 
         .selection-title {
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 0.5vmin;
             font-size: 2.8vmin;
         }
@@ -363,7 +364,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 600;
             color: white;
             text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.45);
             position: relative;
@@ -390,27 +391,28 @@
             cursor: not-allowed;
         }
 
-        .red { background: #e74c3c; }
+                .red { background: #e74c3c; }
         .blue { background: #3498db; }
         .green { background: #2ecc71; }
         .yellow { background: #f1c40f; color: #333; }
         .purple { background: #9b59b6; }
 
         .shooting-particle {
-            position: fixed;
-            width: 1.8vmin;
-            height: 1.8vmin;
-            border-radius: 50%;
-            z-index: 2000;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 0.5vmin rgba(0,0,0,0.2);
-        }
+    position: fixed;
+    width: 2.5vmin;
+    height: 2.5vmin;
+    border-radius: 50%;
+    z-index: 2500;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0.5vmin rgba(0,0,0,0.2);
+    background: #ffffff; /* 기본 배경색 */
+}
 
         .damage-text {
             position: fixed;
             color: #ff4444;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 2.5vmin;
             z-index: 2001;
             pointer-events: none;
@@ -464,10 +466,14 @@
             background: #6c757d;
         }
 
+        .btn-ranking {
+            background: #6c757d;
+        }
+
         .message {
             text-align: center;
             margin-top: 0.5vmin;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 2.8vmin;
             min-height: 3vmin;
             width: 100%;
@@ -491,29 +497,79 @@
         }
 
         .modal {
-            background: white;
+            background: #fff;
             padding: 2vmin;
             border-radius: 1vmin;
             width: 80vw;
             max-width: 90vw;
             text-align: center;
             box-shadow: 0 1vmin 2.5vmin rgba(0,0,0,0.35);
+            font-family: 'Pretendard', Arial, sans-serif;
         }
 
         .modal h2 {
             margin: 0.5vmin 0 1vmin 0;
             font-size: 3.5vmin;
+            color: #333;
         }
 
         .modal p {
             margin: 0.8vmin 0 1.5vmin 0;
             font-size: 2.8vmin;
+            color: #495057;
         }
 
         .modal .modal-actions {
             display: flex;
             gap: 1vmin;
             justify-content: center;
+        }
+
+        .ranking-modal {
+            width: 90vw;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2vmin 0;
+            font-size: 2.8vmin;
+            color: #333;
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            border: 0.2vmin solid #dee2e6;
+            padding: 1vmin;
+            text-align: center;
+        }
+
+        .ranking-table th {
+            background: #343a40;
+            color: white;
+            font-weight: 600;
+        }
+
+        .ranking-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .ranking-table tr:nth-child(odd) {
+            background: #fff;
+        }
+
+        .score-input {
+            padding: 1vmin;
+            font-size: 2.8vmin;
+            border: 0.2vmin solid #dee2e6;
+            border-radius: 0.8vmin;
+            margin: 1vmin 0;
+            width: 80%;
+            max-width: 300px;
+            font-family: 'Pretendard', Arial, sans-serif;
         }
 
         @media (max-width: 768px) {
@@ -651,6 +707,17 @@
             .game-controls {
                 padding: 0.3vmin;
             }
+            .ranking-table {
+                font-size: 3.5vmin;
+            }
+            .ranking-table th,
+            .ranking-table td {
+                padding: 1.5vmin;
+            }
+            .score-input {
+                font-size: 3.5vmin;
+                padding: 1.5vmin;
+            }
         }
 
         @media (max-height: 600px) {
@@ -760,6 +827,17 @@
             .game-controls {
                 padding: 0.3vmin;
             }
+            .ranking-table {
+                font-size: 3.2vmin;
+            }
+            .ranking-table th,
+            .ranking-table td {
+                padding: 1.2vmin;
+            }
+            .score-input {
+                font-size: 3.2vmin;
+                padding: 1.2vmin;
+            }
         }
 
         @media (orientation: landscape) and (max-height: 500px) {
@@ -791,6 +869,17 @@
             .target-lane, .stack {
                 max-height: calc(32vh - 4.5vmin);
             }
+            .ranking-table {
+                font-size: 3vmin;
+            }
+            .ranking-table th,
+            .ranking-table td {
+                padding: 1vmin;
+            }
+            .score-input {
+                font-size: 3vmin;
+                padding: 1vmin;
+            }
         }
     </style>
 </head>
@@ -799,6 +888,7 @@
         <h1>컬러 슈터</h1>
         <p>색상 블록을 활용해 타겟을 모두 제거하세요!</p>
         <button class="intro-btn" onclick="startIntroGame()">게임 시작</button>
+        <button class="intro-btn btn-ranking" onclick="showRankingModal()">랭킹 보기</button>
     </div>
 
     <div class="game-container" id="gameContainer">
@@ -832,7 +922,35 @@
 
     <div id="modalRoot"></div>
 
-    <script>
+    <div id="nameModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:4000;">
+        <div style="background:white; padding:18px; border-radius:10px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif;">
+            <h3 style="margin:8px 0 6px 0; font-size:3.5vmin; color:#333;">이름을 입력하세요</h3>
+            <input id="playerNameInput" placeholder="이름 (예: 홍길동)" style="width:88%; padding:10px; border-radius:6px; border:1px solid #dee2e6; font-size:2.8vmin; font-family: 'Pretendard', Arial, sans-serif;">
+            <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+                <button id="saveNameBtn" style="padding:10px 14px; border-radius:8px; border:none; background:#667eea; color:white; font-size:2.8vmin;">확인</button>
+                <button id="cancelNameBtn" style="padding:10px 14px; border-radius:8px; border:none; background:#6c757d; color:white; font-size:2.8vmin;">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+            authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+            databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+            projectId: "gukhyeon-ce3ba",
+            storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+            messagingSenderId: "751956972723",
+            appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+            measurementId: "G-JBBLJNDGY1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         class ColorShooterGame {
             constructor() {
                 this.fullColorPool = ['red', 'blue', 'green', 'yellow', 'purple'];
@@ -1149,87 +1267,94 @@
             }
 
             createSingleParticle(queueIndex, laneIndex, color) {
-                const queueArea = document.getElementById('queueArea');
-                const targetLanes = document.getElementById('targetLanes');
+    const queueArea = document.getElementById('queueArea');
+    const targetLanes = document.getElementById('targetLanes');
+    console.log(`Creating particle: queueIndex=${queueIndex}, laneIndex=${laneIndex}, color=${color}`);
 
-                const slotEl = queueArea.children[queueIndex];
-                if (!slotEl) {
-                    console.warn(`Queue slot ${queueIndex} not found`);
-                    this._particleCount = Math.max(0, this._particleCount - 1);
-                    return;
-                }
+    const slotEl = queueArea.children[queueIndex];
+    if (!slotEl) {
+        console.warn(`Queue slot ${queueIndex} not found`);
+        this._particleCount = Math.max(0, this._particleCount - 1);
+        return;
+    }
+    const slotRect = slotEl.getBoundingClientRect();
+    const startX = slotRect.left + slotRect.width / 2 + window.scrollX;
+const startY = slotRect.top + slotRect.height / 2 + window.scrollY;
+    console.log(`Start position: x=${startX}, y=${startY}, slotRect=${JSON.stringify(slotRect)}`);
 
-                const slotRect = slotEl.getBoundingClientRect();
-                const startX = slotRect.left + slotRect.width / 2;
-                const startY = slotRect.top + slotRect.height / 2;
+    const laneEl = targetLanes.children[laneIndex];
+    if (!laneEl) {
+        console.warn(`Lane ${laneIndex} not found`);
+        this._particleCount = Math.max(0, this._particleCount - 1);
+        return;
+    }
+    const bottomBlock = laneEl.children[0];
+    if (!bottomBlock) {
+        console.warn(`Bottom block in lane ${laneIndex} not found`);
+        this._particleCount = Math.max(0, this._particleCount - 1);
+        return;
+    }
+    const targetRect = bottomBlock.getBoundingClientRect();
+    const targetX = targetRect.left + targetRect.width / 2 + window.scrollX;
+const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
+    console.log(`Target position: x=${targetX}, y=${targetY}, targetRect=${JSON.stringify(targetRect)}`);
 
-                const laneEl = targetLanes.children[laneIndex];
-                if (!laneEl) {
-                    console.warn(`Lane ${laneIndex} not found`);
-                    this._particleCount = Math.max(0, this._particleCount - 1);
-                    return;
-                }
+    const p = document.createElement('div');
+    p.className = 'shooting-particle';
+    const colorMap = {
+        red: '#ff0000',
+        blue: '#0000ff',
+        green: '#00ff00',
+        yellow: '#ffff00',
+        purple: '#800080'
+    };
+    p.style.background = colorMap[color] || window.getComputedStyle(document.querySelector('.' + color))?.backgroundColor || '#ffffff';
+    p.style.left = startX + 'px';
+    p.style.top = startY + 'px';
+    p.style.opacity = '1';
 
-                const bottomBlock = laneEl.children[0];
-                if (!bottomBlock) {
-                    console.warn(`Bottom block in lane ${laneIndex} not found`);
-                    this._particleCount = Math.max(0, this._particleCount - 1);
-                    return;
-                }
+    document.body.appendChild(p);
+    console.log(`Particle created, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
 
-                const targetRect = bottomBlock.getBoundingClientRect();
-                const targetX = targetRect.left + targetRect.width / 2;
-                const targetY = targetRect.top + targetRect.height / 2;
+    const duration = 300;
+    const start = performance.now();
 
-                const p = document.createElement('div');
-                p.className = 'shooting-particle';
-                p.style.background = window.getComputedStyle(document.querySelector('.' + color))?.backgroundColor || color;
-                p.style.left = startX + 'px';
-                p.style.top = startY + 'px';
-                p.style.opacity = '1';
+    function easeOutQuad(t) {
+        return t * (2 - t);
+    }
 
-                document.body.appendChild(p);
-                console.log(`Particle created, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+    const frame = (now) => {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = easeOutQuad(t);
+        const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 1;
+        const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 1;
+        p.style.left = curX + 'px';
+        p.style.top = curY + 'px';
+        p.style.opacity = String(1 - eased);
+        const scale = 1 - 0.35 * eased;
+        p.style.transform = `translate(-50%,-50%) scale(${scale})`;
 
-                const duration = 150;
-                const start = performance.now();
-
-                function easeOutQuad(t) {
-                    return t * (2 - t);
-                }
-
-                const frame = (now) => {
-                    const t = Math.min(1, (now - start) / duration);
-                    const eased = easeOutQuad(t);
-                    const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 1;
-                    const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 1;
-                    p.style.left = curX + 'px';
-                    p.style.top = curY + 'px';
-                    p.style.opacity = String(1 - eased);
-                    const scale = 1 - 0.35 * eased;
-                    p.style.transform = `translate(-50%,-50%) scale(${scale})`;
-
-                    if (t < 1) {
-                        requestAnimationFrame(frame);
-                    } else {
-                        if (p.parentNode) {
-                            p.parentNode.removeChild(p);
-                            this._particleCount = Math.max(0, this._particleCount - 1);
-                            console.log(`Particle removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
-                        }
-                    }
-                };
-
-                requestAnimationFrame(frame.bind(this));
-
-                setTimeout(() => {
-                    if (p.parentNode) {
-                        p.parentNode.removeChild(p);
-                        this._particleCount = Math.max(0, this._particleCount - 1);
-                        console.log(`Particle force-removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
-                    }
-                }, duration + 50);
+        if (t < 1) {
+            requestAnimationFrame(frame);
+        } else {
+            if (p.parentNode) {
+                p.parentNode.removeChild(p);
+                this._particleCount = Math.max(0, this._particleCount - 1);
+                console.log(`Particle removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
             }
+        }
+    };
+
+    requestAnimationFrame(frame.bind(this));
+
+    setTimeout(() => {
+        if (p.parentNode) {
+            p.parentNode.removeChild(p);
+            this._particleCount = Math.max(0, this._particleCount - 1);
+            console.log(`Particle force-removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+        }
+    }, duration + 100);
+}
 
             showDamageText(laneIndex, damage) {
                 const targetLanesEl = document.getElementById('targetLanes');
@@ -1264,40 +1389,11 @@
                     if (this.stage < 10) {
                         this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
                     } else {
-                        this.showGameOverModal(`모든 스테이지 완료! 최종 점수: ${this.score}`);
+                        window.showNameModal(this.score, () => {
+                            this.showGameOverModal(`모든 스테이지 완료! 최종 점수: ${this.score}`);
+                        });
                     }
                 }
-            }
-
-            advanceStage() {
-                this.stage++;
-                this.gameRunning = false;
-                this.clearAllParticles();
-                this.stopQueueScanLoop();
-                this.initStage();
-                this.startGame();
-                console.log(`Advanced to stage: ${this.stage}`);
-            }
-
-            checkQueueStuck() {
-                if (this.getAvailableQueueSlot() !== -1) {
-                    this.scheduleUpdate();
-                    return;
-                }
-
-                for (let q of this.attackQueue) {
-                    if (!q || q.number <= 0) continue;
-                    for (let lane of this.targetLanes) {
-                        if (lane.length > 0 && lane[0].color === q.color) {
-                            this.scheduleUpdate();
-                            return;
-                        }
-                    }
-                }
-
-                this.gameRunning = false;
-                this.stopQueueScanLoop();
-                this.showGameOverModal(`대기열이 가득 차 매칭 불가! 점수: ${this.score}`);
             }
 
             showStageClearModal(message) {
@@ -1377,6 +1473,39 @@
                 modal.appendChild(actions);
                 backdrop.appendChild(modal);
                 root.appendChild(backdrop);
+            }
+
+            advanceStage() {
+                this.stage++;
+                this.gameRunning = false;
+                this.clearAllParticles();
+                this.stopQueueScanLoop();
+                this.initStage();
+                this.startGame();
+                console.log(`Advanced to stage: ${this.stage}`);
+            }
+
+            checkQueueStuck() {
+                if (this.getAvailableQueueSlot() !== -1) {
+                    this.scheduleUpdate();
+                    return;
+                }
+
+                for (let q of this.attackQueue) {
+                    if (!q || q.number <= 0) continue;
+                    for (let lane of this.targetLanes) {
+                        if (lane.length > 0 && lane[0].color === q.color) {
+                            this.scheduleUpdate();
+                            return;
+                        }
+                    }
+                }
+
+                this.gameRunning = false;
+                this.stopQueueScanLoop();
+                window.showNameModal(this.score, () => {
+                    this.showGameOverModal(`대기열이 가득 차 매칭 불가! 점수: ${this.score}`);
+                });
             }
 
             updateStageProgress() {
@@ -1509,7 +1638,7 @@
 
         let game;
 
-        function startIntroGame() {
+        window.startIntroGame = function() {
             document.getElementById('intro').style.display = 'none';
             document.getElementById('gameContainer').style.display = 'flex';
             if (!game) {
@@ -1517,16 +1646,157 @@
                 game.initGame();
             }
             game.startGame();
-        }
+        };
 
-        function resetGame() {
+        window.resetGame = function() {
             if (game) game.resetGame();
+        };
+
+        window.showRankingModal = async function() {
+            console.log('Attempting to fetch rankings...');
+            const root = document.getElementById('modalRoot');
+            root.innerHTML = '';
+
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop';
+
+            const modal = document.createElement('div');
+            modal.className = 'modal ranking-modal';
+            modal.innerHTML = `
+                <h2>랭킹</h2>
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>이름</th>
+                            <th>점수</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingTableBody">
+                        <tr><td colspan="3">랭킹을 불러오는 중...</td></tr>
+                    </tbody>
+                </table>
+            `;
+
+            const actions = document.createElement('div');
+            actions.className = 'modal-actions';
+
+            const close = document.createElement('button');
+            close.className = 'btn btn-close';
+            close.textContent = '닫기';
+            close.onclick = () => {
+                root.innerHTML = '';
+            };
+
+            actions.appendChild(close);
+            modal.appendChild(actions);
+            backdrop.appendChild(modal);
+            root.appendChild(backdrop);
+
+            try {
+                console.log('Fetching scores from Firebase...');
+                const scoresRef = ref(db, 'scores');
+                const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+                const snapshot = await get(topScoresQuery);
+                console.log('Snapshot received:', snapshot.exists());
+                const scores = [];
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    scores.push({ name: data.name, score: data.score });
+                    console.log('Score entry:', data);
+                });
+
+                scores.sort((a, b) => b.score - a.score);
+                const rankingTableBody = document.getElementById('rankingTableBody');
+                rankingTableBody.innerHTML = '';
+                if (scores.length === 0) {
+                    rankingTableBody.innerHTML = '<tr><td colspan="3">아직 랭킹 데이터가 없습니다.</td></tr>';
+                    console.log('No ranking data found.');
+                } else {
+                    scores.forEach((entry, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${escapeHtml(entry.name) || '익명'}</td>
+                            <td>${entry.score}</td>
+                        `;
+                        rankingTableBody.appendChild(row);
+                    });
+                    console.log(`Rankings loaded: ${scores.length} entries`);
+                }
+            } catch (error) {
+                console.error('Error fetching rankings:', error.message, error.code);
+                document.getElementById('rankingTableBody').innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 인터넷 연결 또는 데이터베이스 권한을 확인하세요.</td></tr>';
+            }
+        };
+
+        window.saveScore = function(name, score) {
+            try {
+                console.log(`Saving score: ${name}, ${score}`);
+                push(ref(db, 'scores'), {
+                    name: name || '익명',
+                    score: score,
+                    timestamp: Date.now()
+                });
+                console.log('Score saved successfully');
+            } catch (error) {
+                console.error('Error saving score:', error.message, error.code);
+            }
+        };
+
+        window.showNameModal = function(score, callback = null) {
+            console.log(`Showing name modal for score: ${score}`);
+            const modal = document.getElementById('nameModal');
+            const input = document.getElementById('playerNameInput');
+            const saveBtn = document.getElementById('saveNameBtn');
+            const cancelBtn = document.getElementById('cancelNameBtn');
+
+            modal.style.display = 'flex';
+            input.value = '';
+            input.focus();
+
+            function onSave() {
+                const name = input.value.trim();
+                if (!name) {
+                    alert('이름을 입력하세요.');
+                    input.focus();
+                    return;
+                }
+                window.saveScore(name, score);
+                modal.style.display = 'none';
+                saveBtn.removeEventListener('click', onSave);
+                cancelBtn.removeEventListener('click', onCancel);
+                if (callback) callback();
+            }
+
+            function onCancel() {
+                modal.style.display = 'none';
+                saveBtn.removeEventListener('click', onSave);
+                cancelBtn.removeEventListener('click', onCancel);
+                if (callback) callback();
+            }
+
+            saveBtn.addEventListener('click', onSave);
+            cancelBtn.addEventListener('click', onCancel);
+
+            input.onkeydown = function(e) {
+                if (e.key === 'Enter') onSave();
+            };
+        };
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
         window.onload = function() {
             document.getElementById('intro').style.display = 'flex';
             document.getElementById('gameContainer').style.display = 'none';
-            console.log('Game loaded');
+            console.log('Game loaded at', new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }));
         };
     </script>
 </body>
