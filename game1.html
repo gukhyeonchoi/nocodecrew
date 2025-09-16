@@ -454,12 +454,13 @@
             filter: brightness(1.1);
         }
 
-        .btn-next {
-            background: #28a745;
-        }
-
         .btn-retry {
             background: #007bff;
+        }
+
+        .btn-continue {
+            background: #ffc107;
+            color: #333;
         }
 
         .btn-close {
@@ -468,6 +469,10 @@
 
         .btn-ranking {
             background: #6c757d;
+        }
+
+        .btn-next {
+            background: #28a745;
         }
 
         .message {
@@ -1395,8 +1400,11 @@
                     if (this.stage < 15) {
                         this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
                     } else {
-                        this.checkTop10Score(this.score, () => {
-                            this.showGameOverModal(`모든 스테이지 완료! 최종 점수: ${this.score}`);
+                        this.checkTop10Score(this.score, (isTop10) => {
+                            const message = isTop10 
+                                ? `모든 스테이지 완료! 최종 점수: ${this.score}\n축하합니다! 상위 10위 안에 들었습니다!`
+                                : `모든 스테이지 완료! 최종 점수: ${this.score}\n아쉽게도 상위 10위에 들지 못했습니다.`;
+                            this.showGameOverModal(message, isTop10);
                         });
                     }
                 }
@@ -1413,14 +1421,15 @@
                     });
                     scores.sort((a, b) => b - a);
                     const minTop10Score = scores.length >= 10 ? scores[scores.length - 1] : 0;
-                    if (score > minTop10Score || scores.length < 10) {
-                        window.showNameModal(score, true, callback);
+                    const isTop10 = score > minTop10Score || scores.length < 10;
+                    if (isTop10) {
+                        window.showNameModal(score, true, () => callback(isTop10));
                     } else {
-                        callback();
+                        callback(isTop10);
                     }
                 } catch (error) {
                     console.error('Error checking top 10 scores:', error.message);
-                    callback();
+                    callback(false);
                 }
             }
 
@@ -1465,7 +1474,7 @@
                 }
             }
 
-            showGameOverModal(message) {
+            showGameOverModal(message, isTop10) {
                 const root = document.getElementById('modalRoot');
                 root.innerHTML = '';
 
@@ -1474,36 +1483,67 @@
 
                 const modal = document.createElement('div');
                 modal.className = 'modal';
-                modal.innerHTML = `<h2>게임 오버</h2><p>${message}</p>`;
+                modal.innerHTML = `<h2>게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
+
+                const actions = document.createElement('div');
+                actions.className = 'modal-actions';
+
+                const retry = document.createElement('button');
+                retry.className = 'btn btn-retry';
+                retry.textContent = '다시 플레이하기';
+                retry.onclick = () => {
+                    root.innerHTML = '';
+                    this.resetGame();
+                };
+
+                const continueBtn = document.createElement('button');
+                continueBtn.className = 'btn btn-continue';
+                continueBtn.textContent = '광고 보고 이어하기';
+                continueBtn.onclick = () => {
+                    root.innerHTML = '';
+                    this.showAdModal();
+                };
+
+                actions.appendChild(retry);
+                actions.appendChild(continueBtn);
+                modal.appendChild(actions);
+                backdrop.appendChild(modal);
+                root.appendChild(backdrop);
+            }
+
+            showAdModal() {
+                const root = document.getElementById('modalRoot');
+                root.innerHTML = '';
+
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <h2>광고 문의</h2>
+                    <p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>
+                `;
 
                 const actions = document.createElement('div');
                 actions.className = 'modal-actions';
 
                 const close = document.createElement('button');
                 close.className = 'btn btn-close';
-                close.textContent = '나가기';
+                close.textContent = '닫기';
                 close.onclick = () => {
-                    root.innerHTML = '';
-                    document.getElementById('gameContainer').style.display = 'none';
-                    document.getElementById('intro').style.display = 'block';
-                    // Reset game state completely when exiting
-                    this.initGame();
-                    this.gameRunning = false;
-                };
-
-                const retry = document.createElement('button');
-                retry.className = 'btn btn-retry';
-                retry.textContent = '다시 플레이';
-                retry.onclick = () => {
                     root.innerHTML = '';
                     this.resetGame();
                 };
 
                 actions.appendChild(close);
-                actions.appendChild(retry);
                 modal.appendChild(actions);
                 backdrop.appendChild(modal);
                 root.appendChild(backdrop);
+
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([50]);
+                }
             }
 
             advanceStage() {
@@ -1534,8 +1574,11 @@
 
                 this.gameRunning = false;
                 this.stopQueueScanLoop();
-                this.checkTop10Score(this.score, () => {
-                    this.showGameOverModal(`대기열이 가득 차 매칭 불가! 점수: ${this.score}`);
+                this.checkTop10Score(this.score, (isTop10) => {
+                    const message = isTop10 
+                        ? `대기열이 가득 차 매칭 불가! 점수: ${this.score}\n축하합니다! 상위 10위 안에 들었습니다!`
+                        : `대기열이 가득 차 매칭 불가! 점수: ${this.score}\n아쉽게도 상위 10위에 들지 못했습니다.`;
+                    this.showGameOverModal(message, isTop10);
                 });
             }
 
