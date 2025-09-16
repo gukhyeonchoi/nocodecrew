@@ -391,23 +391,23 @@
             cursor: not-allowed;
         }
 
-                .red { background: #e74c3c; }
+        .red { background: #e74c3c; }
         .blue { background: #3498db; }
         .green { background: #2ecc71; }
         .yellow { background: #f1c40f; color: #333; }
         .purple { background: #9b59b6; }
 
         .shooting-particle {
-    position: fixed;
-    width: 2.5vmin;
-    height: 2.5vmin;
-    border-radius: 50%;
-    z-index: 2500;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 0.5vmin rgba(0,0,0,0.2);
-    background: #ffffff; /* 기본 배경색 */
-}
+            position: fixed;
+            width: 2.5vmin;
+            height: 2.5vmin;
+            border-radius: 50%;
+            z-index: 2500;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0.5vmin rgba(0,0,0,0.2);
+            background: #ffffff;
+        }
 
         .damage-text {
             position: fixed;
@@ -925,6 +925,7 @@
     <div id="nameModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:4000;">
         <div style="background:white; padding:18px; border-radius:10px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif;">
             <h3 style="margin:8px 0 6px 0; font-size:3.5vmin; color:#333;">이름을 입력하세요</h3>
+            <p id="congratsMessage" style="margin:0.8vmin 0; font-size:2.8vmin; color:#28a745; display:none;">축하합니다! 상위 10위 안에 들었습니다!</p>
             <input id="playerNameInput" placeholder="이름 (예: 홍길동)" style="width:88%; padding:10px; border-radius:6px; border:1px solid #dee2e6; font-size:2.8vmin; font-family: 'Pretendard', Arial, sans-serif;">
             <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
                 <button id="saveNameBtn" style="padding:10px 14px; border-radius:8px; border:none; background:#667eea; color:white; font-size:2.8vmin;">확인</button>
@@ -967,7 +968,12 @@
                     7: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
                     8: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
                     9: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75] },
-                    10: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] }
+                    10: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] },
+                    11: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] },
+                    12: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 7, numberRange: [15, 30, 45, 60, 75, 90] },
+                    13: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 8, numberRange: [15, 30, 45, 60, 75, 90, 120] },
+                    14: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 9, numberRange: [15, 30, 45, 60, 75, 90, 120] },
+                    15: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 10, numberRange: [15, 30, 45, 60, 75, 90, 120] }
                 };
                 this.colors = [];
                 this.targetNumbers = [];
@@ -1267,94 +1273,94 @@
             }
 
             createSingleParticle(queueIndex, laneIndex, color) {
-    const queueArea = document.getElementById('queueArea');
-    const targetLanes = document.getElementById('targetLanes');
-    console.log(`Creating particle: queueIndex=${queueIndex}, laneIndex=${laneIndex}, color=${color}`);
+                const queueArea = document.getElementById('queueArea');
+                const targetLanes = document.getElementById('targetLanes');
+                console.log(`Creating particle: queueIndex=${queueIndex}, laneIndex=${laneIndex}, color=${color}`);
 
-    const slotEl = queueArea.children[queueIndex];
-    if (!slotEl) {
-        console.warn(`Queue slot ${queueIndex} not found`);
-        this._particleCount = Math.max(0, this._particleCount - 1);
-        return;
-    }
-    const slotRect = slotEl.getBoundingClientRect();
-    const startX = slotRect.left + slotRect.width / 2 + window.scrollX;
-const startY = slotRect.top + slotRect.height / 2 + window.scrollY;
-    console.log(`Start position: x=${startX}, y=${startY}, slotRect=${JSON.stringify(slotRect)}`);
+                const slotEl = queueArea.children[queueIndex];
+                if (!slotEl) {
+                    console.warn(`Queue slot ${queueIndex} not found`);
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
+                const slotRect = slotEl.getBoundingClientRect();
+                const startX = slotRect.left + slotRect.width / 2 + window.scrollX;
+                const startY = slotRect.top + slotRect.height / 2 + window.scrollY;
+                console.log(`Start position: x=${startX}, y=${startY}, slotRect=${JSON.stringify(slotRect)}`);
 
-    const laneEl = targetLanes.children[laneIndex];
-    if (!laneEl) {
-        console.warn(`Lane ${laneIndex} not found`);
-        this._particleCount = Math.max(0, this._particleCount - 1);
-        return;
-    }
-    const bottomBlock = laneEl.children[0];
-    if (!bottomBlock) {
-        console.warn(`Bottom block in lane ${laneIndex} not found`);
-        this._particleCount = Math.max(0, this._particleCount - 1);
-        return;
-    }
-    const targetRect = bottomBlock.getBoundingClientRect();
-    const targetX = targetRect.left + targetRect.width / 2 + window.scrollX;
-const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
-    console.log(`Target position: x=${targetX}, y=${targetY}, targetRect=${JSON.stringify(targetRect)}`);
+                const laneEl = targetLanes.children[laneIndex];
+                if (!laneEl) {
+                    console.warn(`Lane ${laneIndex} not found`);
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
+                const bottomBlock = laneEl.children[0];
+                if (!bottomBlock) {
+                    console.warn(`Bottom block in lane ${laneIndex} not found`);
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
+                const targetRect = bottomBlock.getBoundingClientRect();
+                const targetX = targetRect.left + targetRect.width / 2 + window.scrollX;
+                const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
+                console.log(`Target position: x=${targetX}, y=${targetY}, targetRect=${JSON.stringify(targetRect)}`);
 
-    const p = document.createElement('div');
-    p.className = 'shooting-particle';
-    const colorMap = {
-        red: '#ff0000',
-        blue: '#0000ff',
-        green: '#00ff00',
-        yellow: '#ffff00',
-        purple: '#800080'
-    };
-    p.style.background = colorMap[color] || window.getComputedStyle(document.querySelector('.' + color))?.backgroundColor || '#ffffff';
-    p.style.left = startX + 'px';
-    p.style.top = startY + 'px';
-    p.style.opacity = '1';
+                const p = document.createElement('div');
+                p.className = 'shooting-particle';
+                const colorMap = {
+                    red: '#ff0000',
+                    blue: '#0000ff',
+                    green: '#00ff00',
+                    yellow: '#ffff00',
+                    purple: '#800080'
+                };
+                p.style.background = colorMap[color] || window.getComputedStyle(document.querySelector('.' + color))?.backgroundColor || '#ffffff';
+                p.style.left = startX + 'px';
+                p.style.top = startY + 'px';
+                p.style.opacity = '1';
 
-    document.body.appendChild(p);
-    console.log(`Particle created, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+                document.body.appendChild(p);
+                console.log(`Particle created, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
 
-    const duration = 300;
-    const start = performance.now();
+                const duration = 300;
+                const start = performance.now();
 
-    function easeOutQuad(t) {
-        return t * (2 - t);
-    }
+                function easeOutQuad(t) {
+                    return t * (2 - t);
+                }
 
-    const frame = (now) => {
-        const t = Math.min(1, (now - start) / duration);
-        const eased = easeOutQuad(t);
-        const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 1;
-        const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 1;
-        p.style.left = curX + 'px';
-        p.style.top = curY + 'px';
-        p.style.opacity = String(1 - eased);
-        const scale = 1 - 0.35 * eased;
-        p.style.transform = `translate(-50%,-50%) scale(${scale})`;
+                const frame = (now) => {
+                    const t = Math.min(1, (now - start) / duration);
+                    const eased = easeOutQuad(t);
+                    const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 1;
+                    const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 1;
+                    p.style.left = curX + 'px';
+                    p.style.top = curY + 'px';
+                    p.style.opacity = String(1 - eased);
+                    const scale = 1 - 0.35 * eased;
+                    p.style.transform = `translate(-50%,-50%) scale(${scale})`;
 
-        if (t < 1) {
-            requestAnimationFrame(frame);
-        } else {
-            if (p.parentNode) {
-                p.parentNode.removeChild(p);
-                this._particleCount = Math.max(0, this._particleCount - 1);
-                console.log(`Particle removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+                    if (t < 1) {
+                        requestAnimationFrame(frame);
+                    } else {
+                        if (p.parentNode) {
+                            p.parentNode.removeChild(p);
+                            this._particleCount = Math.max(0, this._particleCount - 1);
+                            console.log(`Particle removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+                        }
+                    }
+                };
+
+                requestAnimationFrame(frame.bind(this));
+
+                setTimeout(() => {
+                    if (p.parentNode) {
+                        p.parentNode.removeChild(p);
+                        this._particleCount = Math.max(0, this._particleCount - 1);
+                        console.log(`Particle force-removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
+                    }
+                }, duration + 100);
             }
-        }
-    };
-
-    requestAnimationFrame(frame.bind(this));
-
-    setTimeout(() => {
-        if (p.parentNode) {
-            p.parentNode.removeChild(p);
-            this._particleCount = Math.max(0, this._particleCount - 1);
-            console.log(`Particle force-removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
-        }
-    }, duration + 100);
-}
 
             showDamageText(laneIndex, damage) {
                 const targetLanesEl = document.getElementById('targetLanes');
@@ -1386,13 +1392,35 @@ const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
                     this.clearedStages.add(this.stage);
                     this.gameRunning = false;
                     this.stopQueueScanLoop();
-                    if (this.stage < 10) {
+                    if (this.stage < 15) {
                         this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
                     } else {
-                        window.showNameModal(this.score, () => {
+                        this.checkTop10Score(this.score, () => {
                             this.showGameOverModal(`모든 스테이지 완료! 최종 점수: ${this.score}`);
                         });
                     }
+                }
+            }
+
+            async checkTop10Score(score, callback) {
+                try {
+                    const scoresRef = ref(db, 'scores');
+                    const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+                    const snapshot = await get(topScoresQuery);
+                    const scores = [];
+                    snapshot.forEach(child => {
+                        scores.push(child.val().score);
+                    });
+                    scores.sort((a, b) => b - a);
+                    const minTop10Score = scores.length >= 10 ? scores[scores.length - 1] : 0;
+                    if (score > minTop10Score || scores.length < 10) {
+                        window.showNameModal(score, true, callback);
+                    } else {
+                        callback();
+                    }
+                } catch (error) {
+                    console.error('Error checking top 10 scores:', error.message);
+                    callback();
                 }
             }
 
@@ -1458,6 +1486,9 @@ const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
                     root.innerHTML = '';
                     document.getElementById('gameContainer').style.display = 'none';
                     document.getElementById('intro').style.display = 'block';
+                    // Reset game state completely when exiting
+                    this.initGame();
+                    this.gameRunning = false;
                 };
 
                 const retry = document.createElement('button');
@@ -1503,7 +1534,7 @@ const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
 
                 this.gameRunning = false;
                 this.stopQueueScanLoop();
-                window.showNameModal(this.score, () => {
+                this.checkTop10Score(this.score, () => {
                     this.showGameOverModal(`대기열이 가득 차 매칭 불가! 점수: ${this.score}`);
                 });
             }
@@ -1511,7 +1542,7 @@ const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
             updateStageProgress() {
                 const stageProgress = document.getElementById('stageProgress');
                 stageProgress.innerHTML = '';
-                for (let i = 1; i <= 10; i++) {
+                for (let i = 1; i <= 15; i++) {
                     const indicator = document.createElement('div');
                     indicator.className = `stage-indicator ${
                         i === this.stage ? 'current' : this.clearedStages.has(i) ? 'cleared' : ''
@@ -1744,14 +1775,16 @@ const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
             }
         };
 
-        window.showNameModal = function(score, callback = null) {
-            console.log(`Showing name modal for score: ${score}`);
+        window.showNameModal = function(score, showCongrats = false, callback = null) {
+            console.log(`Showing name modal for score: ${score}, showCongrats: ${showCongrats}`);
             const modal = document.getElementById('nameModal');
             const input = document.getElementById('playerNameInput');
             const saveBtn = document.getElementById('saveNameBtn');
             const cancelBtn = document.getElementById('cancelNameBtn');
+            const congratsMessage = document.getElementById('congratsMessage');
 
             modal.style.display = 'flex';
+            congratsMessage.style.display = showCongrats ? 'block' : 'none';
             input.value = '';
             input.focus();
 
