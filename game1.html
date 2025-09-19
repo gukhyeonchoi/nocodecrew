@@ -736,8 +736,8 @@
             background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
             padding: 24px;
             border-radius: 16px;
-            width: 80vw;
-            max-width: 90vw;
+            width: 90vw;
+            max-width: 95vw;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             font-family: 'Pretendard', Arial, sans-serif;
@@ -1196,8 +1196,8 @@
         
         <div class="game-instructions">
             <h3>📖 게임 방법</h3>
-            <p>• 하단 블록 스택에서 상단 블록만 터치 가능</p>
-            <p>• 선택한 블록이 대기열에 추가됩니다</p>
+            <p>• 하단 블록에서 상단 블록만 터치 가능</p>
+            <p>• 선택한 블록이 가운데 대기열에 추가됩니다</p>
             <p>• 같은 색상의 타겟이 있으면 자동으로 공격</p>
             <p>• 모든 타겟을 제거하면 다음 스테이지!</p>
         </div>
@@ -1543,7 +1543,7 @@
                     return;
                 }
 
-                const shotInterval = 1000 / 25; // 약간 느리게 조정하여 시각적 효과 개선
+                const shotInterval = 1000 / 27; // 약간 느리게 조정하여 시각적 효과 개선
                 let shotsFired = 0;
                 let lastShotTime = performance.now();
 
@@ -1784,7 +1784,7 @@
 
                 const retry = document.createElement('button');
                 retry.className = 'btn btn-retry';
-                retry.textContent = '🏠 그만하기';
+                retry.textContent = '🏠홈으로';
                 retry.onclick = () => {
                     root.innerHTML = '';
                     this.resetGame();
@@ -1792,7 +1792,7 @@
 
                 const next = document.createElement('button');
                 next.className = 'btn btn-next';
-                next.textContent = '▶️ 다음 스테이지';
+                next.textContent = '▶️다음 스테이지';
                 next.onclick = () => {
                     root.innerHTML = '';
                     this.advanceStage();
@@ -1825,7 +1825,7 @@
 
                 const retry = document.createElement('button');
                 retry.className = 'btn btn-retry';
-                retry.textContent = '🔄 다시 플레이하기';
+                retry.textContent = '🔄 재도전';
                 retry.onclick = () => {
                     root.innerHTML = '';
                     this.resetGame();
