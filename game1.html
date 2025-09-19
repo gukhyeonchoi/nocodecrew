@@ -3,14 +3,20 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>컬러 슈터</title>
+    <title>컬러 슈터 - Color Shooter</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
             font-family: 'Pretendard', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease-in-out infinite;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -20,59 +26,150 @@
             -webkit-user-select: none;
             user-select: none;
             overflow: hidden;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* 배경 파티클 효과 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                radial-gradient(circle at 90% 40%, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+                radial-gradient(circle at 60% 90%, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 60px 60px, 90px 90px;
+            animation: float 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-100px); }
         }
 
         #intro {
-            background: rgba(255,255,255,0.95);
-            border-radius: 2vmin;
-            padding: 3vmin;
-            box-shadow: 0 1vmin 2vmin rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1);
             max-width: 90vw;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2vmin;
+            gap: 20px;
+            z-index: 10;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        #intro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 20px;
+            z-index: -1;
         }
 
         #intro h1 {
             margin: 0;
-            font-size: 4vmin;
-            color: #333;
+            font-size: 36px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         #intro p {
             margin: 0;
-            font-size: 2.5vmin;
+            font-size: 18px;
             color: #495057;
+            line-height: 1.6;
+        }
+
+        .game-instructions {
+            background: rgba(246, 248, 250, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 14px;
+            color: #495057;
+            line-height: 1.5;
+        }
+
+        .game-instructions h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
         }
 
         .intro-btn {
-            background: #007bff;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: #fff;
             border: none;
-            padding: 2vmin 4vmin;
-            border-radius: 1vmin;
+            padding: 16px 32px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 2.8vmin;
+            font-size: 18px;
             font-weight: 600;
-            transition: transform 0.15s ease, filter 0.15s ease;
+            transition: all 0.3s ease;
             touch-action: manipulation;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intro-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .intro-btn:hover::before {
+            left: 100%;
         }
 
         .intro-btn:active {
             transform: scale(0.95);
-            filter: brightness(0.9);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .intro-btn.btn-ranking {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
         }
 
         .game-container {
             display: none;
-            background: white;
-            border-radius: 2vmin;
-            padding: 0.5vmin;
-            box-shadow: 0 1vmin 2.5vmin rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1);
             width: 100vw;
             max-width: 95vw;
             height: 100vh;
@@ -82,73 +179,90 @@
             justify-content: space-around;
             align-items: center;
             overflow: hidden;
-            box-sizing: border-box;
             touch-action: manipulation;
+            z-index: 10;
+            position: relative;
         }
 
         .score-board {
             text-align: center;
-            margin-bottom: 0.5vmin;
-            font-size: 2.8vmin;
+            margin-bottom: 8px;
+            font-size: 20px;
             font-weight: 600;
             color: #333;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .stage-progress {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 0.8vmin;
-            margin-bottom: 0.5vmin;
-            font-size: 1.6vmin;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
             color: #333;
             position: sticky;
             top: 0;
             z-index: 100;
-            background: white;
-            padding: 0.5vmin 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 0;
+            border-radius: 12px;
         }
 
         .stage-indicator {
-            width: 2.5vmin;
-            height: 2.5vmin;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            border: 0.2vmin solid #6c757d;
-            background: transparent;
+            border: 2px solid #6c757d;
+            background: rgba(255, 255, 255, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6vmin;
+            font-size: 12px;
             font-weight: 600;
             color: #333;
             position: relative;
+            transition: all 0.3s ease;
         }
 
         .stage-indicator.cleared {
-            background: #6c757d;
-            border-color: #6c757d;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-color: #28a745;
             color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
 
         .stage-indicator.current {
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             border-color: #007bff;
             color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.2); }
+            50% { transform: scale(1.3); }
         }
 
         .stage-indicator:not(:last-child)::after {
             content: '-';
             position: absolute;
-            right: -1vmin;
+            right: -12px;
             color: #dee2e6;
-            font-size: 1.6vmin;
+            font-size: 12px;
         }
 
         .game-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 1.5vmin;
+            gap: 16px;
             justify-content: center;
             align-items: center;
             width: 100%;
@@ -156,32 +270,34 @@
         }
 
         .target-area {
-            background: #f8f9fa;
-            border: 0.3vmin solid #dee2e6;
-            border-radius: 1vmin;
-            padding: 0.5vmin;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid rgba(222, 226, 230, 0.8);
+            border-radius: 16px;
+            padding: 12px;
             height: 33vh;
             width: 100%;
             position: relative;
             overflow: hidden;
-            margin-bottom: 1vmin;
+            margin-bottom: 8px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .target-title {
             text-align: center;
             font-weight: 600;
-            margin-bottom: 0.5vmin;
+            margin-bottom: 8px;
             color: #495057;
-            font-size: 2.8vmin;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
         }
 
         .target-lanes {
             display: flex;
-            gap: 1vmin;
+            gap: 12px;
             justify-content: center;
             align-items: flex-end;
-            height: calc(100% - 4vmin);
-            max-height: calc(33vh - 4vmin);
+            height: calc(100% - 32px);
+            max-height: calc(33vh - 32px);
             overflow: hidden;
             position: relative;
         }
@@ -189,143 +305,159 @@
         .target-lanes::after {
             content: '';
             position: absolute;
-            top: -10vmin;
+            top: -40px;
             left: 0;
             right: 0;
-            height: 10vmin;
+            height: 40px;
             background: linear-gradient(to bottom, #f8f9fa 0%, #f8f9fa 50%, transparent 100%);
             pointer-events: none;
             z-index: 10;
         }
 
         .target-lane {
-            width: 8vmin;
+            width: 60px;
             display: flex;
             flex-direction: column-reverse;
-            gap: 0.5vmin;
+            gap: 4px;
             height: 100%;
-            align-items: center;
-            max-height: calc(33vh - 4vmin);
+            align-items: flex-end;
+            padding-bottom: 5px;
+            max-height: calc(33vh - 32px);
             overflow: visible;
         }
 
         .target-block {
-            width: 8vmin;
-            height: 8vmin;
-            border-radius: 1vmin;
-            border: 0.2vmin solid rgba(0,0,0,0.12);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             color: white;
-            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             position: relative;
             box-sizing: border-box;
-            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            transition: all 0.3s ease;
             flex-shrink: 0;
+            background: linear-gradient(135deg, var(--color-start), var(--color-end));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
         }
 
         .target-block.attackable {
-            border-color: #ffeb3b;
-            box-shadow: 0 0 1.2vmin rgba(255,235,59,0.5);
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 4px 12px rgba(0,0,0,0.2);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 4px 12px rgba(0,0,0,0.2); }
+            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 6px 16px rgba(0,0,0,0.3); }
         }
 
         .target-block.attackable:active {
-            box-shadow: 0 0 1.5vmin rgba(255,235,59,0.7);
             transform: scale(0.95);
         }
 
         .block-number {
-            font-size: 3vmin;
+            font-size: 20px;
             line-height: 1;
         }
 
         .block-label {
-            font-size: 1.6vmin;
+            font-size: 10px;
             opacity: 0.85;
         }
 
         .queue-area {
-            background: #f8f9fa;
-            border: 0.3vmin solid #dee2e6;
-            border-radius: 1vmin;
-            padding: 0.5vmin;
+            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            border: 2px solid rgba(222, 226, 230, 0.3);
+            border-radius: 16px;
+            padding: 12px;
             display: flex;
             justify-content: center;
-            gap: 1vmin;
+            gap: 12px;
             align-items: center;
-            height: 15vh;
+            height: 10vh;
             width: 100%;
             position: relative;
             z-index: 30;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .queue-slot {
-            width: 8vmin;
-            height: 8vmin;
-            border-radius: 0.8vmin;
-            border: 0.2vmin dashed rgba(0,0,0,0.28);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 2px dashed rgba(255,255,255,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2vmin;
-            color: #6c757d;
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
             position: relative;
             box-sizing: border-box;
+            background: rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
         }
 
         .queue-block {
-            width: 8vmin;
-            height: 8vmin;
-            border-radius: 0.8vmin;
-            border: 0.2vmin solid rgba(0,0,0,0.28);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             color: white;
-            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             position: relative;
             box-sizing: border-box;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--color-start), var(--color-end));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
         }
 
         .queue-block.added {
-            animation: fadeIn 0.3s ease;
+            animation: slideIn 0.4s ease-out;
         }
 
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
+        @keyframes slideIn {
+            0% { opacity: 0; transform: scale(0.6) translateY(-20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .selection-area {
-            background: #343a40;
-            border-radius: 1vmin;
-            padding: 0.5vmin;
+            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            border-radius: 16px;
+            padding: 8px;
             color: white;
             height: 35vh;
             width: 100%;
             overflow: hidden;
             position: relative;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .selection-title {
             text-align: center;
             font-weight: 600;
-            margin-bottom: 0.5vmin;
-            font-size: 2.8vmin;
+            margin-bottom: 8px;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .stacks-container {
             display: flex;
-            gap: 1vmin;
+            gap: 12px;
             justify-content: center;
             align-items: flex-start;
-            height: calc(100% - 3.5vmin);
+            padding-top: 5px;
+            height: calc(100% - 28px);
             max-height: 35vh;
             overflow: hidden;
             position: relative;
@@ -337,7 +469,7 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 10vmin;
+            height: 40px;
             background: linear-gradient(to bottom, #343a40 0%, #343a40 70%, transparent 100%);
             pointer-events: none;
             z-index: 10;
@@ -346,147 +478,238 @@
         .stack {
             display: flex;
             flex-direction: column;
-            gap: 0.5vmin;
+            gap: 4px;
             align-items: center;
             height: 100%;
             max-height: 35vh;
-            width: 8vmin;
+            width: 60px;
             overflow: visible;
         }
 
         .stack-block {
-            width: 8vmin;
-            height: 8vmin;
-            border-radius: 0.8vmin;
-            border: 0.3vmin solid rgba(255,255,255,0.25);
-            transition: box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             color: white;
-            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.45);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             position: relative;
             box-sizing: border-box;
             z-index: 10;
             flex-shrink: 0;
             touch-action: manipulation;
+            background: linear-gradient(135deg, var(--color-start), var(--color-end));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
         }
 
         .stack-block.top-block {
             border-color: #2ecc71;
-            box-shadow: 0 0 1.2vmin rgba(46,204,113,0.6);
+            box-shadow: 0 0 20px rgba(46,204,113,0.6), 0 4px 12px rgba(0,0,0,0.3);
             cursor: pointer;
-            padding: 0.5vmin;
+            transform: translateY(-4px);
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: translateY(-4px); }
+            50% { transform: translateY(-8px); }
         }
 
         .stack-block.top-block:active {
-            box-shadow: 0 0 1.5vmin rgba(46,204,113,0.8);
-            transform: scale(0.9);
+            transform: scale(0.9) translateY(-4px);
+            box-shadow: 0 0 25px rgba(46,204,113,0.8), 0 6px 16px rgba(0,0,0,0.4);
         }
 
         .stack-block:not(.top-block) {
-            opacity: 0.75;
+            opacity: 0.7;
             cursor: not-allowed;
         }
 
-        .red { background: #e74c3c; }
-        .blue { background: #3498db; }
-        .green { background: #2ecc71; }
-        .yellow { background: #f1c40f; color: #333; }
-        .purple { background: #9b59b6; }
+        /* 색상별 그라데이션 정의 */
+        .red { 
+            --color-start: #e74c3c; 
+            --color-end: #c0392b; 
+        }
+        .blue { 
+            --color-start: #3498db; 
+            --color-end: #2980b9; 
+        }
+        .green { 
+            --color-start: #2ecc71; 
+            --color-end: #27ae60; 
+        }
+        .yellow { 
+            --color-start: #f1c40f; 
+            --color-end: #e67e22;
+            color: #333 !important;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5) !important;
+        }
+        .purple { 
+            --color-start: #9b59b6; 
+            --color-end: #8e44ad; 
+        }
 
         .shooting-particle {
             position: fixed;
-            width: 2.5vmin;
-            height: 2.5vmin;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             z-index: 2500;
             pointer-events: none;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 0.5vmin rgba(0,0,0,0.2);
-            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3), 0 0 20px var(--particle-color);
+            background: radial-gradient(circle, var(--particle-color), var(--particle-color-dark));
+            animation: sparkle 0.3s ease-out;
+        }
+
+        @keyframes sparkle {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
 
         .damage-text {
             position: fixed;
             color: #ff4444;
-            font-weight: 600;
-            font-size: 2.5vmin;
+            font-weight: 700;
+            font-size: 18px;
             z-index: 2001;
             pointer-events: none;
-            animation: damageFloat 0.8s ease-out forwards;
+            animation: damageFloat 1s ease-out forwards;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         @keyframes damageFloat {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-5vmin) scale(1.1); }
+            0% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+                color: #ff4444;
+            }
+            50% {
+                color: #ff6b6b;
+                transform: translateY(-20px) scale(1.2);
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-40px) scale(0.8);
+                color: #ff8a80;
+            }
         }
 
         .game-controls {
             text-align: center;
-            padding: 0.5vmin;
-            background: white;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
             position: sticky;
             bottom: 0;
             z-index: 100;
             width: 100%;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
         }
 
         .btn {
             color: white;
             border: none;
-            padding: 2vmin 4vmin;
-            border-radius: 1vmin;
+            padding: 12px 24px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 2.8vmin;
-            margin: 0 1vmin;
-            transition: transform 0.15s ease, filter 0.15s ease;
+            font-size: 16px;
+            margin: 0 8px;
+            transition: all 0.3s ease;
             touch-action: manipulation;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:active {
             transform: scale(0.95);
         }
 
-        .btn:hover {
-            filter: brightness(1.1);
-        }
-
         .btn-retry {
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
         }
 
         .btn-continue {
-            background: #ffc107;
+            background: linear-gradient(135deg, #ffc107, #e0a800);
             color: #333;
         }
 
         .btn-close {
-            background: #6c757d;
+            background: linear-gradient(135deg, #6c757d, #545b62);
         }
 
         .btn-ranking {
-            background: #6c757d;
+            background: linear-gradient(135deg, #6c757d, #545b62);
         }
 
         .btn-next {
-            background: #28a745;
+            background: linear-gradient(135deg, #28a745, #1e7e34);
         }
 
         .message {
             text-align: center;
-            margin-top: 0.5vmin;
+            margin-top: 8px;
             font-weight: 600;
-            font-size: 2.8vmin;
-            min-height: 3vmin;
+            font-size: 16px;
+            min-height: 24px;
             width: 100%;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
         }
 
-        .success { color: #28a745; }
-        .warning { color: #ffc107; }
-        .error { color: #dc3545; }
+        .success { 
+            color: #28a745; 
+            animation: successPulse 0.6s ease-out;
+        }
+        .warning { 
+            color: #ffc107; 
+            animation: warningShake 0.5s ease-out;
+        }
+        .error { 
+            color: #dc3545; 
+            animation: errorShake 0.5s ease-out;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes warningShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
 
         .modal-backdrop {
             position: fixed;
@@ -494,39 +717,64 @@
             top: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 3000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal {
-            background: #fff;
-            padding: 2vmin;
-            border-radius: 1vmin;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            padding: 24px;
+            border-radius: 16px;
             width: 80vw;
             max-width: 90vw;
             text-align: center;
-            box-shadow: 0 1vmin 2.5vmin rgba(0,0,0,0.35);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             font-family: 'Pretendard', Arial, sans-serif;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.8) translateY(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+            }
         }
 
         .modal h2 {
-            margin: 0.5vmin 0 1vmin 0;
-            font-size: 3.5vmin;
-            color: #333;
+            margin: 8px 0 16px 0;
+            font-size: 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
         }
 
         .modal p {
-            margin: 0.8vmin 0 1.5vmin 0;
-            font-size: 2.8vmin;
+            margin: 12px 0 20px 0;
+            font-size: 16px;
             color: #495057;
+            line-height: 1.5;
         }
 
         .modal .modal-actions {
             display: flex;
-            gap: 1vmin;
+            gap: 12px;
             justify-content: center;
         }
 
@@ -540,22 +788,26 @@
         .ranking-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 2vmin 0;
-            font-size: 2.8vmin;
+            margin: 16px 0;
+            font-size: 16px;
             color: #333;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .ranking-table th,
         .ranking-table td {
-            border: 0.2vmin solid #dee2e6;
-            padding: 1vmin;
+            border: 1px solid #dee2e6;
+            padding: 12px;
             text-align: center;
         }
 
         .ranking-table th {
-            background: #343a40;
+            background: linear-gradient(135deg, #343a40, #495057);
             color: white;
             font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .ranking-table tr:nth-child(even) {
@@ -566,360 +818,407 @@
             background: #fff;
         }
 
+        .ranking-table tr:hover {
+            background: #e3f2fd;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+
         .score-input {
-            padding: 1vmin;
-            font-size: 2.8vmin;
-            border: 0.2vmin solid #dee2e6;
-            border-radius: 0.8vmin;
-            margin: 1vmin 0;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            margin: 12px 0;
             width: 80%;
             max-width: 300px;
             font-family: 'Pretendard', Arial, sans-serif;
+            background: rgba(255,255,255,0.9);
+            transition: all 0.3s ease;
         }
 
+        .score-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255,255,255,1);
+        }
+
+        /* 모바일 최적화 */
         @media (max-width: 768px) {
             #intro {
-                padding: 2.5vmin;
+                padding: 30px 20px;
             }
             #intro h1 {
-                font-size: 5.5vmin;
+                font-size: 28px;
             }
             #intro p {
-                font-size: 3.5vmin;
+                font-size: 16px;
             }
             .intro-btn {
-                font-size: 4vmin;
-                padding: 3vmin 6vmin;
+                font-size: 16px;
+                padding: 14px 28px;
             }
             .game-container {
-                padding: 0.2vmin;
+                padding: 4px;
                 max-width: 100vw;
                 max-height: 100vh;
                 justify-content: space-evenly;
             }
             .game-area {
-                gap: 2vmin;
+                gap: 12px;
             }
             .score-board {
-                font-size: 3.5vmin;
-                margin-bottom: 0.3vmin;
+                font-size: 16px;
+                margin-bottom: 4px;
+                padding: 8px 16px;
             }
             .stage-progress {
-                gap: 1vmin;
-                margin-bottom: 0.3vmin;
-                font-size: 2vmin;
-                padding: 0.3vmin 0;
+                gap: 6px;
+                margin-bottom: 4px;
+                font-size: 10px;
+                padding: 4px 0;
             }
             .stage-indicator {
-                width: 3vmin;
-                height: 3vmin;
-                font-size: 2vmin;
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
             }
             .stage-indicator:not(:last-child)::after {
-                right: -1.2vmin;
-                font-size: 2vmin;
+                right: -9px;
+                font-size: 10px;
             }
             .target-area {
                 height: 38vh;
-                padding: 0.3vmin;
-                margin-bottom: 1.5vmin;
+                padding: 8px;
+                margin-bottom: 8px;
             }
             .target-lanes {
-                max-height: calc(38vh - 4.5vmin);
-                gap: 1.5vmin;
+                max-height: calc(38vh - 28px);
+                gap: 8px;
             }
             .target-lane {
-                width: 14vw;
-                min-width: 48px;
-                max-height: calc(38vh - 4.5vmin);
+                width: 50px;
+                max-height: calc(38vh - 28px);
             }
             .target-block {
-                width: 14vw;
-                height: 14vw;
-                min-width: 48px;
-                min-height: 48px;
-                border: 0.2vmin solid rgba(0,0,0,0.12);
+                width: 50px;
+                height: 50px;
+                border-radius: 10px;
             }
             .queue-area {
                 height: 20vh;
-                padding: 0.3vmin;
-                gap: 1.5vmin;
-                z-index: 30;
+                padding: 8px;
+                gap: 8px;
             }
             .queue-slot, .queue-block {
-                width: 14vw;
-                height: 14vw;
-                min-width: 48px;
-                min-height: 48px;
-                border: 0.2vmin solid rgba(0,0,0,0.28);
+                width: 50px;
+                height: 50px;
+                border-radius: 10px;
             }
             .selection-area {
                 height: 38vh;
-                padding: 0.3vmin;
+                padding: 8px;
             }
             .stacks-container {
-                max-height: calc(38vh - 4.5vmin);
-                gap: 1.5vmin;
+                max-height: calc(38vh - 24px);
+                gap: 8px;
             }
             .stack {
-                max-height: calc(38vh - 4.5vmin);
-                width: 14vw;
-                min-width: 48px;
+                max-height: calc(38vh - 24px);
+                width: 50px;
             }
             .stack-block {
-                width: 14vw;
-                height: 14vw;
-                min-width: 48px;
-                min-height: 48px;
-                border: 0.3vmin solid rgba(255,255,255,0.25);
+                width: 50px;
+                height: 50px;
+                border-radius: 10px;
             }
             .block-number {
-                font-size: 4.5vmin;
-                min-font-size: 18px;
+                font-size: 16px;
             }
             .block-label {
-                font-size: 2.2vmin;
+                font-size: 8px;
             }
             .target-title, .selection-title {
-                font-size: 4vmin;
-                margin-bottom: 0.3vmin;
+                font-size: 14px;
+                margin-bottom: 6px;
             }
             .btn {
-                font-size: 4vmin;
-                padding: 3vmin 6vmin;
-            }
-            .intro-btn {
-                font-size: 4vmin;
-                padding: 3vmin 6vmin;
+                font-size: 14px;
+                padding: 10px 20px;
             }
             .message {
-                font-size: 4vmin;
-                margin-top: 0.3vmin;
+                font-size: 14px;
+                margin-top: 4px;
             }
             .damage-text {
-                font-size: 3.2vmin;
+                font-size: 16px;
             }
             .modal h2 {
-                font-size: 5vmin;
+                font-size: 20px;
             }
             .modal p {
-                font-size: 4vmin;
+                font-size: 14px;
             }
             .shooting-particle {
-                width: 2.4vmin;
-                height: 2.4vmin;
+                width: 16px;
+                height: 16px;
             }
             .game-controls {
-                padding: 0.3vmin;
+                padding: 6px;
             }
             .ranking-table {
-                font-size: 3.5vmin;
+                font-size: 14px;
             }
             .ranking-table th,
             .ranking-table td {
-                padding: 1.5vmin;
+                padding: 8px;
             }
             .score-input {
-                font-size: 3.5vmin;
-                padding: 1.5vmin;
+                font-size: 14px;
+                padding: 10px;
             }
         }
 
         @media (max-height: 600px) {
             .game-container {
-                padding: 0.2vmin;
+                padding: 4px;
                 max-height: 100vh;
                 justify-content: space-evenly;
             }
             .game-area {
-                gap: 1.8vmin;
+                gap: 8px;
             }
             .target-area {
                 height: 35vh;
-                padding: 0.3vmin;
-                margin-bottom: 1.2vmin;
+                padding: 6px;
+                margin-bottom: 6px;
             }
             .selection-area {
                 height: 35vh;
-                padding: 0.3vmin;
+                padding: 6px;
             }
             .queue-area {
                 height: 18vh;
-                padding: 0.3vmin;
-                gap: 1.2vmin;
-                z-index: 30;
+                padding: 6px;
+                gap: 6px;
             }
             .target-lanes, .stacks-container {
-                max-height: calc(35vh - 4.5vmin);
-                gap: 1.2vmin;
+                max-height: calc(35vh - 20px);
+                gap: 6px;
             }
             .target-lane, .stack {
-                max-height: calc(35vh - 4.5vmin);
-                width: 12vw;
-                min-width: 44px;
+                max-height: calc(35vh - 20px);
+                width: 45px;
             }
-            .target-block {
-                width: 12vw;
-                height: 12vw;
-                min-width: 44px;
-                min-height: 44px;
-                border: 0.2vmin solid rgba(0,0,0,0.12);
-            }
-            .queue-slot, .queue-block {
-                width: 12vw;
-                height: 12vw;
-                min-width: 44px;
-                min-height: 44px;
-                border: 0.2vmin solid rgba(0,0,0,0.28);
-            }
-            .stack-block {
-                width: 12vw;
-                height: 12vw;
-                min-width: 44px;
-                min-height: 44px;
-                border: 0.3vmin solid rgba(255,255,255,0.25);
+            .target-block, .queue-slot, .queue-block, .stack-block {
+                width: 45px;
+                height: 45px;
+                border-radius: 8px;
             }
             .block-number {
-                font-size: 4vmin;
-                min-font-size: 16px;
+                font-size: 14px;
             }
             .block-label {
-                font-size: 2vmin;
+                font-size: 7px;
             }
             .target-title, .selection-title {
-                font-size: 3.5vmin;
-                margin-bottom: 0.3vmin;
+                font-size: 12px;
+                margin-bottom: 4px;
             }
-            .btn, .intro-btn {
-                font-size: 3.5vmin;
-                padding: 2.5vmin 5vmin;
+            .btn {
+                font-size: 12px;
+                padding: 8px 16px;
             }
             .score-board {
-                font-size: 3.2vmin;
-                margin-bottom: 0.3vmin;
+                font-size: 14px;
+                margin-bottom: 4px;
+                padding: 6px 12px;
             }
             .message {
-                font-size: 3.5vmin;
-                margin-top: 0.3vmin;
+                font-size: 12px;
+                margin-top: 4px;
             }
             .modal h2 {
-                font-size: 4.5vmin;
+                font-size: 18px;
             }
             .modal p {
-                font-size: 3.5vmin;
+                font-size: 12px;
             }
             .damage-text {
-                font-size: 3vmin;
+                font-size: 14px;
             }
             .stage-progress {
-                gap: 0.8vmin;
-                margin-bottom: 0.3vmin;
-                font-size: 1.8vmin;
+                gap: 4px;
+                margin-bottom: 4px;
+                font-size: 8px;
             }
             .stage-indicator {
-                width: 2.8vmin;
-                height: 2.8vmin;
-                font-size: 1.8vmin;
+                width: 18px;
+                height: 18px;
+                font-size: 8px;
             }
             .stage-indicator:not(:last-child)::after {
-                right: -1.1vmin;
-                font-size: 1.8vmin;
+                right: -8px;
+                font-size: 8px;
             }
             .shooting-particle {
-                width: 2.2vmin;
-                height: 2.2vmin;
+                width: 14px;
+                height: 14px;
             }
             .game-controls {
-                padding: 0.3vmin;
+                padding: 4px;
             }
             .ranking-table {
-                font-size: 3.2vmin;
+                font-size: 12px;
             }
             .ranking-table th,
             .ranking-table td {
-                padding: 1.2vmin;
+                padding: 6px;
             }
             .score-input {
-                font-size: 3.2vmin;
-                padding: 1.2vmin;
+                font-size: 12px;
+                padding: 8px;
             }
         }
 
         @media (orientation: landscape) and (max-height: 500px) {
             .game-container {
-                padding: 0.2vmin;
+                padding: 2px;
                 justify-content: space-evenly;
             }
             .game-area {
-                gap: 1.5vmin;
+                gap: 6px;
             }
             .target-area {
                 height: 32vh;
-                padding: 0.3vmin;
-                margin-bottom: 1vmin;
+                padding: 4px;
+                margin-bottom: 4px;
             }
             .selection-area {
                 height: 32vh;
-                padding: 0.3vmin;
+                padding: 4px;
             }
             .queue-area {
                 height: 16vh;
-                padding: 0.3vmin;
-                gap: 1vmin;
-                z-index: 30;
+                padding: 4px;
+                gap: 4px;
             }
             .target-lanes, .stacks-container {
-                max-height: calc(32vh - 4.5vmin);
+                max-height: calc(32vh - 16px);
             }
             .target-lane, .stack {
-                max-height: calc(32vh - 4.5vmin);
+                max-height: calc(32vh - 16px);
             }
             .ranking-table {
-                font-size: 3vmin;
+                font-size: 10px;
             }
             .ranking-table th,
             .ranking-table td {
-                padding: 1vmin;
+                padding: 4px;
             }
             .score-input {
-                font-size: 3vmin;
-                padding: 1vmin;
+                font-size: 10px;
+                padding: 6px;
             }
+        }
+
+        /* 터치 피드백 개선 */
+        .stack-block.top-block:active,
+        .target-block.attackable:active,
+        .btn:active,
+        .intro-btn:active {
+            transition: transform 0.1s ease;
+        }
+
+        /* 성능 최적화를 위한 will-change */
+        .shooting-particle {
+            will-change: transform, opacity;
+        }
+
+        .damage-text {
+            will-change: transform, opacity;
+        }
+
+        .stack-block.top-block {
+            will-change: transform;
+        }
+
+        /* 접근성 개선 */
+        .btn:focus,
+        .intro-btn:focus,
+        .stack-block.top-block:focus {
+            outline: 3px solid rgba(102, 126, 234, 0.5);
+            outline-offset: 2px;
+        }
+
+        /* 로딩 상태 */
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div id="intro">
-        <h1>컬러 슈터</h1>
-        <p>색상 블록을 활용해 타겟을 모두 제거하세요!</p>
-        <button class="intro-btn" onclick="startIntroGame()">게임 시작</button>
-        <button class="intro-btn btn-ranking" onclick="showRankingModal()">랭킹 보기</button>
+        <h1>🎯 컬러 슈터</h1>
+        <p>색상을 매칭하여 타겟 블록을 모두 제거하세요!</p>
+        
+        <div class="game-instructions">
+            <h3>📖 게임 방법</h3>
+            <p>• 하단 블록 스택에서 상단 블록만 터치 가능</p>
+            <p>• 선택한 블록이 대기열에 추가됩니다</p>
+            <p>• 같은 색상의 타겟이 있으면 자동으로 공격</p>
+            <p>• 모든 타겟을 제거하면 다음 스테이지!</p>
+        </div>
+        
+        <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
+        <button class="intro-btn btn-ranking" id="showRankingBtn">🏆 랭킹 보기</button>
     </div>
 
     <div class="game-container" id="gameContainer">
         <div class="score-board">
-            <span>스테이지: <span id="stage">1</span></span>
-            <span style="margin-left: 3vmin;">점수: <span id="score">0</span></span>
-            <span style="margin-left: 3vmin;">색상: <span id="colorCount">3</span></span>
+            <span>🎯 스테이지: <span id="stage">1</span></span>
+            <span style="margin-left: 20px;">⭐ 점수: <span id="score">0</span></span>
+            <span style="margin-left: 20px;">🎨 색상: <span id="colorCount">3</span></span>
         </div>
         <div class="stage-progress" id="stageProgress"></div>
 
         <div class="game-area">
             <div class="target-area">
-                <div class="target-title">목표 블록(하단 부터 공격 가능)</div>
+                <div class="target-title">🎯 목표 블록 (하단부터 공격 가능)</div>
                 <div class="target-lanes" id="targetLanes"></div>
             </div>
 
             <div class="queue-area" id="queueArea"></div>
 
             <div class="selection-area">
-                <div class="selection-title">블록 선택(상단만 터치 가능)</div>
+                <div class="selection-title">🎮 블록 선택 (상단만 터치 가능)</div>
                 <div class="stacks-container" id="stacksContainer"></div>
             </div>
         </div>
 
         <div class="game-controls">
-            <button class="btn btn-retry" onclick="resetGame()">다시 시작</button>
+            <button class="btn btn-retry" id="resetGameBtn">🔄 다시 시작</button>
         </div>
 
         <div class="message" id="message"></div>
@@ -927,14 +1226,14 @@
 
     <div id="modalRoot"></div>
 
-    <div id="nameModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:4000;">
-        <div style="background:white; padding:18px; border-radius:10px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif;">
-            <h3 style="margin:8px 0 6px 0; font-size:3.5vmin; color:#333;">이름을 입력하세요</h3>
-            <p id="congratsMessage" style="margin:0.8vmin 0; font-size:2.8vmin; color:#28a745; display:none;">축하합니다! 상위 10위 안에 들었습니다!</p>
-            <input id="playerNameInput" placeholder="이름 (예: 홍길동)" style="width:88%; padding:10px; border-radius:6px; border:1px solid #dee2e6; font-size:2.8vmin; font-family: 'Pretendard', Arial, sans-serif;">
-            <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
-                <button id="saveNameBtn" style="padding:10px 14px; border-radius:8px; border:none; background:#667eea; color:white; font-size:2.8vmin;">확인</button>
-                <button id="cancelNameBtn" style="padding:10px 14px; border-radius:8px; border:none; background:#6c757d; color:white; font-size:2.8vmin;">취소</button>
+    <div id="nameModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); align-items:center; justify-content:center; z-index:4000;">
+        <div style="background:linear-gradient(135deg, #fff 0%, #f8f9fa 100%); padding:24px; border-radius:16px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2);">
+            <h3 style="margin:8px 0 6px 0; font-size:20px; background:linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700;">🎉 이름을 입력하세요</h3>
+            <p id="congratsMessage" style="margin:12px 0; font-size:16px; color:#28a745; display:none; font-weight:600;">🏆 축하합니다! 상위 10위 안에 들었습니다!</p>
+            <input id="playerNameInput" placeholder="이름을 입력하세요 (예: 홍길동)" style="width:88%; padding:12px; border-radius:12px; border:2px solid #dee2e6; font-size:16px; font-family: 'Pretendard', Arial, sans-serif; background:rgba(255,255,255,0.9); transition:all 0.3s ease;">
+            <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
+                <button id="saveNameBtn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #667eea, #764ba2); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(102, 126, 234, 0.3);">✅ 확인</button>
+                <button id="cancelNameBtn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #6c757d, #545b62); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(108, 117, 125, 0.3);">❌ 취소</button>
             </div>
         </div>
     </div>
@@ -990,8 +1289,29 @@
                 this._queueScanTimer = null;
                 this._pendingUpdate = false;
                 this._particleCount = 0;
-                this._maxParticles = 50;
+                this._maxParticles = 30; // 파티클 수 제한으로 성능 최적화
                 this.handleBlockTouch = this.handleBlockTouch.bind(this);
+                this.colorParticleMap = {
+                    red: { color: '#e74c3c', dark: '#c0392b' },
+                    blue: { color: '#3498db', dark: '#2980b9' },
+                    green: { color: '#2ecc71', dark: '#27ae60' },
+                    yellow: { color: '#f1c40f', dark: '#e67e22' },
+                    purple: { color: '#9b59b6', dark: '#8e44ad' }
+                };
+            }
+
+            showMessage(text, type = '') {
+                const messageEl = document.getElementById('message');
+                messageEl.textContent = text;
+                messageEl.className = `message ${type}`;
+                
+                // 3초 후 메시지 지우기
+                setTimeout(() => {
+                    if (messageEl.textContent === text) {
+                        messageEl.textContent = '';
+                        messageEl.className = 'message';
+                    }
+                }, 3000);
             }
 
             clearAllParticles() {
@@ -1016,6 +1336,7 @@
                 this.initStage();
                 this.updateDisplay();
                 this.updateStageProgress();
+                this.showMessage('🎮 새 게임을 시작합니다!', 'success');
                 console.log(`Game initialized, stage: ${this.stage}`);
             }
 
@@ -1072,6 +1393,7 @@
             startGame() {
                 this.gameRunning = true;
                 this.clearAllParticles();
+                this.showMessage(`🚀 스테이지 ${this.stage} 시작!`, 'success');
                 console.log(`스테이지 ${this.stage} 시작!`);
                 this.updateDisplay();
                 this.updateStageProgress();
@@ -1094,23 +1416,27 @@
 
             selectBlock(stackIndex) {
                 if (!this.gameRunning) {
+                    this.showMessage('❌ 게임이 시작되지 않았습니다!', 'error');
                     console.log('게임이 시작되지 않았습니다!');
                     return false;
                 }
 
                 if (stackIndex < 0 || stackIndex >= this.stacks.length) {
+                    this.showMessage(`❌ 잘못된 스택: ${stackIndex + 1}`, 'error');
                     console.log(`잘못된 스택: ${stackIndex + 1}`);
                     return false;
                 }
 
                 const slotIndex = this.getAvailableQueueSlot();
                 if (slotIndex === -1) {
+                    this.showMessage('⚠️ 대기열이 가득 찼습니다!', 'warning');
                     console.log('대기열이 가득 찼습니다!');
                     return false;
                 }
 
                 const stack = this.stacks[stackIndex];
                 if (!stack || stack.length === 0) {
+                    this.showMessage(`❌ 스택 ${stackIndex + 1}이 비었습니다!`, 'error');
                     console.log(`스택 ${stackIndex + 1}이 비었습니다!`);
                     return false;
                 }
@@ -1126,6 +1452,7 @@
                 this.attackQueue[slotIndex] = queueBlock;
                 this.stacks[stackIndex].shift();
 
+                this.showMessage(`✅ ${topBlock.color} 블록 (${topBlock.number}) 추가`, 'success');
                 console.log(`블록(${topBlock.color}, ${topBlock.number}) 추가`);
                 this.updateQueue();
                 this.scheduleUpdate(() => {
@@ -1147,7 +1474,7 @@
                 this._queueScanTimer = setInterval(() => {
                     if (!this.gameRunning) return;
                     this.scanAndFireOnce();
-                }, 150);
+                }, 120); // 약간 빠르게 조정
             }
 
             stopQueueScanLoop() {
@@ -1205,7 +1532,7 @@
                     return;
                 }
 
-                const shotInterval = 1000 / 30;
+                const shotInterval = 1000 / 25; // 약간 느리게 조정하여 시각적 효과 개선
                 let shotsFired = 0;
                 let lastShotTime = performance.now();
 
@@ -1250,7 +1577,7 @@
                             }
                         }
                         if ('vibrate' in navigator) {
-                            navigator.vibrate(50);
+                            navigator.vibrate(30);
                         }
                     }
 
@@ -1268,6 +1595,7 @@
                         this.updateTargetLanes();
                         this.scheduleUpdate(() => {
                             this.showDamageText(laneIndex, shotsFired);
+                            this.showMessage(`🎯 매칭 성공! +${shotsFired}점`, 'success');
                             console.log(`매칭 성공! +${shotsFired}점`);
                             this.checkStageClear();
                         });
@@ -1291,7 +1619,6 @@
                 const slotRect = slotEl.getBoundingClientRect();
                 const startX = slotRect.left + slotRect.width / 2 + window.scrollX;
                 const startY = slotRect.top + slotRect.height / 2 + window.scrollY;
-                console.log(`Start position: x=${startX}, y=${startY}, slotRect=${JSON.stringify(slotRect)}`);
 
                 const laneEl = targetLanes.children[laneIndex];
                 if (!laneEl) {
@@ -1308,41 +1635,39 @@
                 const targetRect = bottomBlock.getBoundingClientRect();
                 const targetX = targetRect.left + targetRect.width / 2 + window.scrollX;
                 const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
-                console.log(`Target position: x=${targetX}, y=${targetY}, targetRect=${JSON.stringify(targetRect)}`);
 
                 const p = document.createElement('div');
                 p.className = 'shooting-particle';
-                const colorMap = {
-                    red: '#ff0000',
-                    blue: '#0000ff',
-                    green: '#00ff00',
-                    yellow: '#ffff00',
-                    purple: '#800080'
-                };
-                p.style.background = colorMap[color] || window.getComputedStyle(document.querySelector('.' + color))?.backgroundColor || '#ffffff';
+                const particleColors = this.colorParticleMap[color];
+                if (particleColors) {
+                    p.style.setProperty('--particle-color', particleColors.color);
+                    p.style.setProperty('--particle-color-dark', particleColors.dark);
+                } else {
+                    p.style.setProperty('--particle-color', '#ffffff');
+                    p.style.setProperty('--particle-color-dark', '#cccccc');
+                }
                 p.style.left = startX + 'px';
                 p.style.top = startY + 'px';
                 p.style.opacity = '1';
 
                 document.body.appendChild(p);
-                console.log(`Particle created, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
 
-                const duration = 300;
+                const duration = 250; // 약간 빨라짐
                 const start = performance.now();
 
-                function easeOutQuad(t) {
-                    return t * (2 - t);
+                function easeOutCubic(t) {
+                    return 1 - Math.pow(1 - t, 3);
                 }
 
                 const frame = (now) => {
                     const t = Math.min(1, (now - start) / duration);
-                    const eased = easeOutQuad(t);
-                    const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 1;
-                    const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 1;
+                    const eased = easeOutCubic(t);
+                    const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 2;
+                    const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 2;
                     p.style.left = curX + 'px';
                     p.style.top = curY + 'px';
-                    p.style.opacity = String(1 - eased);
-                    const scale = 1 - 0.35 * eased;
+                    p.style.opacity = String(1 - eased * 0.3);
+                    const scale = 1 - 0.4 * eased;
                     p.style.transform = `translate(-50%,-50%) scale(${scale})`;
 
                     if (t < 1) {
@@ -1351,18 +1676,17 @@
                         if (p.parentNode) {
                             p.parentNode.removeChild(p);
                             this._particleCount = Math.max(0, this._particleCount - 1);
-                            console.log(`Particle removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
                         }
                     }
                 };
 
                 requestAnimationFrame(frame.bind(this));
 
+                // 안전장치
                 setTimeout(() => {
                     if (p.parentNode) {
                         p.parentNode.removeChild(p);
                         this._particleCount = Math.max(0, this._particleCount - 1);
-                        console.log(`Particle force-removed, count: ${this._particleCount}, DOM particles: ${document.querySelectorAll('.shooting-particle').length}`);
                     }
                 }, duration + 100);
             }
@@ -1388,7 +1712,7 @@
 
                 setTimeout(() => {
                     if (d.parentNode) d.parentNode.removeChild(d);
-                }, 800);
+                }, 1000);
             }
 
             checkStageClear() {
@@ -1442,14 +1766,14 @@
 
                 const modal = document.createElement('div');
                 modal.className = 'modal';
-                modal.innerHTML = `<h2>스테이지 클리어!</h2><p>${message}</p>`;
+                modal.innerHTML = `<h2>🎉 스테이지 클리어!</h2><p>${message}</p>`;
 
                 const actions = document.createElement('div');
                 actions.className = 'modal-actions';
 
                 const retry = document.createElement('button');
                 retry.className = 'btn btn-retry';
-                retry.textContent = '그만하기';
+                retry.textContent = '🏠 그만하기';
                 retry.onclick = () => {
                     root.innerHTML = '';
                     this.resetGame();
@@ -1457,7 +1781,7 @@
 
                 const next = document.createElement('button');
                 next.className = 'btn btn-next';
-                next.textContent = '다음 스테이지';
+                next.textContent = '▶️ 다음 스테이지';
                 next.onclick = () => {
                     root.innerHTML = '';
                     this.advanceStage();
@@ -1470,7 +1794,7 @@
                 root.appendChild(backdrop);
 
                 if ('vibrate' in navigator) {
-                    navigator.vibrate([100, 50, 100]);
+                    navigator.vibrate([200, 100, 200]);
                 }
             }
 
@@ -1483,14 +1807,14 @@
 
                 const modal = document.createElement('div');
                 modal.className = 'modal';
-                modal.innerHTML = `<h2>게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
+                modal.innerHTML = `<h2>🎮 게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
 
                 const actions = document.createElement('div');
                 actions.className = 'modal-actions';
 
                 const retry = document.createElement('button');
                 retry.className = 'btn btn-retry';
-                retry.textContent = '다시 플레이하기';
+                retry.textContent = '🔄 다시 플레이하기';
                 retry.onclick = () => {
                     root.innerHTML = '';
                     this.resetGame();
@@ -1498,7 +1822,7 @@
 
                 const continueBtn = document.createElement('button');
                 continueBtn.className = 'btn btn-continue';
-                continueBtn.textContent = '광고 보고 이어하기';
+                continueBtn.textContent = '📺 광고 보고 이어하기';
                 continueBtn.onclick = () => {
                     root.innerHTML = '';
                     this.showAdModal();
@@ -1521,7 +1845,7 @@
                 const modal = document.createElement('div');
                 modal.className = 'modal';
                 modal.innerHTML = `
-                    <h2>광고 문의</h2>
+                    <h2>📺 광고 문의</h2>
                     <p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>
                 `;
 
@@ -1530,7 +1854,7 @@
 
                 const close = document.createElement('button');
                 close.className = 'btn btn-close';
-                close.textContent = '닫기';
+                close.textContent = '❌ 닫기';
                 close.onclick = () => {
                     root.innerHTML = '';
                     this.resetGame();
@@ -1574,6 +1898,7 @@
 
                 this.gameRunning = false;
                 this.stopQueueScanLoop();
+                this.showMessage('❌ 대기열이 가득 차 매칭 불가!', 'error');
                 this.checkTop10Score(this.score, (isTop10) => {
                     const message = isTop10 
                         ? `대기열이 가득 차 매칭 불가! 점수: ${this.score}\n축하합니다! 상위 10위 안에 들었습니다!`
@@ -1603,7 +1928,6 @@
                 this.updateTargetLanes();
                 this.updateStageProgress();
                 this.scheduleUpdate();
-                console.log(`Display updated, target-area: ${document.querySelector('.target-area')?.offsetWidth}px, queue-area: ${document.querySelector('.queue-area')?.offsetWidth}px, selection-area: ${document.querySelector('.selection-area')?.offsetWidth}px`);
             }
 
             updateTargetLanes() {
@@ -1624,7 +1948,6 @@
                     });
                     targetContainer.appendChild(laneEl);
                 });
-                console.log(`Target lanes updated, offsetLeft: ${targetContainer.offsetLeft}px, width: ${targetContainer.offsetWidth}px, lanes: ${this.targetLanes.length}`);
             }
 
             updateQueueUI() {
@@ -1639,7 +1962,6 @@
                     queueArea.appendChild(slot);
                 }
                 this.updateQueue();
-                console.log(`Queue UI initialized, offsetLeft: ${queueArea.offsetLeft}px, width: ${queueArea.offsetWidth}px, slots: ${config.queueSlots}`);
             }
 
             scheduleUpdate(callback = null) {
@@ -1680,7 +2002,6 @@
                     stacksContainer.appendChild(stackEl);
                 });
                 this.updateQueue();
-                console.log(`Stacks updated, offsetLeft: ${stacksContainer.offsetLeft}px, width: ${stacksContainer.offsetWidth}px, stacks: ${this.stacks.length}`);
             }
 
             updateQueue() {
@@ -1701,18 +2022,17 @@
                         }
                     }
                 }
-                console.log(`Queue updated, offsetLeft: ${queueArea.offsetLeft}px, width: ${queueArea.offsetWidth}px, slots rendered: ${queueArea.children.length}`);
             }
 
             handleBlockTouch(stackIndex) {
-                console.log(`Block touched, stack: ${stackIndex}, size: ${document.querySelector('.stack-block')?.offsetWidth}px`);
+                console.log(`Block touched, stack: ${stackIndex}`);
                 this.selectBlock(stackIndex);
             }
         }
 
         let game;
 
-        window.startIntroGame = function() {
+        function startIntroGame() {
             document.getElementById('intro').style.display = 'none';
             document.getElementById('gameContainer').style.display = 'flex';
             if (!game) {
@@ -1720,13 +2040,13 @@
                 game.initGame();
             }
             game.startGame();
-        };
+        }
 
-        window.resetGame = function() {
+        function resetGame() {
             if (game) game.resetGame();
-        };
+        }
 
-        window.showRankingModal = async function() {
+        async function showRankingModal() {
             console.log('Attempting to fetch rankings...');
             const root = document.getElementById('modalRoot');
             root.innerHTML = '';
@@ -1737,7 +2057,7 @@
             const modal = document.createElement('div');
             modal.className = 'modal ranking-modal';
             modal.innerHTML = `
-                <h2>랭킹</h2>
+                <h2>🏆 랭킹</h2>
                 <table class="ranking-table">
                     <thead>
                         <tr>
@@ -1747,7 +2067,7 @@
                         </tr>
                     </thead>
                     <tbody id="rankingTableBody">
-                        <tr><td colspan="3">랭킹을 불러오는 중...</td></tr>
+                        <tr><td colspan="3" class="loading">랭킹을 불러오는 중...</td></tr>
                     </tbody>
                 </table>
             `;
@@ -1757,7 +2077,7 @@
 
             const close = document.createElement('button');
             close.className = 'btn btn-close';
-            close.textContent = '닫기';
+            close.textContent = '❌ 닫기';
             close.onclick = () => {
                 root.innerHTML = '';
             };
@@ -1789,10 +2109,12 @@
                 } else {
                     scores.forEach((entry, index) => {
                         const row = document.createElement('tr');
+                        const rank = index + 1;
+                        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}위`;
                         row.innerHTML = `
-                            <td>${index + 1}</td>
+                            <td>${rankEmoji}</td>
                             <td>${escapeHtml(entry.name) || '익명'}</td>
-                            <td>${entry.score}</td>
+                            <td>${entry.score.toLocaleString()}</td>
                         `;
                         rankingTableBody.appendChild(row);
                     });
@@ -1800,11 +2122,11 @@
                 }
             } catch (error) {
                 console.error('Error fetching rankings:', error.message, error.code);
-                document.getElementById('rankingTableBody').innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 인터넷 연결 또는 데이터베이스 권한을 확인하세요.</td></tr>';
+                document.getElementById('rankingTableBody').innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 네트워크 연결을 확인해주세요.</td></tr>';
             }
-        };
+        }
 
-        window.saveScore = function(name, score) {
+        function saveScore(name, score) {
             try {
                 console.log(`Saving score: ${name}, ${score}`);
                 push(ref(db, 'scores'), {
@@ -1816,9 +2138,9 @@
             } catch (error) {
                 console.error('Error saving score:', error.message, error.code);
             }
-        };
+        }
 
-        window.showNameModal = function(score, showCongrats = false, callback = null) {
+        function showNameModal(score, showCongrats = false, callback = null) {
             console.log(`Showing name modal for score: ${score}, showCongrats: ${showCongrats}`);
             const modal = document.getElementById('nameModal');
             const input = document.getElementById('playerNameInput');
@@ -1831,6 +2153,19 @@
             input.value = '';
             input.focus();
 
+            // 입력 필드 스타일 개선
+            input.addEventListener('focus', () => {
+                input.style.borderColor = '#667eea';
+                input.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                input.style.background = 'rgba(255,255,255,1)';
+            });
+
+            input.addEventListener('blur', () => {
+                input.style.borderColor = '#dee2e6';
+                input.style.boxShadow = 'none';
+                input.style.background = 'rgba(255,255,255,0.9)';
+            });
+
             function onSave() {
                 const name = input.value.trim();
                 if (!name) {
@@ -1838,7 +2173,7 @@
                     input.focus();
                     return;
                 }
-                window.saveScore(name, score);
+                saveScore(name, score);
                 modal.style.display = 'none';
                 saveBtn.removeEventListener('click', onSave);
                 cancelBtn.removeEventListener('click', onCancel);
@@ -1858,7 +2193,7 @@
             input.onkeydown = function(e) {
                 if (e.key === 'Enter') onSave();
             };
-        };
+        }
 
         function escapeHtml(unsafe) {
             return unsafe
@@ -1869,11 +2204,18 @@
                 .replace(/'/g, "&#039;");
         }
 
-        window.onload = function() {
+        // 이벤트 리스너 등록
+        document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('intro').style.display = 'flex';
             document.getElementById('gameContainer').style.display = 'none';
+            
+            // 버튼 이벤트 연결
+            document.getElementById('startGameBtn').addEventListener('click', startIntroGame);
+            document.getElementById('showRankingBtn').addEventListener('click', showRankingModal);
+            document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+            
             console.log('Game loaded at', new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }));
-        };
+        });
     </script>
 </body>
 </html>
