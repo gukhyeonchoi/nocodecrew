@@ -380,7 +380,7 @@
             justify-content: center;
             gap: 12px;
             align-items: center;
-            height: 10vh;
+            height: 10vh; /* 기본 높이 줄임 */
             width: 100%;
             position: relative;
             z-index: 30;
@@ -434,7 +434,7 @@
         .selection-area {
             background: linear-gradient(135deg, #343a40 0%, #495057 100%);
             border-radius: 16px;
-            padding: 8px;
+            padding: 12px;
             color: white;
             height: 35vh;
             width: 100%;
@@ -456,11 +456,12 @@
             gap: 12px;
             justify-content: center;
             align-items: flex-start;
-            padding-top: 5px;
+            padding-top: 10px;
             height: calc(100% - 28px);
             max-height: 35vh;
             overflow: hidden;
             position: relative;
+            margin-top: 20px; /* 사각형을 아래로 이동 */
         }
 
         .stacks-container::before {
@@ -617,7 +618,7 @@
         .btn {
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 40px; /* 버튼 좌우 패딩 늘림 */
             border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
@@ -907,7 +908,7 @@
                 border-radius: 10px;
             }
             .queue-area {
-                height: 20vh;
+                height: 12vh; /* 모바일 높이 줄임 */
                 padding: 8px;
                 gap: 8px;
             }
@@ -923,6 +924,7 @@
             .stacks-container {
                 max-height: calc(38vh - 24px);
                 gap: 8px;
+                margin-top: 20px; /* 모바일에서도 사각형을 아래로 이동 */
             }
             .stack {
                 max-height: calc(38vh - 24px);
@@ -945,7 +947,7 @@
             }
             .btn {
                 font-size: 14px;
-                padding: 10px 20px;
+                padding: 10px 30px; /* 모바일 버튼 좌우 패딩 늘림 */
             }
             .message {
                 font-size: 14px;
@@ -999,7 +1001,7 @@
                 padding: 6px;
             }
             .queue-area {
-                height: 18vh;
+                height: 10vh; /* 작은 화면 높이 줄임 */
                 padding: 6px;
                 gap: 6px;
             }
@@ -1028,7 +1030,7 @@
             }
             .btn {
                 font-size: 12px;
-                padding: 8px 16px;
+                padding: 8px 24px; /* 작은 화면 버튼 좌우 패딩 늘림 */
             }
             .score-board {
                 font-size: 14px;
@@ -1080,6 +1082,9 @@
                 font-size: 12px;
                 padding: 8px;
             }
+            .stacks-container {
+                margin-top: 20px; /* 작은 화면에서도 사각형을 아래로 이동 */
+            }
         }
 
         @media (orientation: landscape) and (max-height: 500px) {
@@ -1100,7 +1105,7 @@
                 padding: 4px;
             }
             .queue-area {
-                height: 16vh;
+                height: 8vh; /* 가로 모드 높이 줄임 */
                 padding: 4px;
                 gap: 4px;
             }
@@ -1120,6 +1125,12 @@
             .score-input {
                 font-size: 10px;
                 padding: 6px;
+            }
+            .stacks-container {
+                margin-top: 20px; /* 가로 모드에서도 사각형을 아래로 이동 */
+            }
+            .btn {
+                padding: 8px 24px; /* 가로 모드 버튼 좌우 패딩 늘림 */
             }
         }
 
