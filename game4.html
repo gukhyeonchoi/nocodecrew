@@ -635,58 +635,58 @@
       playSound('bgm').then(() => sounds.bgm.pause()).catch(() => console.warn("BGM pause failed"));
     }
 
-    function startStage() {
-      console.log(`Starting stage ${stage}`);
-      hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
-      timeLeft = CONFIG.TIME_LIMITS[stage - 1];
-      comboCount = 0;
-      updateHearts();
-      updateStageIndicator();
-      updateTimer();
-      updateProgress();
-      scoreDiv.textContent = `점수: ${score}`;
-      showMessage(`스테이지 ${stage}`);
-      document.body.style.background = STAGE_THEMES[stage - 1].bg;
-      document.querySelectorAll('.card .back').forEach(back => {
+function startStage() {
+    console.log(`Starting stage ${stage}`);
+    hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
+    timeLeft = CONFIG.TIME_LIMITS[stage - 1];
+    comboCount = 0;
+    updateHearts();
+    updateStageIndicator();
+    updateTimer();
+    updateProgress();
+    scoreDiv.textContent = `점수: ${score}`;
+    showMessage(`스테이지 ${stage}`);
+    document.body.style.background = STAGE_THEMES[stage - 1].bg;
+    document.querySelectorAll('.card .back').forEach(back => {
         back.style.background = STAGE_THEMES[stage - 1].cardBack;
-      });
-      board.style.opacity = "0";
-      board.classList.remove('stage-5');
-      if (stage === 5) {
+    });
+    board.style.opacity = "0";
+    board.classList.remove('stage-5');
+    if (stage === 4 || stage === 5) {
         board.classList.add('stage-5');
         board.style.gridTemplateColumns = 'repeat(4, 1fr)';
         board.style.gridTemplateRows = 'repeat(4, 1fr)';
-      } else {
+    } else {
         board.style.gridTemplateColumns = 'repeat(3, 1fr)';
         board.style.gridTemplateRows = 'repeat(4, 1fr)';
-      }
-      setTimeout(() => {
+    }
+    setTimeout(() => {
         board.innerHTML = "";
         cards = generateCards();
         shuffle(cards);
         cards.forEach(img => {
-          const card = document.createElement("div");
-          card.classList.add("card");
-          const front = document.createElement("div");
-          front.classList.add("front");
-          front.textContent = img;
-          const back = document.createElement("div");
-          back.classList.add("back");
-          card.appendChild(front);
-          card.appendChild(back);
-          card.dataset.img = img;
-          card.addEventListener("click", flipCard);
-          card.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            flipCard.call(card);
-          });
-          board.appendChild(card);
+            const card = document.createElement("div");
+            card.classList.add("card");
+            const front = document.createElement("div");
+            front.classList.add("front");
+            front.textContent = img;
+            const back = document.createElement("div");
+            back.classList.add("back");
+            card.appendChild(front);
+            card.appendChild(back);
+            card.dataset.img = img;
+            card.addEventListener("click", flipCard);
+            card.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                flipCard.call(card);
+            });
+            board.appendChild(card);
         });
         board.style.opacity = "1";
         startTimer();
-      }, 500);
-      sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
-    }
+    }, 500);
+    sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
+}
 
     function updateHearts(change = 0) {
       hearts += change;
