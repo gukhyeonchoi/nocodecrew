@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사과 숫자 게임 - 7 스테이지</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .welcome-content {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: welcomeAppear 0.5s ease-out;
+        }
+
+        @keyframes welcomeAppear {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .welcome-title {
+            font-size: 3em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .game-rules {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .rule-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .rule-icon {
+            font-size: 1.2em;
+            margin-right: 10px;
+            margin-top: 2px;
+        }
+
+        .stage-preview {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .stage-box {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+        }
+
+        .stage-normal {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .stage-gravity {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+        }
+
+        .stage-infinite {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .start-button {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+            margin-bottom: 15px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .ranking-button {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .ranking-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            display: none;
+        }
+
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .stage-info {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .stage-info.gravity {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+        }
+
+        .stage-info.infinite {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .timer-bar-container {
+            background: #ecf0f1;
+            border-radius: 25px;
+            height: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timer-bar {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            height: 100%;
+            transition: width 0.1s ease;
+            border-radius: 25px;
+        }
+
+        .timer-bar.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .timer-bar.danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            animation: pulseTimer 0.5s infinite alternate;
+        }
+
+        @keyframes pulseTimer {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .timer-text {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        /* Apple emoji tile styling */
+        .tile {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .tile::before {
+            content: '🍎';
+            position: absolute;
+            font-size: 60px;
+            z-index: 1;
+            transition: all 0.3s ease;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .tile .number {
+            position: absolute;
+            z-index: 3;
+            font-size: 1.6em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            backdrop-filter: blur(2px);
+        }
+
+        .tile:hover {
+            transform: translateY(-3px) scale(1.05);
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3)) brightness(1.1);
+        }
+
+        .tile:hover::before {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .tile.selected {
+            transform: scale(1.1);
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4)) saturate(1.3);
+        }
+
+        .tile.selected::before {
+            transform: translate(-50%, -50%) scale(1.1);
+            filter: brightness(1.2) contrast(1.1);
+        }
+
+        .tile.selected .number {
+            background: rgba(255,165,0,0.5);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255,165,0,0.3);
+        }
+
+        .empty-slot {
+            width: 60px;
+            height: 60px;
+            background: transparent;
+            border-radius: 10px;
+        }
+
+        .drag-selection {
+            position: absolute;
+            background: rgba(52, 152, 219, 0.3);
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-next {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn-reset {
+            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-new {
+            background: linear-gradient(145deg, #8e44ad, #9b59b6);
+            color: white;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            min-height: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .message.success {
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 2px solid #27ae60;
+        }
+
+        .message.error {
+            background: #fadbd8;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+
+        .combo-effect {
+            animation: comboFlash 0.5s ease-in-out;
+        }
+
+        @keyframes comboFlash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); background: #f1c40f; }
+        }
+
+        .tile-remove {
+            animation: tileDisappear 0.5s ease-in-out forwards;
+        }
+
+        @keyframes tileDisappear {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0) rotate(180deg); opacity: 0; }
+        }
+
+        .tile.gravity-fall {
+            animation: gravityFall 0.8s ease-in-out;
+        }
+
+        @keyframes gravityFall {
+            0% { transform: translateY(-100px) scale(1); opacity: 0.8; }
+            50% { transform: translateY(0px) scale(1.05); opacity: 1; }
+            100% { transform: translateY(0px) scale(1); opacity: 1; }
+        }
+
+        .tile-spawn {
+            animation: tileSpawn 0.8s ease-out;
+        }
+
+        @keyframes tileSpawn {
+            0% { transform: translateY(-120px) scale(0.8); opacity: 0; }
+            50% { transform: translateY(-60px) scale(1.1); opacity: 0.8; }
+            100% { transform: translateY(0px) scale(1); opacity: 1; }
+        }
+
+        .time-bonus {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.5em;
+            font-weight: bold;
+            z-index: 1001;
+            animation: timeBonusShow 1s ease-out forwards;
+        }
+
+        @keyframes timeBonusShow {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        .stage-complete-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: popupAppear 0.3s ease-out;
+        }
+
+        @keyframes popupAppear {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-title {
+            font-size: 2em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .popup-score {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .coming-soon-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .coming-soon-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: popupAppear 0.3s ease-out;
+        }
+
+        .coming-soon-title {
+            font-size: 2em;
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .coming-soon-message {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .coming-soon-button {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .coming-soon-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-content { padding: 30px; }
+            .welcome-title { font-size: 2.5em; }
+            .stage-preview { flex-direction: column; }
+            .game-board { grid-template-columns: repeat(5, 1fr); }
+            .tile, .empty-slot { width: 50px; height: 50px; }
+            .tile .number { font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-content">
+            <div class="welcome-title">🍎 사과 숫자 게임</div>
+            <div class="welcome-subtitle">드래그로 숫자를 모아 10을 만드세요!</div>
+            
+            <div class="game-rules">
+                <div class="rule-item">
+                    <span class="rule-icon">🎯</span>
+                    <span><strong>목표:</strong> 드래그로 타일을 선택하여 숫자 합이 10이 되는 조합을 만드세요</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">⏰</span>
+                    <span><strong>시간:</strong> 각 스테이지는 30초 제한시간 (무한 모드는 60초 + 연장)</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">🔥</span>
+                    <span><strong>콤보:</strong> 연속 성공 시 점수 배수 증가</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">⚡</span>
+                    <span><strong>즉시 제거:</strong> 합이 10이면 바로 제거, 아니면 자동 취소</span>
+                </div>
+            </div>
+
+            <div class="stage-preview">
+                <div class="stage-box stage-normal">스테이지 1<br>일반 모드</div>
+                <div class="stage-box stage-gravity">스테이지 2<br>중력 모드</div>
+                <div class="stage-box stage-infinite">스테이지 3<br>무한 모드</div>
+            </div>
+
+            <button class="start-button" id="startButton">🎮 게임 시작</button>
+            <button class="ranking-button" id="rankingButton">🏆 랭킹 보기</button>
+        </div>
+    </div>
+
+    <div class="game-container" id="gameContainer">
+        <h1>🍎 사과 숫자 게임</h1>
+        <p class="subtitle">3스테이지 도전! 1단계는 일반 모드, 2단계는 중력 모드, 3단계는 무한 모드</p>
+        
+        <div class="stage-info" id="stageInfo">스테이지 1 - 일반 모드 (6x6)</div>
+        
+        <div class="timer-text" id="timerText">남은 시간: 30초</div>
+        <div class="timer-bar-container">
+            <div class="timer-bar" id="timerBar" style="width: 100%;"></div>
+        </div>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">총 점수</div>
+                <div class="score-value" id="totalScore">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">스테이지</div>
+                <div class="score-value" id="currentStage">1</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">남은 타일</div>
+                <div class="score-value" id="remainingTiles">36</div>
+            </div>
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+
+        <div class="controls">
+            <button class="btn btn-next" id="nextStageBtn" style="display: none;">다음 스테이지</button>
+            <button class="btn btn-reset" id="resetStageBtn">스테이지 재시작</button>
+            <button class="btn btn-new" id="newGameBtn">게임 재시작</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+<script>
+let gameInstance = null;
+
+function startGame() {
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('gameContainer').style.display = 'block';
+    gameInstance = new AppleNumberGame();
+}
+
+function showComingSoon() {
+    const popup = document.createElement('div');
+    popup.className = 'coming-soon-popup';
+    
+    popup.innerHTML = `
+        <div class="coming-soon-content">
+            <div class="coming-soon-title">🏆 랭킹 시스템</div>
+            <div class="coming-soon-message">
+                랭킹 기능은 현재 개발 중입니다!<br>
+                곧 멋진 랭킹 시스템으로 돌아올 예정이에요 🚀
+            </div>
+            <button class="coming-soon-button" onclick="this.closest('.coming-soon-popup').remove();">확인</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('startButton').addEventListener('click', startGame);
+    document.getElementById('rankingButton').addEventListener('click', showComingSoon);
+});
+
+class AppleNumberGame {
+    constructor() {
+        this.currentStage = 1;
+        this.totalScore = 0;
+        this.stageScores = {};
+        this.currentStageScore = 0;
+        this.board = [];
+        this.selectedTiles = [];
+        this.combo = 0;
+        this.isDragging = false;
+        this.dragStart = { x: 0, y: 0 };
+        this.dragSelection = null;
+        this.timeLeft = 30;
+        this.timerInterval = null;
+        this.stageActive = false;
+        this.isInfiniteMode = false;
+        this.infiniteScore = 0;
+        
+        this.stageConfig = {
+            1: { rows: 8, cols: 6, gravity: false, name: "일반 모드 (8x6)" },
+            2: { rows: 8, cols: 6, gravity: true, name: "중력 모드 (8x6)" },
+            3: { rows: 8, cols: 6, gravity: true, name: "무한 모드", isInfinite: true }
+        };
+        
+        this.init();
+    }
+
+    init() {
+        this.initElements();
+        this.bindEvents();
+        this.startStage(1);
+    }
+
+    initElements() {
+        this.gameBoard = document.getElementById('gameBoard');
+        this.stageInfo = document.getElementById('stageInfo');
+        this.timerText = document.getElementById('timerText');
+        this.timerBar = document.getElementById('timerBar');
+        this.totalScoreEl = document.getElementById('totalScore');
+        this.currentStageEl = document.getElementById('currentStage');
+        this.remainingTilesEl = document.getElementById('remainingTiles');
+        this.messageEl = document.getElementById('message');
+        this.nextStageBtn = document.getElementById('nextStageBtn');
+        this.resetStageBtn = document.getElementById('resetStageBtn');
+        this.newGameBtn = document.getElementById('newGameBtn');
+    }
+
+    bindEvents() {
+        this.nextStageBtn.addEventListener('click', () => this.nextStage());
+        this.resetStageBtn.addEventListener('click', () => this.resetStage());
+        this.newGameBtn.addEventListener('click', () => this.newGame());
+
+        this.gameBoard.addEventListener('mousedown', (e) => this.startDrag(e));
+        document.addEventListener('mousemove', (e) => this.moveDrag(e));
+        document.addEventListener('mouseup', (e) => this.endDrag(e));
+        
+        this.gameBoard.addEventListener('touchstart', (e) => {
+            this.startDrag(e.touches[0]);
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if(this.isDragging) { 
+                e.preventDefault(); 
+                this.moveDrag(e.touches[0]); 
+            }
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            this.endDrag(e.changedTouches[0]);
+        });
+    }
+
+    startDrag(e) {
+        if (!this.stageActive) return;
+        this.isDragging = true;
+        const rect = this.gameBoard.getBoundingClientRect();
+        this.dragStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        
+        if (this.dragSelection) this.dragSelection.remove();
+        
+        this.dragSelection = document.createElement('div');
+        this.dragSelection.className = 'drag-selection';
+        this.dragSelection.style.left = this.dragStart.x + 'px';
+        this.dragSelection.style.top = this.dragStart.y + 'px';
+        this.dragSelection.style.width = '1px';
+        this.dragSelection.style.height = '1px';
+        this.gameBoard.appendChild(this.dragSelection);
+        
+        e.preventDefault();
+    }
+
+    moveDrag(e) {
+        if (!this.isDragging || !this.dragSelection) return;
+        
+        const rect = this.gameBoard.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+        
+        const left = Math.min(this.dragStart.x, currentX);
+        const top = Math.min(this.dragStart.y, currentY);
+        const width = Math.abs(currentX - this.dragStart.x);
+        const height = Math.abs(currentY - this.dragStart.y);
+        
+        this.dragSelection.style.left = left + 'px';
+        this.dragSelection.style.top = top + 'px';
+        this.dragSelection.style.width = width + 'px';
+        this.dragSelection.style.height = height + 'px';
+        
+        this.highlightTiles(left, top, width, height);
+    }
+
+    endDrag(e) {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+        
+        if (this.dragSelection) {
+            const rect = this.dragSelection.getBoundingClientRect();
+            const boardRect = this.gameBoard.getBoundingClientRect();
+            
+            const left = rect.left - boardRect.left;
+            const top = rect.top - boardRect.top;
+            const width = rect.width;
+            const height = rect.height;
+            
+            if (width > 5 || height > 5) {
+                const selected = this.getSelectedTiles(left, top, width, height);
+                if (selected.length > 0) {
+                    const sum = selected.reduce((total, id) => {
+                        const tile = this.board.find(t => t.id === id);
+                        return total + (tile ? tile.value : 0);
+                    }, 0);
+                    
+                    if (sum === 10) {
+                        this.removeTiles(selected);
+                        this.combo++;
+                        const points = selected.length * 100 * this.combo;
+                        
+                        if (this.isInfiniteMode) {
+                            this.infiniteScore += points;
+                            this.timeLeft += 2;
+                            this.showTimeBonus('+2초');
+                        } else {
+                            this.currentStageScore += points;
+                        }
+                        
+                        this.showMessage(`성공! +${points}점 (${selected.length}개 타일, 콤보 x${this.combo})`, 'success');
+                        this.updateDisplay();
+                        this.gameBoard.classList.add('combo-effect');
+                        setTimeout(() => this.gameBoard.classList.remove('combo-effect'), 500);
+                    } else {
+                        this.combo = 0;
+                        this.showMessage(`합이 ${sum}입니다. 10이 되는 조합을 선택해주세요!`, 'error');
+                    }
+                }
+            }
+            
+            this.dragSelection.remove();
+            this.dragSelection = null;
+        }
+        this.updateSelectionDisplay();
+    }
+
+    highlightTiles(left, top, width, height) {
+        const tiles = this.gameBoard.querySelectorAll('.tile');
+        const tempSelected = [];
+        
+        tiles.forEach(tile => {
+            const tileRect = tile.getBoundingClientRect();
+            const boardRect = this.gameBoard.getBoundingClientRect();
+            const tileLeft = tileRect.left - boardRect.left;
+            const tileTop = tileRect.top - boardRect.top;
+            const tileRight = tileLeft + tileRect.width;
+            const tileBottom = tileTop + tileRect.height;
+            const selectionRight = left + width;
+            const selectionBottom = top + height;
+            
+            const isOverlapping = !(tileRight < left || tileLeft > selectionRight || tileBottom < top || tileTop > selectionBottom);
+            
+            if (isOverlapping) {
+                const tileId = parseInt(tile.dataset.id);
+                tempSelected.push(tileId);
+                tile.classList.add('selected');
+            } else if (!this.selectedTiles.includes(parseInt(tile.dataset.id))) {
+                tile.classList.remove('selected');
+            }
+        });
+        
+        const previewSum = tempSelected.reduce((sum, id) => {
+            const tile = this.board.find(t => t.id === id);
+            return sum + (tile ? tile.value : 0);
+        }, 0);
+        
+        const existingSum = this.selectedTiles.reduce((sum, id) => {
+            const tile = this.board.find(t => t.id === id);
+            return sum + (tile ? tile.value : 0);
+        }, 0);
+    }
+
+    getSelectedTiles(left, top, width, height) {
+        const tiles = this.gameBoard.querySelectorAll('.tile');
+        const selected = [];
+        
+        tiles.forEach(tile => {
+            const tileRect = tile.getBoundingClientRect();
+            const boardRect = this.gameBoard.getBoundingClientRect();
+            const tileLeft = tileRect.left - boardRect.left;
+            const tileTop = tileRect.top - boardRect.top;
+            const tileRight = tileLeft + tileRect.width;
+            const tileBottom = tileTop + tileRect.height;
+            const selectionRight = left + width;
+            const selectionBottom = top + height;
+            
+            const isOverlapping = !(tileRight < left || tileLeft > selectionRight || tileBottom < top || tileTop > selectionBottom);
+            
+            if (isOverlapping) {
+                const tileId = parseInt(tile.dataset.id);
+                if (!this.selectedTiles.includes(tileId)) {
+                    selected.push(tileId);
+                }
+            }
+        });
+        
+        return selected;
+    }
+
+    removeTiles(tilesToRemove) {
+        tilesToRemove.forEach(id => {
+            const tile = this.board.find(t => t.id === id);
+            if (tile) {
+                tile.active = false;
+                const el = document.querySelector(`[data-id="${id}"]`);
+                if (el) el.classList.add('tile-remove');
+            }
+        });
+        
+        setTimeout(() => {
+            if (this.hasGravity) this.applyGravity();
+            this.renderBoard();
+        }, 500);
+    }
+
+    applyGravity() {
+        for (let col = 0; col < this.boardSize.cols; col++) {
+            const column = [];
+            
+            // 해당 열의 모든 활성 타일을 아래서부터 위로 수집
+            for (let row = this.boardSize.rows - 1; row >= 0; row--) {
+                const index = row * this.boardSize.cols + col;
+                const tile = this.board[index];
+                if (tile && tile.active) {
+                    column.push({ 
+                        value: tile.value, 
+                        originalRow: row 
+                    });
+                }
+            }
+            
+            // 해당 열을 모두 비움
+            for (let row = 0; row < this.boardSize.rows; row++) {
+                const index = row * this.boardSize.cols + col;
+                this.board[index] = { id: index, value: 0, active: false };
+            }
+            
+            // 무한 모드에서는 상단에 새 타일 추가
+            if (this.isInfiniteMode) {
+                const emptySpaces = this.boardSize.rows - column.length;
+                // 상단에 새 타일들을 추가 (위에서부터 채움)
+                for (let i = 0; i < emptySpaces; i++) {
+                    column.push({ 
+                        value: Math.floor(Math.random() * 9) + 1, 
+                        originalRow: -1, // 새로 생성된 타일 표시
+                        isNew: true 
+                    });
+                }
+            }
+            
+            // 기존 타일들을 아래부터 배치하고, 새 타일들을 위에 배치
+            for (let i = 0; i < column.length; i++) {
+                const newRow = this.boardSize.rows - 1 - i;
+                const newIndex = newRow * this.boardSize.cols + col;
+                
+                this.board[newIndex] = {
+                    id: newIndex,
+                    value: column[i].value,
+                    active: true,
+                    justFell: column[i].originalRow !== newRow || column[i].isNew,
+                    isNewTile: column[i].isNew
+                };
+            }
+        }
+    }
+
+    newGame() {
+        this.currentStage = 1;
+        this.totalScore = 0;
+        this.stageScores = {};
+        this.currentStageScore = 0;
+        this.infiniteScore = 0;
+        this.isInfiniteMode = false;
+        this.startStage(1);
+        this.showMessage('새 게임이 시작되었습니다!', 'success');
+    }
+
+    nextStage() {
+        if (this.currentStage < 3) {
+            this.currentStage++;
+            this.startStage(this.currentStage);
+        }
+    }
+
+    resetStage() {
+        this.startStage(this.currentStage);
+        const msg = this.isInfiniteMode ? '무한 모드를 재시작했습니다.' : '스테이지를 재시작했습니다.';
+        this.showMessage(msg, 'success');
+    }
+
+    startStage(stage) {
+        this.currentStage = stage;
+        this.selectedTiles = [];
+        this.combo = 0;
+        this.stageActive = true;
+        
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        
+        const config = this.stageConfig[stage];
+        this.boardSize = { rows: config.rows, cols: config.cols };
+        this.hasGravity = config.gravity;
+        this.isInfiniteMode = config.isInfinite || false;
+        
+        if (this.isInfiniteMode) {
+            this.timeLeft = 60;
+            this.infiniteScore = 0;
+        } else {
+            this.timeLeft = 30;
+            this.currentStageScore = 0;
+        }
+        
+        this.stageInfo.textContent = `스테이지 ${stage} - ${config.name}`;
+        this.stageInfo.className = this.isInfiniteMode ? 'stage-info infinite' : (config.gravity ? 'stage-info gravity' : 'stage-info');
+        this.currentStageEl.textContent = this.isInfiniteMode ? '3 (∞)' : stage;
+        
+        this.generateBoard();
+        this.updateDisplay();
+        this.nextStageBtn.style.display = 'none';
+        
+        const msg = this.isInfiniteMode ? '스테이지 3 - 무한 모드! 타일 제거 시 +2초!' : '게임이 시작되었습니다!';
+        this.showMessage(msg, 'success');
+        
+        this.startTimer();
+    }
+
+    generateBoard() {
+        this.board = [];
+        const total = this.boardSize.rows * this.boardSize.cols;
+        for (let i = 0; i < total; i++) {
+            this.board.push({ id: i, value: Math.floor(Math.random() * 9) + 1, active: true });
+        }
+        this.renderBoard();
+    }
+
+    renderBoard() {
+        this.gameBoard.innerHTML = '';
+        this.gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize.cols}, 1fr)`;
+        
+        for (let i = 0; i < this.boardSize.rows * this.boardSize.cols; i++) {
+            const tile = this.board[i];
+            
+            if (tile && tile.active) {
+                const el = document.createElement('div');
+                el.className = 'tile';
+                el.innerHTML = `<span class="number">${tile.value}</span>`;
+                el.dataset.id = tile.id;
+                
+                if (tile.justFell && this.hasGravity) {
+                    el.classList.add(tile.isNewTile ? 'tile-spawn' : 'gravity-fall');
+                    tile.justFell = false;
+                    tile.isNewTile = false;
+                    setTimeout(() => el.classList.remove('gravity-fall', 'tile-spawn'), 800);
+                }
+                
+                el.addEventListener('click', () => this.toggleTile(tile.id));
+                this.gameBoard.appendChild(el);
+            } else {
+                const empty = document.createElement('div');
+                empty.className = 'empty-slot';
+                this.gameBoard.appendChild(empty);
+            }
+        }
+    }
+
+    toggleTile(id) {
+        const index = this.selectedTiles.indexOf(id);
+        if (index > -1) {
+            this.selectedTiles.splice(index, 1);
+        } else {
+            this.selectedTiles.push(id);
+        }
+        this.updateSelectionDisplay();
+    }
+
+    updateSelectionDisplay() {
+        document.querySelectorAll('.tile').forEach(tile => {
+            const id = parseInt(tile.dataset.id);
+            tile.classList.toggle('selected', this.selectedTiles.includes(id));
+        });
+    }
+
+    calculateSum() {
+        return this.selectedTiles.reduce((sum, id) => {
+            const tile = this.board.find(t => t.id === id);
+            return sum + (tile ? tile.value : 0);
+        }, 0);
+    }
+
+    startTimer() {
+        this.updateTimer();
+        this.timerInterval = setInterval(() => {
+            this.timeLeft--;
+            this.updateTimer();
+            if (this.timeLeft <= 0) this.endStage();
+        }, 1000);
+    }
+
+    updateTimer() {
+        this.timerText.textContent = `남은 시간: ${this.timeLeft}초`;
+        const maxTime = this.isInfiniteMode ? Math.max(60, this.timeLeft + 60) : 30;
+        const percentage = Math.min(100, (this.timeLeft / maxTime) * 100);
+        this.timerBar.style.width = percentage + '%';
+        
+        this.timerBar.className = 'timer-bar';
+        if (this.timeLeft <= 5) this.timerBar.classList.add('danger');
+        else if (this.timeLeft <= 10) this.timerBar.classList.add('warning');
+    }
+
+    showTimeBonus(text) {
+        const bonus = document.createElement('div');
+        bonus.className = 'time-bonus';
+        bonus.textContent = text;
+        document.body.appendChild(bonus);
+        setTimeout(() => bonus.remove(), 1000);
+    }
+
+    endStage() {
+        this.stageActive = false;
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        
+        if (this.isInfiniteMode) {
+            this.showInfinitePopup(this.infiniteScore);
+        } else {
+            const prevBest = this.stageScores[this.currentStage] || 0;
+            if (this.currentStageScore > prevBest) {
+                this.stageScores[this.currentStage] = this.currentStageScore;
+                this.calculateTotalScore();
+            }
+            this.showStagePopup(this.currentStageScore);
+        }
+    }
+
+    calculateTotalScore() {
+        this.totalScore = Object.values(this.stageScores).reduce((sum, score) => sum + score, 0);
+    }
+
+    showStagePopup(score) {
+        const popup = document.createElement('div');
+        popup.className = 'stage-complete-popup';
+        
+        const isLastStage = this.currentStage === 2;
+        const prevBest = this.stageScores[this.currentStage] || 0;
+        const isNewRecord = score > prevBest;
+        
+        let scoreText = `이번 점수: ${score.toLocaleString()}점`;
+        if (prevBest > 0 && !isNewRecord) {
+            scoreText += `<br>최고 기록: ${prevBest.toLocaleString()}점`;
+        } else if (isNewRecord && prevBest > 0) {
+            scoreText += `<br>🎉 신기록! (이전: ${prevBest.toLocaleString()}점)`;
+        }
+        scoreText += `<br>누적 총점: ${this.totalScore.toLocaleString()}점`;
+        
+        if (isLastStage) {
+            scoreText += `<br><br>🌟 다음은 최종 스테이지 3 - 무한 모드입니다!`;
+        }
+        
+        popup.innerHTML = `
+            <div class="popup-content">
+                <div class="popup-title">스테이지 ${this.currentStage} 완료!</div>
+                <div class="popup-score">${scoreText}</div>
+                <div class="popup-buttons">
+                    <button class="btn btn-next" onclick="this.closest('.stage-complete-popup').remove(); gameInstance.nextStage();">다음 스테이지</button>
+                    <button class="btn btn-reset" onclick="this.closest('.stage-complete-popup').remove(); gameInstance.resetStage();">다시 도전</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(popup);
+    }
+
+    showInfinitePopup(score) {
+        const popup = document.createElement('div');
+        popup.className = 'stage-complete-popup';
+        
+        popup.innerHTML = `
+            <div class="popup-content">
+                <div class="popup-title">🌟 스테이지 3 - 무한 모드 완료!</div>
+                <div class="popup-score">
+                    무한 모드 점수: ${score.toLocaleString()}점<br>
+                    최대 콤보: x${this.combo}<br><br>
+                    🎉 모든 스테이지를 완주하셨습니다!
+                </div>
+                <div class="popup-buttons">
+                    <button class="btn btn-reset" onclick="this.closest('.stage-complete-popup').remove(); location.reload();">메인으로 돌아가기</button>
+                    <button class="btn btn-new" onclick="this.closest('.stage-complete-popup').remove(); gameInstance.newGame();">새 게임</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(popup);
+    }
+
+    updateDisplay() {
+        const score = this.isInfiniteMode ? this.infiniteScore : this.totalScore;
+        this.totalScoreEl.textContent = score.toLocaleString();
+        
+        const activeTiles = this.board.filter(tile => tile.active).length;
+        this.remainingTilesEl.textContent = activeTiles;
+    }
+
+    showMessage(text, type) {
+        this.messageEl.textContent = text;
+        this.messageEl.className = `message ${type}`;
+        
+        if (text && type !== 'stage-complete') {
+            setTimeout(() => {
+                if (!this.messageEl.textContent.includes('클리어')) {
+                    this.messageEl.textContent = '';
+                    this.messageEl.className = 'message';
+                }
+            }, 3000);
+        }
+    }
+}
+</script>
+</body>
+</html>
