@@ -1727,46 +1727,64 @@
             }
 
             checkStageClear() {
-                const allCleared = this.targetLanes.every(lane => lane.length === 0);
-                if (allCleared) {
-                    this.clearedStages.add(this.stage);
-                    this.gameRunning = false;
-                    this.stopQueueScanLoop();
-                    if (this.stage < 15) {
-                        this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
-                    } else {
-                        this.checkTop10Score(this.score, (isTop10) => {
-                            const message = isTop10 
-                                ? `모든 스테이지 완료! 최종 점수: ${this.score}\n축하합니다! 상위 10위 안에 들었습니다!`
-                                : `모든 스테이지 완료! 최종 점수: ${this.score}\n아쉽게도 상위 10위에 들지 못했습니다.`;
-                            this.showGameOverModal(message, isTop10);
-                        });
-                    }
+    const allCleared = this.targetLanes.every(lane => lane.length === 0);
+    if (allCleared) {
+        this.clearedStages.add(this.stage);
+        this.gameRunning = false;
+        this.stopQueueScanLoop();
+        if (this.stage < 15) {
+            this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
+        } else {
+            this.checkTop10Score(this.score, (isTop10) => {
+                if (isTop10) {
+                    window.showNameModal(this.score, true, () => {
+                        showRankingModal();
+                    });
+                } else {
+                    const message = `🎮 모든 스테이지 완료! 최종 점수: ${this.score}\n상위 10위에 들기 위해 더 높은 점수를 노려보세요!`;
+                    this.showGameOverModal(message, isTop10);
                 }
-            }
+            });
+        }
+    }
+}
 
             async checkTop10Score(score, callback) {
-                try {
-                    const scoresRef = ref(db, 'scores');
-                    const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
-                    const snapshot = await get(topScoresQuery);
-                    const scores = [];
-                    snapshot.forEach(child => {
-                        scores.push(child.val().score);
-                    });
-                    scores.sort((a, b) => b - a);
-                    const minTop10Score = scores.length >= 10 ? scores[scores.length - 1] : 0;
-                    const isTop10 = score > minTop10Score || scores.length < 10;
-                    if (isTop10) {
-                        window.showNameModal(score, true, () => callback(isTop10));
-                    } else {
-                        callback(isTop10);
-                    }
-                } catch (error) {
-                    console.error('Error checking top 10 scores:', error.message);
-                    callback(false);
-                }
+    console.log('Starting checkTop10Score with score:', score);
+    try {
+        const scoresRef = ref(db, 'scores');
+        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+        const snapshot = await get(topScoresQuery);
+        console.log('Snapshot exists:', snapshot.exists());
+        const scores = [];
+        snapshot.forEach(child => {
+            const data = child.val();
+            console.log('Score data:', data);
+            if (typeof data.score === 'number') {
+                scores.push(data.score);
             }
+        });
+        scores.sort((a, b) => b - a);
+        console.log('Sorted scores:', scores);
+        let isTop10 = false;
+        if (scores.length < 10) {
+            isTop10 = score > 0;
+        } else {
+            const minTop10Score = scores[scores.length - 1] || 0;
+            isTop10 = score > minTop10Score || score === minTop10Score;
+        }
+        console.log(`checkTop10Score: score=${score}, minTop10Score=${scores.length >= 10 ? scores[scores.length - 1] : 0}, isTop10=${isTop10}, scores.length=${scores.length}`);
+        if (isTop10) {
+            window.showNameModal(score, true, () => callback(isTop10));
+        } else {
+            callback(isTop10);
+        }
+    } catch (error) {
+        console.error('Error checking top 10 scores:', error.message, error.stack);
+        this.showMessage('❌ 랭킹을 확인할 수 없습니다. 네트워크를 확인해주세요.', 'error');
+        callback(false);
+    }
+}
 
             showStageClearModal(message) {
                 const root = document.getElementById('modalRoot');
@@ -1892,31 +1910,29 @@
             }
 
             checkQueueStuck() {
-                if (this.getAvailableQueueSlot() !== -1) {
-                    this.scheduleUpdate();
-                    return;
-                }
-
-                for (let q of this.attackQueue) {
-                    if (!q || q.number <= 0) continue;
-                    for (let lane of this.targetLanes) {
-                        if (lane.length > 0 && lane[0].color === q.color) {
-                            this.scheduleUpdate();
-                            return;
-                        }
-                    }
-                }
-
-                this.gameRunning = false;
-                this.stopQueueScanLoop();
-                this.showMessage('❌ 대기열이 가득 차 매칭 불가!', 'error');
-                this.checkTop10Score(this.score, (isTop10) => {
-                    const message = isTop10 
-                        ? `대기열이 가득 차 매칭 불가! 점수: ${this.score}\n축하합니다! 상위 10위 안에 들었습니다!`
-                        : `대기열이 가득 차 매칭 불가! 점수: ${this.score}\n아쉽게도 상위 10위에 들지 못했습니다.`;
-                    this.showGameOverModal(message, isTop10);
-                });
+    if (this.getAvailableQueueSlot() !== -1) {
+        this.scheduleUpdate();
+        return;
+    }
+    for (let q of this.attackQueue) {
+        if (!q || q.number <= 0) continue;
+        for (let lane of this.targetLanes) {
+            if (lane.length > 0 && lane[0].color === q.color) {
+                this.scheduleUpdate();
+                return;
             }
+        }
+    }
+    this.gameRunning = false;
+    this.stopQueueScanLoop();
+    this.showMessage('❌ 대기열이 가득 차 매칭 불가!', 'error');
+    this.checkTop10Score(this.score, (isTop10) => {
+        const message = isTop10
+            ? `😓 대기열이 가득 차 매칭 불가! 점수: ${this.score}\n축하합니다! 상위 10위 안에 들었습니다! 이름을 입력해주세요.`
+            : `😓 대기열이 가득 차 매칭 불가! 점수: ${this.score}\n상위 10위에 들기 위해 더 높은 점수를 노려보세요!`;
+        this.showGameOverModal(message, isTop10);
+    });
+}
 
             updateStageProgress() {
                 const stageProgress = document.getElementById('stageProgress');
@@ -2137,74 +2153,68 @@
             }
         }
 
-        function saveScore(name, score) {
-            try {
-                console.log(`Saving score: ${name}, ${score}`);
-                push(ref(db, 'scores'), {
-                    name: name || '익명',
-                    score: score,
-                    timestamp: Date.now()
-                });
-                console.log('Score saved successfully');
-            } catch (error) {
-                console.error('Error saving score:', error.message, error.code);
-            }
-        }
+        async function saveScore(name, score) {
+    try {
+        console.log(`Saving score: ${name}, ${score}`);
+        await push(ref(db, 'scores'), {
+            name: name || '익명',
+            score: score,
+            timestamp: Date.now()
+        });
+        console.log('Score saved successfully');
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 동기화 대기
+    } catch (error) {
+        console.error('Error saving score:', error.message, error.code);
+    }
+}
 
         function showNameModal(score, showCongrats = false, callback = null) {
-            console.log(`Showing name modal for score: ${score}, showCongrats: ${showCongrats}`);
-            const modal = document.getElementById('nameModal');
-            const input = document.getElementById('playerNameInput');
-            const saveBtn = document.getElementById('saveNameBtn');
-            const cancelBtn = document.getElementById('cancelNameBtn');
-            const congratsMessage = document.getElementById('congratsMessage');
-
-            modal.style.display = 'flex';
-            congratsMessage.style.display = showCongrats ? 'block' : 'none';
-            input.value = '';
+    console.log(`Showing name modal for score: ${score}, showCongrats: ${showCongrats}`);
+    const modal = document.getElementById('nameModal');
+    const input = document.getElementById('playerNameInput');
+    const saveBtn = document.getElementById('saveNameBtn');
+    const cancelBtn = document.getElementById('cancelNameBtn');
+    const congratsMessage = document.getElementById('congratsMessage');
+    modal.style.display = 'flex';
+    congratsMessage.style.display = showCongrats ? 'block' : 'none';
+    input.value = '';
+    input.focus();
+    input.addEventListener('focus', () => {
+        input.style.borderColor = '#667eea';
+        input.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+        input.style.background = 'rgba(255,255,255,1)';
+    });
+    input.addEventListener('blur', () => {
+        input.style.borderColor = '#dee2e6';
+        input.style.boxShadow = 'none';
+        input.style.background = 'rgba(255,255,255,0.9)';
+    });
+    async function onSave() {
+        const name = input.value.trim();
+        if (!name) {
+            alert('이름을 입력하세요.');
             input.focus();
-
-            // 입력 필드 스타일 개선
-            input.addEventListener('focus', () => {
-                input.style.borderColor = '#667eea';
-                input.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-                input.style.background = 'rgba(255,255,255,1)';
-            });
-
-            input.addEventListener('blur', () => {
-                input.style.borderColor = '#dee2e6';
-                input.style.boxShadow = 'none';
-                input.style.background = 'rgba(255,255,255,0.9)';
-            });
-
-            function onSave() {
-                const name = input.value.trim();
-                if (!name) {
-                    alert('이름을 입력하세요.');
-                    input.focus();
-                    return;
-                }
-                saveScore(name, score);
-                modal.style.display = 'none';
-                saveBtn.removeEventListener('click', onSave);
-                cancelBtn.removeEventListener('click', onCancel);
-                if (callback) callback();
-            }
-
-            function onCancel() {
-                modal.style.display = 'none';
-                saveBtn.removeEventListener('click', onSave);
-                cancelBtn.removeEventListener('click', onCancel);
-                if (callback) callback();
-            }
-
-            saveBtn.addEventListener('click', onSave);
-            cancelBtn.addEventListener('click', onCancel);
-
-            input.onkeydown = function(e) {
-                if (e.key === 'Enter') onSave();
-            };
+            return;
         }
+        await saveScore(name, score);
+        modal.style.display = 'none';
+        saveBtn.removeEventListener('click', onSave);
+        cancelBtn.removeEventListener('click', onCancel);
+        showRankingModal();
+        if (callback) callback();
+    }
+    function onCancel() {
+        modal.style.display = 'none';
+        saveBtn.removeEventListener('click', onSave);
+        cancelBtn.removeEventListener('click', onCancel);
+        if (callback) callback();
+    }
+    saveBtn.addEventListener('click', onSave);
+    cancelBtn.addEventListener('click', onCancel);
+    input.onkeydown = function(e) {
+        if (e.key === 'Enter') onSave();
+    };
+}
 
         function escapeHtml(unsafe) {
             return unsafe
