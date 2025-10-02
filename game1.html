@@ -1238,20 +1238,19 @@
     <div id="modalRoot"></div>
 
     <div id="nameModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); align-items:center; justify-content:center; z-index:4000;">
-        <div style="background:linear-gradient(135deg, #fff 0%, #f8f9fa 100%); padding:24px; border-radius:16px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2);">
-            <h3 style="margin:8px 0 6px 0; font-size:20px; background:linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700;">🎉 이름을 입력하세요</h3>
-            <p id="congratsMessage" style="margin:12px 0; font-size:16px; color:#28a745; display:none; font-weight:600;">🏆 축하합니다! 상위 10위 안에 들었습니다!</p>
-            <input id="playerNameInput" placeholder="이름을 입력하세요 (예: 홍길동)" style="width:88%; padding:12px; border-radius:12px; border:2px solid #dee2e6; font-size:16px; font-family: 'Pretendard', Arial, sans-serif; background:rgba(255,255,255,0.9); transition:all 0.3s ease;">
-            <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
-                <button id="saveNameBtn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #667eea, #764ba2); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(102, 126, 234, 0.3);">✅ 확인</button>
-                <button id="cancelNameBtn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #6c757d, #545b62); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(108, 117, 125, 0.3);">❌ 취소</button>
-            </div>
+    <div style="background:linear-gradient(135deg, #fff 0%, #f8f9fa 100%); padding:24px; border-radius:16px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2);">
+        <h3 style="margin:8px 0 6px 0; font-size:20px; background:linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700;">🎉 이름을 입력하세요</h3>
+        <input id="playerNameInput" placeholder="이름을 입력하세요 (예: 홍길동)" style="width:88%; padding:12px; border-radius:12px; border:2px solid #dee2e6; font-size:16px; font-family: 'Pretendard', Arial, sans-serif; background:rgba(255,255,255,0.9); transition:all 0.3s ease;">
+        <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
+            <button id="saveNameBtn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #667eea, #764ba2); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(102, 126, 234, 0.3);">✅ 확인</button>
+            <button id="cancelNameBtn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #6c757d, #545b62); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(108, 117, 125, 0.3);">❌ 취소</button>
         </div>
     </div>
+</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
@@ -1529,92 +1528,82 @@
             }
 
             fireFromQueueIndex(queueIndex, laneIndex) {
-                const queued = this.attackQueue[queueIndex];
-                if (!queued || queued.number <= 0) {
-                    this.attackQueue[queueIndex] = null;
-                    this.scheduleUpdate();
-                    return;
-                }
-
-                const lane = this.targetLanes[laneIndex];
-                if (!lane || lane.length === 0) {
-                    this.attackQueue[queueIndex].isFiring = false;
-                    this.scheduleUpdate();
-                    return;
-                }
-
-                const shotInterval = 1000 / 27; // 약간 느리게 조정하여 시각적 효과 개선
-                let shotsFired = 0;
-                let lastShotTime = performance.now();
-
-                const fireLoop = (now) => {
-                    if (!this.gameRunning) {
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-                        this.scheduleUpdate();
-                        return;
-                    }
-
-                    const lane = this.targetLanes[laneIndex];
-                    if (!lane || lane.length === 0 || lane[0].color !== queued.color) {
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-                        this.scheduleUpdate();
-                        return;
-                    }
-
-                    const currentBottom = lane[0];
-                    if (!currentBottom) {
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-                        this.scheduleUpdate();
-                        return;
-                    }
-
-                    if (now - lastShotTime >= shotInterval) {
-                        if (this._particleCount < this._maxParticles) {
-                            this.createSingleParticle(queueIndex, laneIndex, queued.color);
-                            this._particleCount++;
-                        }
-                        currentBottom.number -= 1;
-                        queued.number -= 1;
-                        shotsFired++;
-                        lastShotTime = now;
-
-                        this.updateTargetLanes();
-                        this.updateQueue();
-
-                        if (currentBottom.number <= 0) {
-                            this.targetLanes[laneIndex].shift();
-                            if (lane.length > 0 && lane[0].color === queued.color) {
-                                this.updateTargetLanes();
-                            }
-                        }
-                        if ('vibrate' in navigator) {
-                            navigator.vibrate(30);
-                        }
-                    }
-
-                    if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
-                        requestAnimationFrame(fireLoop);
-                    } else {
-                        this.score += shotsFired;
-                        if (queued.number > 0) {
-                            console.log(`잔여값 ${queued.number} 남음`);
-                        } else {
-                            this.attackQueue[queueIndex] = null;
-                        }
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-
-                        this.updateTargetLanes();
-                        this.scheduleUpdate(() => {
-                            this.showDamageText(laneIndex, shotsFired);
-                            this.showMessage(`🎯 매칭 성공! +${shotsFired}점`, 'success');
-                            console.log(`매칭 성공! +${shotsFired}점`);
-                            this.checkStageClear();
-                        });
-                    }
-                };
-
-                requestAnimationFrame(fireLoop);
+    const queued = this.attackQueue[queueIndex];
+    if (!queued || queued.number <= 0) {
+        this.attackQueue[queueIndex] = null;
+        this.scheduleUpdate();
+        return;
+    }
+    const lane = this.targetLanes[laneIndex];
+    if (!lane || lane.length === 0) {
+        this.attackQueue[queueIndex].isFiring = false;
+        this.scheduleUpdate();
+        return;
+    }
+    const shotInterval = 1000 / 27;
+    let shotsFired = 0;
+    let lastShotTime = performance.now();
+    const fireLoop = (now) => {
+        if (!this.gameRunning) {
+            if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+            this.scheduleUpdate();
+            return;
+        }
+        const lane = this.targetLanes[laneIndex];
+        if (!lane || lane.length === 0 || lane[0].color !== queued.color) {
+            if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+            this.scheduleUpdate();
+            return;
+        }
+        const currentBottom = lane[0];
+        if (!currentBottom) {
+            if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+            this.scheduleUpdate();
+            return;
+        }
+        if (now - lastShotTime >= shotInterval) {
+            if (this._particleCount < this._maxParticles) {
+                this.createSingleParticle(queueIndex, laneIndex, queued.color);
+                this._particleCount++;
             }
+            currentBottom.number -= 1;
+            queued.number -= 1;
+            shotsFired++;
+            this.score += 1;
+            this.updateDisplay();
+            lastShotTime = now;
+            this.updateTargetLanes();
+            this.updateQueue();
+            if (currentBottom.number <= 0) {
+                this.targetLanes[laneIndex].shift();
+                if (lane.length > 0 && lane[0].color === queued.color) {
+                    this.updateTargetLanes();
+                }
+            }
+            if ('vibrate' in navigator) {
+                navigator.vibrate(30);
+            }
+        }
+        if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
+            requestAnimationFrame(fireLoop);
+        } else {
+            this.showDamageText(laneIndex, shotsFired);
+            this.showMessage(`🎯 매칭 성공! +${shotsFired}점`, 'success');
+            console.log(`매칭 성공! +${shotsFired}점`);
+            if (queued.number > 0) {
+                console.log(`잔여값 ${queued.number} 남음`);
+            } else {
+                this.attackQueue[queueIndex] = null;
+            }
+            if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+            this.updateTargetLanes();
+            this.scheduleUpdate(() => {
+                this.checkStageClear();
+            });
+        }
+    };
+    requestAnimationFrame(fireLoop);
+}
 
             createSingleParticle(queueIndex, laneIndex, color) {
                 const queueArea = document.getElementById('queueArea');
@@ -1735,56 +1724,15 @@
         if (this.stage < 15) {
             this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
         } else {
-            this.checkTop10Score(this.score, (isTop10) => {
-                if (isTop10) {
-                    window.showNameModal(this.score, true, () => {
-                        showRankingModal();
-                    });
-                } else {
-                    const message = `🎮 모든 스테이지 완료! 최종 점수: ${this.score}\n상위 10위에 들기 위해 더 높은 점수를 노려보세요!`;
-                    this.showGameOverModal(message, isTop10);
-                }
+            saveScore(playerName, this.score).then(() => {
+                this.showGameOverModal(`🎮 모든 스테이지 완료! 최종 점수: ${this.score}`);
+                showRankingModal(this.score);
             });
         }
     }
 }
 
-            async checkTop10Score(score, callback) {
-    console.log('Starting checkTop10Score with score:', score);
-    try {
-        const scoresRef = ref(db, 'scores');
-        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
-        const snapshot = await get(topScoresQuery);
-        console.log('Snapshot exists:', snapshot.exists());
-        const scores = [];
-        snapshot.forEach(child => {
-            const data = child.val();
-            console.log('Score data:', data);
-            if (typeof data.score === 'number') {
-                scores.push(data.score);
-            }
-        });
-        scores.sort((a, b) => b - a);
-        console.log('Sorted scores:', scores);
-        let isTop10 = false;
-        if (scores.length < 10) {
-            isTop10 = score > 0;
-        } else {
-            const minTop10Score = scores[scores.length - 1] || 0;
-            isTop10 = score > minTop10Score || score === minTop10Score;
-        }
-        console.log(`checkTop10Score: score=${score}, minTop10Score=${scores.length >= 10 ? scores[scores.length - 1] : 0}, isTop10=${isTop10}, scores.length=${scores.length}`);
-        if (isTop10) {
-            window.showNameModal(score, true, () => callback(isTop10));
-        } else {
-            callback(isTop10);
-        }
-    } catch (error) {
-        console.error('Error checking top 10 scores:', error.message, error.stack);
-        this.showMessage('❌ 랭킹을 확인할 수 없습니다. 네트워크를 확인해주세요.', 'error');
-        callback(false);
-    }
-}
+            
 
             showStageClearModal(message) {
                 const root = document.getElementById('modalRoot');
@@ -1827,42 +1775,36 @@
                 }
             }
 
-            showGameOverModal(message, isTop10) {
-                const root = document.getElementById('modalRoot');
-                root.innerHTML = '';
-
-                const backdrop = document.createElement('div');
-                backdrop.className = 'modal-backdrop';
-
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                modal.innerHTML = `<h2>🎮 게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
-
-                const actions = document.createElement('div');
-                actions.className = 'modal-actions';
-
-                const retry = document.createElement('button');
-                retry.className = 'btn btn-retry';
-                retry.textContent = '🔄재도전';
-                retry.onclick = () => {
-                    root.innerHTML = '';
-                    this.resetGame();
-                };
-
-                const continueBtn = document.createElement('button');
-                continueBtn.className = 'btn btn-continue';
-                continueBtn.textContent = '📺 광고 보고 이어하기';
-                continueBtn.onclick = () => {
-                    root.innerHTML = '';
-                    this.showAdModal();
-                };
-
-                actions.appendChild(retry);
-                actions.appendChild(continueBtn);
-                modal.appendChild(actions);
-                backdrop.appendChild(modal);
-                root.appendChild(backdrop);
-            }
+            showGameOverModal(message) {
+    const root = document.getElementById('modalRoot');
+    root.innerHTML = '';
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `<h2>🎮 게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions';
+    const retry = document.createElement('button');
+    retry.className = 'btn btn-retry';
+    retry.textContent = '🔄재도전';
+    retry.onclick = () => {
+        root.innerHTML = '';
+        this.resetGame();
+    };
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'btn btn-continue';
+    continueBtn.textContent = '📺 광고 보고 이어하기';
+    continueBtn.onclick = () => {
+        root.innerHTML = '';
+        this.showAdModal();
+    };
+    actions.appendChild(retry);
+    actions.appendChild(continueBtn);
+    modal.appendChild(actions);
+    backdrop.appendChild(modal);
+    root.appendChild(backdrop);
+}
 
             showAdModal() {
                 const root = document.getElementById('modalRoot');
@@ -1926,11 +1868,9 @@
     this.gameRunning = false;
     this.stopQueueScanLoop();
     this.showMessage('❌ 대기열이 가득 차 매칭 불가!', 'error');
-    this.checkTop10Score(this.score, (isTop10) => {
-        const message = isTop10
-            ? `😓 대기열이 가득 차 매칭 불가! 점수: ${this.score}\n축하합니다! 상위 10위 안에 들었습니다! 이름을 입력해주세요.`
-            : `😓 대기열이 가득 차 매칭 불가! 점수: ${this.score}\n상위 10위에 들기 위해 더 높은 점수를 노려보세요!`;
-        this.showGameOverModal(message, isTop10);
+    saveScore(playerName, this.score).then(() => {
+        this.showGameOverModal(`🎮 게임 오버! 최종 점수: ${this.score}`);
+        showRankingModal(this.score);
     });
 }
 
@@ -2060,124 +2000,132 @@
         let game;
 
         function startIntroGame() {
-            document.getElementById('intro').style.display = 'none';
-            document.getElementById('gameContainer').style.display = 'flex';
-            if (!game) {
-                game = new ColorShooterGame();
-                game.initGame();
-            }
-            game.startGame();
+    showNameModal(() => {
+        document.getElementById('intro').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'flex';
+        if (!game) {
+            game = new ColorShooterGame();
+            game.initGame();
         }
+        game.startGame();
+    });
+}
 
         function resetGame() {
             if (game) game.resetGame();
         }
 
-        async function showRankingModal() {
-            console.log('Attempting to fetch rankings...');
-            const root = document.getElementById('modalRoot');
-            root.innerHTML = '';
-
-            const backdrop = document.createElement('div');
-            backdrop.className = 'modal-backdrop';
-
-            const modal = document.createElement('div');
-            modal.className = 'modal ranking-modal';
-            modal.innerHTML = `
-                <h2>🏆 랭킹</h2>
-                <table class="ranking-table">
-                    <thead>
-                        <tr>
-                            <th>순위</th>
-                            <th>이름</th>
-                            <th>점수</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rankingTableBody">
-                        <tr><td colspan="3" class="loading">랭킹을 불러오는 중...</td></tr>
-                    </tbody>
-                </table>
-            `;
-
-            const actions = document.createElement('div');
-            actions.className = 'modal-actions';
-
-            const close = document.createElement('button');
-            close.className = 'btn btn-close';
-            close.textContent = '❌ 닫기';
-            close.onclick = () => {
-                root.innerHTML = '';
-            };
-
-            actions.appendChild(close);
-            modal.appendChild(actions);
-            backdrop.appendChild(modal);
-            root.appendChild(backdrop);
-
-            try {
-                console.log('Fetching scores from Firebase...');
-                const scoresRef = ref(db, 'scores');
-                const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
-                const snapshot = await get(topScoresQuery);
-                console.log('Snapshot received:', snapshot.exists());
-                const scores = [];
-                snapshot.forEach(child => {
-                    const data = child.val();
-                    scores.push({ name: data.name, score: data.score });
-                    console.log('Score entry:', data);
-                });
-
-                scores.sort((a, b) => b.score - a.score);
-                const rankingTableBody = document.getElementById('rankingTableBody');
-                rankingTableBody.innerHTML = '';
-                if (scores.length === 0) {
-                    rankingTableBody.innerHTML = '<tr><td colspan="3">아직 랭킹 데이터가 없습니다.</td></tr>';
-                    console.log('No ranking data found.');
-                } else {
-                    scores.forEach((entry, index) => {
-                        const row = document.createElement('tr');
-                        const rank = index + 1;
-                        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}위`;
-                        row.innerHTML = `
-                            <td>${rankEmoji}</td>
-                            <td>${escapeHtml(entry.name) || '익명'}</td>
-                            <td>${entry.score.toLocaleString()}</td>
-                        `;
-                        rankingTableBody.appendChild(row);
-                    });
-                    console.log(`Rankings loaded: ${scores.length} entries`);
-                }
-            } catch (error) {
-                console.error('Error fetching rankings:', error.message, error.code);
-                document.getElementById('rankingTableBody').innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 네트워크 연결을 확인해주세요.</td></tr>';
+        async function showRankingModal(currentScore = null) {
+    console.log('Attempting to fetch rankings...');
+    const root = document.getElementById('modalRoot');
+    root.innerHTML = '';
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const modal = document.createElement('div');
+    modal.className = 'modal ranking-modal';
+    modal.innerHTML = `
+        <h2>🏆 랭킹</h2>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>이름</th>
+                    <th>점수</th>
+                </tr>
+            </thead>
+            <tbody id="rankingTableBody">
+                <tr><td colspan="3" class="loading">랭킹을 불러오는 중...</td></tr>
+            </tbody>
+        </table>
+    `;
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions';
+    const close = document.createElement('button');
+    close.className = 'btn btn-close';
+    close.textContent = '❌ 닫기';
+    close.onclick = () => {
+        root.innerHTML = '';
+    };
+    actions.appendChild(close);
+    modal.appendChild(actions);
+    backdrop.appendChild(modal);
+    root.appendChild(backdrop);
+    try {
+        console.log('Fetching scores from Firebase...');
+        const scoresRef = ref(db, 'scores');
+        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+        const snapshot = await get(topScoresQuery);
+        console.log('Snapshot received:', snapshot.exists());
+        const scores = [];
+        snapshot.forEach(child => {
+            const data = child.val();
+            if (typeof data.score === 'number' && typeof data.name === 'string' && typeof data.timestamp === 'number') {
+                scores.push({ name: data.name, score: Number(data.score), timestamp: data.timestamp });
             }
+        });
+        scores.sort((a, b) => {
+            if (b.score === a.score) {
+                return b.timestamp - a.timestamp;
+            }
+            return b.score - a.score;
+        });
+        const rankingTableBody = document.getElementById('rankingTableBody');
+        rankingTableBody.innerHTML = '';
+        if (scores.length === 0) {
+            rankingTableBody.innerHTML = '<tr><td colspan="3">아직 랭킹 데이터가 없습니다.</td></tr>';
+            console.log('No ranking data found.');
+        } else {
+            scores.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                const rank = index + 1;
+                const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}위`;
+                const isCurrentScore = currentScore !== null && entry.score === currentScore && entry.name === playerName;
+                const nameCell = document.createElement('td');
+                nameCell.textContent = entry.name || '익명';
+                const rankCell = document.createElement('td');
+                rankCell.textContent = rankEmoji;
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = entry.score.toLocaleString();
+                row.appendChild(rankCell);
+                row.appendChild(nameCell);
+                row.appendChild(scoreCell);
+                if (isCurrentScore) {
+                    row.className = 'current-score';
+                }
+                rankingTableBody.appendChild(row);
+            });
+            console.log(`Rankings loaded: ${scores.length} entries`);
         }
+    } catch (error) {
+        console.error('Error fetching rankings:', error.message, error.code);
+        document.getElementById('rankingTableBody').innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 네트워크 연결을 확인해주세요.</td></tr>';
+    }
+}
 
         async function saveScore(name, score) {
     try {
-        console.log(`Saving score: ${name}, ${score}`);
+        console.log(`Saving score: name=${name}, score=${score}`);
         await push(ref(db, 'scores'), {
             name: name || '익명',
-            score: score,
+            score: Number(score),
             timestamp: Date.now()
         });
         console.log('Score saved successfully');
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 동기화 대기
+        await new Promise(resolve => setTimeout(resolve, 500));
     } catch (error) {
         console.error('Error saving score:', error.message, error.code);
     }
 }
 
-        function showNameModal(score, showCongrats = false, callback = null) {
-    console.log(`Showing name modal for score: ${score}, showCongrats: ${showCongrats}`);
+        let playerName = '';
+function showNameModal(callback = null) {
+    console.log('Showing name modal for game start');
     const modal = document.getElementById('nameModal');
     const input = document.getElementById('playerNameInput');
     const saveBtn = document.getElementById('saveNameBtn');
     const cancelBtn = document.getElementById('cancelNameBtn');
-    const congratsMessage = document.getElementById('congratsMessage');
     modal.style.display = 'flex';
-    congratsMessage.style.display = showCongrats ? 'block' : 'none';
-    input.value = '';
+    input.value = playerName || '';
     input.focus();
     input.addEventListener('focus', () => {
         input.style.borderColor = '#667eea';
@@ -2196,17 +2144,17 @@
             input.focus();
             return;
         }
-        await saveScore(name, score);
+        playerName = name;
         modal.style.display = 'none';
         saveBtn.removeEventListener('click', onSave);
         cancelBtn.removeEventListener('click', onCancel);
-        showRankingModal();
         if (callback) callback();
     }
     function onCancel() {
         modal.style.display = 'none';
         saveBtn.removeEventListener('click', onSave);
         cancelBtn.removeEventListener('click', onCancel);
+        playerName = '익명';
         if (callback) callback();
     }
     saveBtn.addEventListener('click', onSave);
