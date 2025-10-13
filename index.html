@@ -1,97 +1,447 @@
+html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
   <title>게임 선택 화면</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background: #f0f4f8;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e0e7ff, #dbeafe);
+      font-family: 'Pretendard', 'Segoe UI', Arial, sans-serif;
       min-height: 100vh;
       box-sizing: border-box;
       touch-action: manipulation;
+      overflow: hidden;
     }
     body {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       width: 100%;
       min-height: 100vh;
-      padding-top: 46px;
+      position: relative;
+      padding: 20px;
+    }
+    .cinematic-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      animation: fadeIn 2s forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    .bg-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/soft-wallpaper.png'), linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(180, 210, 255, 0.4));
+      background-size: 150px, cover;
+      animation: movePattern 15s linear infinite;
+      z-index: 1;
+      opacity: 0.6;
+    }
+    @keyframes movePattern {
+      0% { background-position: 0 0; }
+      100% { background-position: 150px 150px; }
+    }
+    .bg-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80vw;
+      height: 80vw;
+      max-width: 600px;
+      max-height: 600px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      animation: glowPulse 4s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+      50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
     }
     h1 {
-      color: #2368a4;
-      font-size: 2.1rem;
-      font-weight: 700;
-      margin-bottom: 14vw;
-      margin-top: 0;
+      color: #2563eb;
+      font-size: 2rem;
+      font-weight: 800;
       text-align: center;
-      letter-spacing: -.5px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1.5s ease-out forwards;
+      z-index: 10;
+      margin: 2vh 0;
     }
     .btn-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2.5vw;
+      width: 90vw;
+      max-width: 600px;
+      z-index: 10;
+      animation: fadeIn 1.5s ease-out 0.5s forwards;
+      opacity: 0;
+    }
+    .game-card {
       display: flex;
       flex-direction: column;
-      gap: 5vw;
-      width: 92vw;
-      max-width: 420px;
+      align-items: center;
+      background: linear-gradient(145deg, #ffffff, #e6efff);
+      border-radius: 12px;
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 2vw;
+      transition: transform 0.2s, box-shadow 0.2s;
+      aspect-ratio: 1 / 1.2;
+      position: relative;
+      overflow: hidden;
+    }
+    .game-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     }
     .game-btn {
-      padding: 5vw 0;
-      font-size: 1.25rem;
-      border-radius: 12px;
-      background: #67b5fa;
+      padding: 2.5vw 0;
+      font-size: 1rem;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #60a5fa, #93c5fd);
       color: #fff;
       border: none;
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 3px 14px rgba(70,120,170,0.15);
       width: 100%;
-      transition: background 0.19s;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
       outline: none;
     }
-    .game-btn:active, .game-btn:focus { background: #3694e9; }
-    .note {
-      margin-top: 9vw;
-      color: #636363;
-      font-size: 1rem;
+    .game-btn:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .game-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .game-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -100%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transform: translateY(-50%);
+      transition: left 0.4s;
+    }
+    .game-btn:active::after {
+      left: 100%;
+    }
+    .ranking-list {
+      margin-top: 1vw;
+      font-size: 0.8rem;
+      color: #2563eb;
+      text-align: left;
+      width: 100%;
+      padding: 0 1vw;
+    }
+    .ranking-list p {
+      margin: 0.3vw 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .ranking-list span.rank {
+      font-weight: 600;
+    }
+    .ranking-list span.score {
+      font-weight: 500;
+    }
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(45deg, #60a5fa, #a5b4fc);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: particle-float 4s linear infinite;
+      z-index: 5;
+      box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+    }
+    @keyframes particle-float {
+      0% { transform: translateY(100vh) scale(1); opacity: 0.7; }
+      100% { transform: translateY(-10vh) scale(0.3); opacity: 0; }
+    }
+    .bubble {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: bubble-rise var(--duration) ease-out infinite;
+      z-index: 3;
+    }
+    @keyframes bubble-rise {
+      0% { transform: translateY(100vh) scale(0.5); opacity: 0.5; }
+      50% { opacity: 0.8; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
       text-align: center;
-      word-break: keep-all;
-      padding: 3vw;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .modal-content input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #2563eb;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .modal-content button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #60a5fa, #93c5fd);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
     }
     @media (max-width: 600px) {
       h1 {
-        font-size: 1.23rem;
-        margin-bottom: 10vw;
+        font-size: 1.8rem;
       }
       .game-btn {
-        font-size: 1.09rem;
-        padding: 4vw 0;
+        font-size: 0.9rem;
+        padding: 2vw 0;
       }
       .btn-container {
-        gap: 3vw;
-        max-width: 96vw;
+        gap: 2vw;
+        max-width: 95vw;
       }
-      .note { font-size: 0.94rem; }
+      .bg-glow {
+        width: 90vw;
+        height: 90vw;
+      }
+      .bubble {
+        width: 15px;
+        height: 15px;
+      }
+      .ranking-list {
+        font-size: 0.7rem;
+      }
+      .game-card {
+        padding: 1.5vw;
+      }
+      .modal-content {
+        width: 90%;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="cinematic-container">
+    <div class="bg-pattern"></div>
+    <div class="bg-glow"></div>
+  </div>
   <h1>우리 팀 게임 선택</h1>
   <div class="btn-container">
-    <button class="game-btn" onclick="location.href='game1.html'">게임 1번</button>
-    <button class="game-btn" onclick="location.href='game2.html'">게임 2번</button>
-    <button class="game-btn" onclick="location.href='game3.html'">게임 3번</button>
-    <button class="game-btn" onclick="location.href='game4.html'">게임 4번</button>
-    <button class="game-btn" onclick="location.href='game5.html'">게임 5번</button>
-    <button class="game-btn" onclick="location.href='game6.html'">게임 6번</button>
+    <div class="game-card" data-game="game1">
+      <button class="game-btn" data-game="game1">게임 1번</button>
+      <div class="ranking-list" id="ranking-game1">
+        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+      </div>
+    </div>
+    <div class="game-card" data-game="game2">
+      <button class="game-btn" data-game="game2">게임 2번</button>
+      <div class="ranking-list" id="ranking-game2">
+        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+      </div>
+    </div>
+    <div class="game-card" data-game="game3">
+      <button class="game-btn" data-game="game3">게임 3번</button>
+      <div class="ranking-list" id="ranking-game3">
+        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+      </div>
+    </div>
+    <div class="game-card" data-game="game4">
+      <button class="game-btn" data-game="game4">게임 4번</button>
+      <div class="ranking-list" id="ranking-game4">
+        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+      </div>
+    </div>
+    <div class="game-card" data-game="game5">
+      <button class="game-btn" data-game="game5">게임 5번</button>
+      <div class="ranking-list" id="ranking-game5">
+        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+      </div>
+    </div>
   </div>
-  <div class="note">
-    각 게임은 <b>game1.html ~ game6.html</b> 파일로 올려주세요.<br>
-    버튼을 누르면 해당 게임이 열립니다.<br>
-    (처음엔 빈 화면일 수 있지만, 나중에 각자 필요한 게임 html을 넣으면 됩니다)
+  <div id="name-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>이름 입력</h2>
+      <input type="text" id="player-name-input" placeholder="이름을 입력하세요 (최대 20자)">
+      <div>
+        <button id="save-name-btn">확인</button>
+        <button id="cancel-name-btn">취소</button>
+      </div>
+    </div>
   </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getDatabase, ref, query, orderByChild, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    function loadRankings(gameId) {
+      const scoresRef = ref(db, 'scores/' + gameId);
+      const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(3));
+      onValue(topScoresQuery, (snapshot) => {
+        const rankings = [];
+        snapshot.forEach((child) => {
+          rankings.unshift(child.val());
+        });
+        const rankingDiv = document.getElementById('ranking-' + gameId);
+        rankingDiv.innerHTML = '';
+        rankings.forEach((entry, index) => {
+          rankingDiv.innerHTML += `<p><span class="rank">${index + 1}위</span> <span>${entry.name || '익명'}</span> <span class="score">${entry.score}</span></p>`;
+        });
+        if (rankings.length === 0) {
+          rankingDiv.innerHTML = '<p>랭킹 데이터 없음</p>';
+        }
+      });
+    }
+
+    ['game1', 'game2', 'game3', 'game4', 'game5'].forEach(loadRankings);
+
+    function showNameModal(gameId) {
+      const modal = document.getElementById('name-modal');
+      const input = document.getElementById('player-name-input');
+      const saveBtn = document.getElementById('save-name-btn');
+      const cancelBtn = document.getElementById('cancel-name-btn');
+      modal.style.display = 'flex';
+      input.value = localStorage.getItem('playerName') || '';
+      input.focus();
+
+      function onSave() {
+        const name = input.value.trim();
+        if (!name || name.length > 20) {
+          alert('이름은 1~20자여야 합니다.');
+          input.focus();
+          return;
+        }
+        localStorage.setItem('playerName', name);
+        modal.style.display = 'none';
+        cleanup();
+        location.href = `${gameId}.html`;
+      }
+
+      function onCancel() {
+        modal.style.display = 'none';
+        cleanup();
+      }
+
+      function onKeydown(e) {
+        if (e.key === 'Enter') onSave();
+      }
+
+      function cleanup() {
+        saveBtn.removeEventListener('click', onSave);
+        cancelBtn.removeEventListener('click', onCancel);
+        input.removeEventListener('keydown', onKeydown);
+      }
+
+      saveBtn.addEventListener('click', onSave);
+      cancelBtn.addEventListener('click', onCancel);
+      input.addEventListener('keydown', onKeydown);
+    }
+
+    document.querySelectorAll('.game-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const gameId = btn.getAttribute('data-game');
+        showNameModal(gameId);
+      });
+    });
+
+    function createParticles() {
+      for (let i = 0; i < 25; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particle.style.left = `${Math.random() * 100}vw`;
+        particle.style.animationDelay = `${Math.random() * 3}s`;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 4000);
+      }
+    }
+    function createBubbles() {
+      for (let i = 0; i < 15; i++) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        bubble.style.left = `${Math.random() * 100}vw`;
+        bubble.style.animationDelay = `${Math.random() * 2}s`;
+        const duration = Math.random() * 2 + 2;
+        bubble.style.setProperty('--duration', `${duration}s`);
+        document.body.appendChild(bubble);
+        setTimeout(() => bubble.remove(), duration * 1000);
+      }
+    }
+    createParticles();
+    createBubbles();
+    setInterval(createParticles, 1500);
+    setInterval(createBubbles, 2000);
+  </script>
 </body>
 </html>
