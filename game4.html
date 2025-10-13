@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1, minimum-scale=1">
   <title>메모리 카드 게임</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <style>
     body {
-      font-family: 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
       text-align: center;
       background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
       min-height: 100vh;
@@ -282,6 +283,7 @@
       color: white;
       z-index: 20;
       transition: opacity 0.5s;
+      backdrop-filter: blur(10px);
     }
 
     #start-screen.show, #game-over-screen.show {
@@ -294,8 +296,13 @@
       display: none;
     }
 
-    #start-screen h1 {
+    #start-screen h1, #game-over-screen h1 {
       animation: logo-bounce 1.5s infinite;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
     }
 
     @keyframes logo-bounce {
@@ -308,6 +315,7 @@
       margin: 15px;
       opacity: 0;
       animation: fade-in 1s forwards 0.5s;
+      color: #fff;
     }
 
     @keyframes fade-in {
@@ -317,8 +325,8 @@
     button {
       padding: 10px 25px;
       font-size: 16px;
-      font-family: 'Noto Sans KR', sans-serif;
-      background: #48bb78;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
       border: none;
       border-radius: 10px;
@@ -327,35 +335,40 @@
       position: relative;
       overflow: hidden;
       touch-action: manipulation;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     button::after {
       content: '';
       position: absolute;
       top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255,255,255,0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.3s, height 0.3s;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
     }
 
-    button:hover {
-      transform: scale(1.1);
-      background: #38a169;
+    button:hover::after {
+      left: 100%;
     }
 
-    button:active::after {
-      width: 150px;
-      height: 150px;
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button.btn-ranking {
+      background: linear-gradient(135deg, #6c757d, #545b62);
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
     }
 
     #score, #timer {
       font-size: 18px;
       margin: 5px;
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.8);
+      padding: 5px 10px;
+      border-radius: 8px;
     }
 
     #hint-button {
@@ -375,12 +388,164 @@
       border-radius: 5px;
       margin: 10px auto;
       overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     #progress-fill {
       height: 100%;
-      background: #48bb78;
+      background: linear-gradient(135deg, #28a745, #20c997);
       transition: width 0.3s;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+      padding: 24px;
+      border-radius: 16px;
+      width: 90vw;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      font-family: 'Pretendard', Arial, sans-serif;
+      border: 1px solid rgba(255,255,255,0.2);
+      animation: modalSlideIn 0.4s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: scale(0.8) translateY(-20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal h2 {
+      margin: 8px 0 16px 0;
+      font-size: 24px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    .modal p {
+      margin: 12px 0 20px 0;
+      font-size: 16px;
+      color: #495057;
+      line-height: 1.5;
+    }
+
+    .modal .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .ranking-modal {
+      width: 90vw;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 16px;
+      color: #333;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .ranking-table th,
+    .ranking-table td {
+      border: 1px solid #dee2e6;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .ranking-table th {
+      background: linear-gradient(135deg, #343a40, #495057);
+      color: white;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .ranking-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .ranking-table tr:nth-child(odd) {
+      background: #fff;
+    }
+
+    .ranking-table tr:hover {
+      background: #e3f2fd;
+      transform: scale(1.02);
+      transition: all 0.2s ease;
+    }
+
+    .score-input {
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #dee2e6;
+      border-radius: 12px;
+      margin: 12px 0;
+      width: 80%;
+      max-width: 300px;
+      font-family: 'Pretendard', Arial, sans-serif;
+      background: rgba(255,255,255,0.9);
+      transition: all 0.3s ease;
+    }
+
+    .score-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: rgba(255,255,255,1);
+    }
+
+    .loading {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     @media (max-width: 600px) {
@@ -433,11 +598,22 @@
         height: 20px;
         font-size: 12px;
       }
-      #hint-button {
-        top: 5px;
-        right: 5px;
-        padding: 6px 12px;
-        font-size: 12px;
+      .modal h2 {
+        font-size: 20px;
+      }
+      .modal p {
+        font-size: 14px;
+      }
+      .ranking-table {
+        font-size: 14px;
+      }
+      .ranking-table th,
+      .ranking-table td {
+        padding: 8px;
+      }
+      .score-input {
+        font-size: 14px;
+        padding: 10px;
       }
     }
   </style>
@@ -447,13 +623,26 @@
     <h1>메모리 카드 게임</h1>
     <p id="welcome-message">매칭 챌린지에 오신 것을 환영합니다!</p>
     <button id="start-button">게임 시작</button>
+    <button id="show-ranking-button" class="btn-ranking">🏆 랭킹 보기</button>
   </div>
   <div id="game-over-screen">
     <h1>게임 오버!</h1>
     <p id="final-score"></p>
     <p>다시 도전하여 최고 점수를 갱신하세요!</p>
     <button id="restart-button">다시 시작</button>
+    <button id="show-ranking-gameover" class="btn-ranking">🏆 랭킹 보기</button>
   </div>
+  <div id="name-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); align-items:center; justify-content:center; z-index:4000;">
+    <div style="background:linear-gradient(135deg, #fff 0%, #f8f9fa 100%); padding:24px; border-radius:16px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2);">
+      <h3 style="margin:8px 0 16px 0; font-size:20px; background:linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700;">🎉 이름을 입력하세요</h3>
+      <input id="player-name-input" placeholder="이름을 입력하세요 (예: 홍길동)" style="width:88%; padding:12px; border-radius:12px; border:2px solid #dee2e6; font-size:16px; font-family: 'Pretendard', Arial, sans-serif; background:rgba(255,255,255,0.9); transition:all 0.3s ease;">
+      <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
+        <button id="save-name-btn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #667eea, #764ba2); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(102, 126, 234, 0.3);">✅ 확인</button>
+        <button id="cancel-name-btn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #6c757d, #545b62); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(108, 117, 125, 0.3);">❌ 취소</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal-root"></div>
   <h1>메모리 카드 게임</h1>
   <div id="score">점수: 0</div>
   <div id="timer">남은 시간: 60초</div>
@@ -464,7 +653,31 @@
   <div id="message"></div>
   <button id="hint-button">힌트 (하트 2개)</button>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+      authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+      databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+      projectId: "gukhyeon-ce3ba",
+      storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+      messagingSenderId: "751956972723",
+      appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+      measurementId: "G-JBBLJNDGY1"
+    };
+
+    // Firebase 초기화
+    let app, db;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      console.log("Firebase initialized successfully");
+    } catch (error) {
+      console.error("Firebase initialization failed:", error);
+    }
+
     const CONFIG = {
       MAX_STAGES: 5,
       HEARTS_PER_STAGE: [10, 8, 6, 6, 5],
@@ -499,14 +712,15 @@
     ];
 
     const audioFiles = {
-      flip: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3',
-      match: 'https://freesound.org/data/previews/171/171671_2437358-lq.mp3',
-      mismatch: 'https://freesound.org/data/previews/415/415209_5121236-lq.mp3',
-      stageClear: 'https://cdn.freesound.org/previews/171/171670_2437358-lq.mp3',
-      gameOver: 'https://cdn.freesound.org/previews/171/171673_2437358-lq.mp3',
-      victory: 'https://freesound.org/data/previews/154/154976_2731063-lq.mp3',
-      hint: 'https://freesound.org/data/previews/522/522444_7741464-lq.mp3',
-      bgm: 'https://cdn.pixabay.com/download/audio/2023/05/01/audio_32a3c268a7.mp3?filename=soft-ambient-piano-11894.mp3'
+      flip: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      match: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      mismatch: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      stageClear: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      gameOver: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      victory: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      hint: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      bgm: 'https://www.bensound.com/bensound-music/bensound-ukulele.mp3',
+      button: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3'
     };
 
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -539,7 +753,7 @@
         }, { once: true });
         audio.addEventListener('error', (e) => {
           console.warn(`Error loading sound ${key}:`, e);
-          reject(e);
+          resolve(null); // 오류 시 null 반환
         }, { once: true });
         audio.load();
       });
@@ -557,32 +771,22 @@
 
     async function playSound(key) {
       if (!sounds[key]) {
-        console.warn(`Sound ${key} not found`);
+        console.warn(`Sound ${key} not found or failed to load`);
         return;
       }
       if (!isAudioUnlocked) {
         await unlockAudioContext();
       }
       try {
-        if (sounds[key].readyState < 2) {
-          console.log(`Sound ${key} not ready, waiting...`);
-          await new Promise((resolve) => {
-            sounds[key].oncanplaythrough = () => resolve();
-            sounds[key].onerror = () => resolve();
-            setTimeout(resolve, 1500);
-          });
-        }
         sounds[key].currentTime = 0;
-        const playPromise = sounds[key].play();
-        if (playPromise !== undefined) {
-          await playPromise;
-          console.log(`Playing sound: ${key}`);
-        }
+        await sounds[key].play();
+        console.log(`Playing sound: ${key}`);
       } catch (err) {
         console.warn(`Failed to play sound ${key}:`, err);
       }
     }
 
+    // DOM 요소 캐싱
     const board = document.getElementById("game-board");
     const heartsDiv = document.getElementById("hearts");
     const messageDiv = document.getElementById("message");
@@ -594,6 +798,9 @@
     const startButton = document.getElementById("start-button");
     const restartButton = document.getElementById("restart-button");
     const hintButton = document.getElementById("hint-button");
+    const showRankingButton = document.getElementById("show-ranking-button");
+    const showRankingGameOver = document.getElementById("show-ranking-gameover");
+    const modalRoot = document.getElementById("modal-root");
     const progressFill = document.getElementById("progress-fill");
 
     let stage = 1;
@@ -605,6 +812,7 @@
     let lockBoard = false;
     let cards = [];
     let comboCount = 0;
+    let playerName = '';
 
     function createBackgroundParticles() {
       for (let i = 0; i < 20; i++) {
@@ -618,167 +826,229 @@
     }
 
     function startGame() {
-      console.log("startGame function triggered");
+  console.log("startGame function triggered");
+  showNameModal(() => {
+    if (startScreen) {
       startScreen.classList.remove("show");
       startScreen.style.display = "none";
-      board.style.opacity = "0";
-      createBackgroundParticles();
-      setInterval(createBackgroundParticles, 3000);
-      startStage();
     }
+    if (board) {
+      board.innerHTML = "";
+      board.style.opacity = "0";
+      console.log("Board initialized for new game");
+    }
+    cards = [];
+    createBackgroundParticles();
+    setInterval(createBackgroundParticles, 3000);
+    requestAnimationFrame(() => {
+      startStage();
+      playSound('bgm').catch(err => console.warn("BGM play failed:", err));
+    });
+  });
+}
 
     function endGame() {
-      clearInterval(timerInterval);
-      gameOverScreen.querySelector("#final-score").textContent = `최종 점수: ${score}`;
-      gameOverScreen.classList.add("show");
-      gameOverScreen.style.display = "flex";
-      playSound('bgm').then(() => sounds.bgm.pause()).catch(() => console.warn("BGM pause failed"));
+      if (timerInterval) clearInterval(timerInterval);
+      if (gameOverScreen && scoreDiv) {
+        gameOverScreen.querySelector("#final-score").textContent = `최종 점수: ${score}`;
+        gameOverScreen.classList.add("show");
+        gameOverScreen.style.display = "flex";
+      }
+      playSound('bgm').then(() => {
+        if (sounds.bgm) sounds.bgm.pause();
+      }).catch(err => console.warn("BGM pause failed:", err));
+      if (db) {
+        saveScore(playerName, score).then(() => {
+          showRankingModal(score);
+        }).catch(err => console.error("Score save failed:", err));
+      }
     }
 
-function startStage() {
-    console.log(`Starting stage ${stage}`);
-    hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
-    timeLeft = CONFIG.TIME_LIMITS[stage - 1];
-    comboCount = 0;
-    updateHearts();
-    updateStageIndicator();
-    updateTimer();
-    updateProgress();
-    scoreDiv.textContent = `점수: ${score}`;
-    showMessage(`스테이지 ${stage}`);
-    document.body.style.background = STAGE_THEMES[stage - 1].bg;
-    document.querySelectorAll('.card .back').forEach(back => {
-        back.style.background = STAGE_THEMES[stage - 1].cardBack;
-    });
-    board.style.opacity = "0";
+    function startStage() {
+  console.log(`Starting stage ${stage}`);
+  hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
+  timeLeft = CONFIG.TIME_LIMITS[stage - 1];
+  comboCount = 0;
+  cards = [];
+  if (scoreDiv) scoreDiv.textContent = `점수: ${score}`;
+  updateHearts();
+  updateStageIndicator();
+  updateTimer();
+  updateProgress();
+  showMessage(`스테이지 ${stage}`);
+  if (document.body) document.body.style.background = STAGE_THEMES[stage - 1].bg;
+  if (board) {
     board.classList.remove('stage-5');
+    board.innerHTML = "";
+    board.style.opacity = "0";
     if (stage === 4 || stage === 5) {
-        board.classList.add('stage-5');
-        board.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        board.style.gridTemplateRows = 'repeat(4, 1fr)';
+      board.classList.add('stage-5');
+      board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+      board.style.gridTemplateRows = 'repeat(4, 1fr)';
     } else {
-        board.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        board.style.gridTemplateRows = 'repeat(4, 1fr)';
+      board.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      board.style.gridTemplateRows = 'repeat(4, 1fr)';
     }
-    setTimeout(() => {
-        board.innerHTML = "";
-        cards = generateCards();
-        shuffle(cards);
-        cards.forEach(img => {
-            const card = document.createElement("div");
-            card.classList.add("card");
-            const front = document.createElement("div");
-            front.classList.add("front");
-            front.textContent = img;
-            const back = document.createElement("div");
-            back.classList.add("back");
-            card.appendChild(front);
-            card.appendChild(back);
-            card.dataset.img = img;
-            card.addEventListener("click", flipCard);
-            card.addEventListener("touchstart", (e) => {
-                e.preventDefault();
-                flipCard.call(card);
-            });
-            board.appendChild(card);
-        });
-        board.style.opacity = "1";
-        startTimer();
-    }, 500);
-    sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
+  }
+  cards = generateCards();
+  console.log("Generated cards:", cards);
+  shuffle(cards);
+  cards.forEach((img, index) => {
+  const card = document.createElement("div");
+  card.classList.add("card");
+  const front = document.createElement("div");
+  front.classList.add("front");
+  const imgElement = document.createElement("img");
+  imgElement.src = img;
+  imgElement.style.width = "80%"; // 이미지 크기를 80%로 줄임
+  imgElement.style.height = "80%"; // 이미지 크기를 80%로 줄임
+  imgElement.style.objectFit = "contain"; // 이미지가 잘리지 않고 전체가 보이도록 설정
+  imgElement.style.borderRadius = "10px";
+  imgElement.style.margin = "auto"; // 이미지를 중앙에 정렬
+  front.appendChild(imgElement);
+  const back = document.createElement("div");
+  back.classList.add("back");
+  back.style.background = STAGE_THEMES[stage - 1].cardBack;
+  card.appendChild(front);
+  card.appendChild(back);
+  card.dataset.img = img;
+  card.addEventListener("click", flipCard);
+  card.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    flipCard.call(card);
+  });
+  if (board) {
+    board.appendChild(card);
+    console.log(`Card ${index + 1} appended: ${img}`);
+  }
+});
+  if (board) {
+    console.log(`Total cards appended: ${board.children.length}`);
+    requestAnimationFrame(() => {
+      board.style.opacity = "1";
+      console.log("Board opacity set to 1");
+    });
+  }
+  startTimer();
+  console.log("startTimer called");
+  if (sounds.bgm) sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
 }
 
     function updateHearts(change = 0) {
       hearts += change;
-      heartsDiv.textContent = "❤️".repeat(hearts);
+      if (heartsDiv) heartsDiv.textContent = "❤️".repeat(hearts);
       if (change > 0) {
-        heartsDiv.classList.add("gain");
-        setTimeout(() => heartsDiv.classList.remove("gain"), CONFIG.HEART_GAIN_ANIMATION);
+        if (heartsDiv) heartsDiv.classList.add("gain");
+        setTimeout(() => heartsDiv && heartsDiv.classList.remove("gain"), CONFIG.HEART_GAIN_ANIMATION);
       } else if (change < 0) {
-        heartsDiv.classList.add("lose");
-        setTimeout(() => heartsDiv.classList.remove("lose"), CONFIG.HEART_LOSE_ANIMATION);
+        if (heartsDiv) heartsDiv.classList.add("lose");
+        setTimeout(() => heartsDiv && heartsDiv.classList.remove("lose"), CONFIG.HEART_LOSE_ANIMATION);
       }
     }
 
     function updateScore(points) {
       score += points;
-      scoreDiv.textContent = `점수: ${score}`;
+      if (scoreDiv) scoreDiv.textContent = `점수: ${score}`;
       if (points > 0) {
-        scoreDiv.classList.add("gain");
-        setTimeout(() => scoreDiv.classList.remove("gain"), CONFIG.HEART_GAIN_ANIMATION);
+        if (scoreDiv) scoreDiv.classList.add("gain");
+        setTimeout(() => scoreDiv && scoreDiv.classList.remove("gain"), CONFIG.HEART_GAIN_ANIMATION);
       }
     }
 
     function updateTimer() {
-      timerDiv.textContent = `남은 시간: ${timeLeft}초`;
-      if (timeLeft <= 10) {
-        timerDiv.style.color = "#e53e3e";
-      } else {
-        timerDiv.style.color = "#2d3748";
+      if (timerDiv) {
+        timerDiv.textContent = `남은 시간: ${timeLeft}초`;
+        if (timeLeft <= 10) {
+          timerDiv.style.color = "#e53e3e";
+        } else {
+          timerDiv.style.color = "#2d3748";
+        }
       }
     }
 
-    function updateProgress() {
-      const matchedPairs = document.querySelectorAll(".matched").length / 2;
-      const totalPairs = CONFIG.CARD_PAIRS[stage - 1];
-      const progress = (matchedPairs / totalPairs) * 100;
-      progressFill.style.width = `${progress}%`;
-    }
+function updateProgress() {
+  const matchedPairs = document.querySelectorAll(".matched").length / 2;
+  const totalPairs = CONFIG.CARD_PAIRS[stage - 1];
+  const progress = (matchedPairs / totalPairs) * 100;
+  if (progressFill) {
+    progressFill.style.width = `${progress}%`;
+    console.log(`Progress updated: ${progress}%`);
+  }
+}
 
     function startTimer() {
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        updateTimer();
-        if (timeLeft <= 0) {
-          playSound('gameOver');
-          showMessage("시간 초과!");
-          endGame();
-        }
-      }, 1000);
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    console.log(`Timer tick: ${timeLeft} seconds remaining`);
+    if (timeLeft <= 0) {
+      playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
+      showMessage("시간 초과!");
+      endGame();
     }
+  }, 1000);
+  console.log("Timer started with interval ID:", timerInterval);
+}
 
     function showMessage(text) {
-      messageDiv.textContent = text;
-      messageDiv.classList.add("show");
-      setTimeout(() => {
-        messageDiv.classList.remove("show");
-      }, CONFIG.MESSAGE_DISPLAY_DURATION);
+      if (messageDiv) {
+        messageDiv.textContent = text;
+        messageDiv.classList.add("show");
+        setTimeout(() => {
+          if (messageDiv) messageDiv.classList.remove("show");
+        }, CONFIG.MESSAGE_DISPLAY_DURATION);
+      }
     }
 
     function updateStageIndicator() {
-      stageIndicator.innerHTML = '';
-      for (let i = 1; i <= CONFIG.MAX_STAGES; i++) {
-        if (i > 1) {
-          const connector = document.createTextNode('-');
-          stageIndicator.appendChild(connector);
+      if (stageIndicator) {
+        stageIndicator.innerHTML = '';
+        for (let i = 1; i <= CONFIG.MAX_STAGES; i++) {
+          if (i > 1) {
+            const connector = document.createTextNode('-');
+            stageIndicator.appendChild(connector);
+          }
+          const dot = document.createElement('div');
+          dot.classList.add('stage-dot');
+          dot.textContent = i;
+          if (i === stage) dot.classList.add('active');
+          stageIndicator.appendChild(dot);
         }
-        const dot = document.createElement('div');
-        dot.classList.add('stage-dot');
-        dot.textContent = i;
-        if (i === stage) dot.classList.add('active');
-        stageIndicator.appendChild(dot);
       }
     }
 
     function generateCards() {
-      const base = ["🍎","🍌","🍇","🍓","🍊","🍉","🍍","🥝","🍒","🍑","🍋","🍈"];
-      const pairCount = CONFIG.CARD_PAIRS[stage - 1];
-      const selected = base.slice(0, pairCount);
-      return [...selected, ...selected];
-    }
+  const base = [
+    "assets/card_1.png",
+    "assets/card_2.png",
+    "assets/card_3.png",
+    "assets/card_4.png",
+    "assets/card_5.png",
+    "assets/card_6.png",
+    "assets/card_7.png",
+    "assets/card_8.png",
+    "assets/card_9.png",
+    "assets/card_10.png",
+    "assets/card_11.png",
+    "assets/card_12.png"
+  ];
+  const pairCount = CONFIG.CARD_PAIRS[stage - 1];
+  const selected = base.slice(0, pairCount);
+  return [...selected, ...selected];
+}
 
     function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
     function flipCard() {
       if (lockBoard || this.classList.contains("flipped")) return;
       this.classList.add("flipped");
-      playSound('flip');
+      playSound('flip').catch(err => console.warn("Flip sound failed:", err));
       if (!firstCard) {
         firstCard = this;
       } else {
@@ -788,7 +1058,7 @@ function startStage() {
 
     function useHint() {
       if (hearts < CONFIG.HINT_COST || lockBoard) return;
-      playSound('hint');
+      playSound('hint').catch(err => console.warn("Hint sound failed:", err));
       updateHearts(-CONFIG.HINT_COST);
       const unmatched = cards.filter((_, i) => !board.children[i].classList.contains("matched"));
       if (unmatched.length < 2) return;
@@ -801,12 +1071,14 @@ function startStage() {
       const [index1, index2] = pairIndices;
       const card1 = board.children[cards.indexOf(pairValue)];
       const card2 = board.children[cards.lastIndexOf(pairValue)];
-      card1.classList.add("flipped");
-      card2.classList.add("flipped");
-      setTimeout(() => {
-        card1.classList.remove("flipped");
-        card2.classList.remove("flipped");
-      }, CONFIG.MESSAGE_DISPLAY_DURATION);
+      if (card1 && card2) {
+        card1.classList.add("flipped");
+        card2.classList.add("flipped");
+        setTimeout(() => {
+          if (card1) card1.classList.remove("flipped");
+          if (card2) card2.classList.remove("flipped");
+        }, CONFIG.MESSAGE_DISPLAY_DURATION);
+      }
     }
 
     function createMatchParticles(x, y) {
@@ -825,7 +1097,7 @@ function startStage() {
         particle.style.setProperty('--dy', `${dy}px`);
         particle.style.left = `${x}px`;
         particle.style.top = `${y}px`;
-        board.appendChild(particle);
+        if (board) board.appendChild(particle);
         setTimeout(() => particle.remove(), 700);
       }
     }
@@ -872,7 +1144,7 @@ function startStage() {
       if (firstCard.dataset.img === secondCard.dataset.img) {
         firstCard.classList.add("matched");
         secondCard.classList.add("matched");
-        playSound('match');
+        playSound('match').catch(err => console.warn("Match sound failed:", err));
         comboCount++;
         const points = comboCount >= CONFIG.COMBO_THRESHOLD ? Math.round(CONFIG.SCORE_PER_MATCH * CONFIG.COMBO_MULTIPLIER) : CONFIG.SCORE_PER_MATCH;
         updateHearts(+1);
@@ -887,33 +1159,33 @@ function startStage() {
         firstCard = null;
         lockBoard = false;
       } else {
-        playSound('mismatch');
+        playSound('mismatch').catch(err => console.warn("Mismatch sound failed:", err));
         firstCard.classList.add("wrong");
         secondCard.classList.add("wrong");
         comboCount = 0;
         updateHearts(-1);
         setTimeout(() => {
-          firstCard.classList.remove("flipped", "wrong");
-          secondCard.classList.remove("flipped", "wrong");
+          if (firstCard) firstCard.classList.remove("flipped", "wrong");
+          if (secondCard) secondCard.classList.remove("flipped", "wrong");
           firstCard = null;
           lockBoard = false;
         }, CONFIG.WRONG_CARD_RESET_DELAY);
         if (hearts <= 0) {
-          playSound('gameOver');
+          playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
           showMessage("게임 오버!");
           endGame();
           return;
         }
       }
       if (document.querySelectorAll(".matched").length === cards.length) {
-        clearInterval(timerInterval);
-        playSound('stageClear');
+        if (timerInterval) clearInterval(timerInterval);
+        playSound('stageClear').catch(err => console.warn("StageClear sound failed:", err));
         showMessage(`스테이지 ${stage} 클리어!`);
         createConfetti();
         if (stage === CONFIG.MAX_STAGES) {
           setTimeout(() => {
             showMessage("모든 스테이지 클리어! 승리!");
-            playSound('victory');
+            playSound('victory').catch(err => console.warn("Victory sound failed:", err));
             createVictoryParticles();
             endGame();
           }, CONFIG.STAGE_TRANSITION_DELAY);
@@ -924,91 +1196,317 @@ function startStage() {
       }
     }
 
-    const styleSheet = document.styleSheets[0];
-    styleSheet.insertRule(`.card { transition: transform ${CONFIG.CARD_FLIP_DURATION / 1000}s ease-in-out; }`, styleSheet.cssRules.length);
-    styleSheet.insertRule(`.card.wrong { animation: shake ${CONFIG.SHAKE_ANIMATION_DURATION / 1000}s; }`, styleSheet.cssRules.length);
-    styleSheet.insertRule(`.card.matched .front { animation: glow ${CONFIG.GLOW_ANIMATION_DURATION / 1000}s infinite alternate; }`, styleSheet.cssRules.length);
+    async function saveScore(name, score) {
+      if (!db) {
+        console.error("Database not initialized");
+        return;
+      }
+      try {
+        console.log(`Saving score: name=${name}, score=${score}`);
+        await push(ref(db, 'memory_card_scores'), {
+          name: name || '익명',
+          score: Number(score),
+          timestamp: Date.now()
+        });
+        console.log('Score saved successfully');
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error('Error saving score:', error.message, error.code);
+      }
+    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log("DOM fully loaded");
-      initializeSounds().then(() => {
-        console.log("All sounds initialized");
-      }).catch(err => {
-        console.warn("Sound initialization failed:", err);
-      });
-      startButton.removeEventListener('click', startGame);
-      startButton.addEventListener('click', () => {
-        console.log("Start button clicked");
-        unlockAudioContext().then(() => {
-          playSound('button').then(() => {
-            console.log("Button sound played, starting game");
-            startGame();
-            playSound('bgm');
-          }).catch(err => {
-            console.warn("Button sound failed, starting game anyway:", err);
-            startGame();
-            playSound('bgm');
+    async function showRankingModal(currentScore = null) {
+      if (!modalRoot) {
+        console.error("Modal root element not found");
+        return;
+      }
+      modalRoot.innerHTML = '';
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      const modal = document.createElement('div');
+      modal.className = 'modal ranking-modal';
+      modal.innerHTML = `
+        <h2>🏆 랭킹</h2>
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>순위</th>
+              <th>이름</th>
+              <th>점수</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-table-body">
+            <tr><td colspan="3" class="loading">랭킹을 불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      `;
+      const actions = document.createElement('div');
+      actions.className = 'modal-actions';
+      const close = document.createElement('button');
+      close.className = 'btn btn-close';
+      close.textContent = '❌ 닫기';
+      close.onclick = () => {
+        modalRoot.innerHTML = '';
+      };
+      actions.appendChild(close);
+      modal.appendChild(actions);
+      backdrop.appendChild(modal);
+      modalRoot.appendChild(backdrop);
+      if (!db) {
+        console.error("Database not initialized");
+        document.getElementById('ranking-table-body').innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 데이터베이스 초기화 오류.</td></tr>';
+        return;
+      }
+      try {
+        console.log('Fetching scores from Firebase...');
+        const scoresRef = ref(db, 'memory_card_scores');
+        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+        const snapshot = await get(topScoresQuery);
+        console.log('Snapshot received:', snapshot.exists());
+        const scores = [];
+        snapshot.forEach(child => {
+          const data = child.val();
+          if (data && typeof data.score === 'number' && typeof data.name === 'string' && typeof data.timestamp === 'number') {
+            scores.push({ name: data.name, score: Number(data.score), timestamp: data.timestamp });
+          }
+        });
+        scores.sort((a, b) => {
+          if (b.score === a.score) {
+            return b.timestamp - a.timestamp;
+          }
+          return b.score - a.score;
+        });
+        const rankingTableBody = document.getElementById('ranking-table-body');
+        if (rankingTableBody) {
+          rankingTableBody.innerHTML = '';
+          if (scores.length === 0) {
+            rankingTableBody.innerHTML = '<tr><td colspan="3">아직 랭킹 데이터가 없습니다.</td></tr>';
+            console.log('No ranking data found.');
+          } else {
+            scores.forEach((entry, index) => {
+              const row = document.createElement('tr');
+              const rank = index + 1;
+              const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}위`;
+              const isCurrentScore = currentScore !== null && entry.score === currentScore && entry.name === playerName;
+              const nameCell = document.createElement('td');
+              nameCell.textContent = entry.name || '익명';
+              const rankCell = document.createElement('td');
+              rankCell.textContent = rankEmoji;
+              const scoreCell = document.createElement('td');
+              scoreCell.textContent = entry.score.toLocaleString();
+              row.appendChild(rankCell);
+              row.appendChild(nameCell);
+              row.appendChild(scoreCell);
+              if (isCurrentScore) {
+                row.style.background = '#e3f2fd';
+              }
+              rankingTableBody.appendChild(row);
+            });
+            console.log(`Rankings loaded: ${scores.length} entries`);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching rankings:', error.message, error.code);
+        const rankingTableBody = document.getElementById('ranking-table-body');
+        if (rankingTableBody) {
+          rankingTableBody.innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 네트워크 연결을 확인해주세요.</td></tr>';
+        }
+      }
+    }
+
+    function showNameModal(callback = null) {
+  console.log('Showing name modal for game start');
+  const modal = document.getElementById('name-modal');
+  const input = document.getElementById('player-name-input');
+  const saveBtn = document.getElementById('save-name-btn');
+  const cancelBtn = document.getElementById('cancel-name-btn');
+  if (!modal || !input || !saveBtn || !cancelBtn) {
+    console.error("Name modal elements not found");
+    if (callback) callback();
+    return;
+  }
+  modal.style.display = 'flex';
+  input.value = playerName || '';
+  input.focus();
+  function onSave() {
+    const name = input.value.trim();
+    if (!name) {
+      alert('이름을 입력하세요.');
+      input.focus();
+      return;
+    }
+    playerName = name;
+    modal.style.display = 'none';
+    cleanup();
+    if (callback) callback();
+  }
+  function onCancel() {
+    modal.style.display = 'none';
+    playerName = '익명';
+    cleanup();
+    if (callback) callback();
+  }
+  function onKeydown(e) {
+    if (e.key === 'Enter') onSave();
+  }
+  function cleanup() {
+    saveBtn.removeEventListener('click', onSave);
+    cancelBtn.removeEventListener('click', onCancel);
+    input.removeEventListener('keydown', onKeydown);
+  }
+  saveBtn.removeEventListener('click', onSave);
+  cancelBtn.removeEventListener('click', onCancel);
+  input.removeEventListener('keydown', onKeydown);
+  saveBtn.addEventListener('click', onSave);
+  cancelBtn.addEventListener('click', onCancel);
+  input.addEventListener('keydown', onKeydown);
+  console.log("Name modal event listeners added");
+}
+
+    function escapeHtml(unsafe) {
+      if (typeof unsafe !== 'string') return '';
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function initializeEventListeners() {
+      if (startButton) {
+        startButton.removeEventListener('click', startGame);
+        startButton.addEventListener('click', () => {
+          console.log("Start button clicked");
+          unlockAudioContext().then(() => {
+            playSound('button').then(() => {
+              console.log("Button sound played, prompting for name");
+              startGame();
+            }).catch(err => {
+              console.warn("Button sound failed, prompting for name anyway:", err);
+              startGame();
+            });
           });
         });
-      });
-      startButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        console.log("Start button touched");
-        unlockAudioContext().then(() => {
-          playSound('button').then(() => {
-            console.log("Button sound played, starting game");
-            startGame();
-            playSound('bgm');
-          }).catch(err => {
-            console.warn("Button sound failed, starting game anyway:", err);
-            startGame();
-            playSound('bgm');
-          });
+        startButton.removeEventListener('touchstart', handleTouchStart);
+        startButton.addEventListener('touchstart', handleTouchStart);
+      }
+      if (restartButton) {
+        restartButton.removeEventListener('click', restartGame);
+        restartButton.addEventListener('click', restartGame);
+        restartButton.removeEventListener('touchstart', handleRestartTouch);
+        restartButton.addEventListener('touchstart', handleRestartTouch);
+      }
+      if (hintButton) {
+        hintButton.removeEventListener('click', handleHint);
+        hintButton.addEventListener('click', handleHint);
+        hintButton.removeEventListener('touchstart', handleHintTouch);
+        hintButton.addEventListener('touchstart', handleHintTouch);
+      }
+      if (showRankingButton) {
+        showRankingButton.removeEventListener('click', handleShowRanking);
+        showRankingButton.addEventListener('click', handleShowRanking);
+      }
+      if (showRankingGameOver) {
+        showRankingGameOver.removeEventListener('click', handleShowRankingGameOver);
+        showRankingGameOver.addEventListener('click', handleShowRankingGameOver);
+      }
+    }
+
+    function handleTouchStart(e) {
+      e.preventDefault();
+      console.log("Start button touched");
+      unlockAudioContext().then(() => {
+        playSound('button').then(() => {
+          console.log("Button sound played, prompting for name");
+          startGame();
+        }).catch(err => {
+          console.warn("Button sound failed, prompting for name anyway:", err);
+          startGame();
         });
       });
-      restartButton.removeEventListener('click', restartGame);
-      restartButton.addEventListener('click', restartGame);
-      restartButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        restartGame();
-      });
-      hintButton.removeEventListener('click', useHint);
-      hintButton.addEventListener('click', () => {
-        console.log("Hint button clicked");
-        playSound('button');
-        useHint();
-      });
-      hintButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        console.log("Hint button touched");
-        playSound('button');
-        useHint();
-      });
-    });
+    }
+
+    function handleRestartTouch(e) {
+      e.preventDefault();
+      restartGame();
+    }
+
+    function handleHint(e) {
+      console.log("Hint button clicked");
+      playSound('button').catch(err => console.warn("Button sound failed:", err));
+      useHint();
+    }
+
+    function handleHintTouch(e) {
+      e.preventDefault();
+      console.log("Hint button touched");
+      playSound('button').catch(err => console.warn("Button sound failed:", err));
+      useHint();
+    }
+
+    function handleShowRanking() {
+      console.log("Show ranking button clicked");
+      showRankingModal();
+    }
+
+    function handleShowRankingGameOver() {
+      console.log("Show ranking button (game over) clicked");
+      showRankingModal(score);
+    }
 
     function restartGame() {
       console.log("Restart button clicked");
       unlockAudioContext().then(() => {
         playSound('button').then(() => {
-          gameOverScreen.classList.remove("show");
-          gameOverScreen.style.display = "none";
+          if (gameOverScreen) {
+            gameOverScreen.classList.remove("show");
+            gameOverScreen.style.display = "none";
+          }
           score = 0;
           stage = 1;
-          playSound('bgm').then(() => sounds.bgm.currentTime = 0).catch(() => console.warn("BGM reset failed"));
-          startStage();
+          playSound('bgm').then(() => {
+            if (sounds.bgm) sounds.bgm.currentTime = 0;
+          }).catch(err => console.warn("BGM reset failed:", err));
+          showNameModal(() => {
+            startStage();
+          });
         }).catch(err => {
           console.warn("Button sound failed:", err);
-          gameOverScreen.classList.remove("show");
-          gameOverScreen.style.display = "none";
+          if (gameOverScreen) {
+            gameOverScreen.classList.remove("show");
+            gameOverScreen.style.display = "none";
+          }
           score = 0;
           stage = 1;
-          startStage();
+          showNameModal(() => {
+            startStage();
+          });
         });
       });
     }
 
-    board.style.opacity = "0";
-    console.log("Game initialized");
+    document.addEventListener('DOMContentLoaded', () => {
+  console.log("DOM fully loaded");
+  initializeSounds().then(() => {
+    console.log("All sounds initialized");
+  }).catch(err => {
+    console.warn("Sound initialization failed:", err);
+  });
+  initializeEventListeners();
+  if (board) board.style.opacity = "0";
+  try {
+    const styleSheet = document.createElement('style');
+    document.head.appendChild(styleSheet);
+    styleSheet.sheet.insertRule(`.card { transition: transform ${CONFIG.CARD_FLIP_DURATION / 1000}s ease-in-out; }`, 0);
+    styleSheet.sheet.insertRule(`.card.wrong { animation: shake ${CONFIG.SHAKE_ANIMATION_DURATION / 1000}s; }`, 1);
+    styleSheet.sheet.insertRule(`.card.matched .front { animation: glow ${CONFIG.GLOW_ANIMATION_DURATION / 1000}s infinite alternate; }`, 2);
+  } catch (err) {
+    console.error("Failed to insert stylesheet rules:", err);
+  }
+  console.log("Game initialized");
+});
+
   </script>
 </body>
 </html>
