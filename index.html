@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -7,15 +6,16 @@ html
   <title>게임 선택 화면</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <style>
+    * {
+      box-sizing: border-box;
+    }
     html, body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #e0e7ff, #dbeafe);
+      background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
       font-family: 'Pretendard', 'Segoe UI', Arial, sans-serif;
       min-height: 100vh;
-      box-sizing: border-box;
-      touch-action: manipulation;
-      overflow: hidden;
+      overflow-x: hidden;
     }
     body {
       display: flex;
@@ -27,421 +27,797 @@ html
       position: relative;
       padding: 20px;
     }
-    .cinematic-container {
-      position: absolute;
+
+    /* 부드러운 배경 그라데이션 애니메이션 */
+    .animated-bg {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0;
-      animation: fadeIn 2s forwards;
+      z-index: 0;
+      background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
+      animation: bgShift 15s ease infinite;
     }
-    @keyframes fadeIn {
-      to { opacity: 1; }
+
+    @keyframes bgShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
-    .bg-pattern {
+
+    /* 떠다니는 구름 */
+    .cloud {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('https://www.transparenttextures.com/patterns/soft-wallpaper.png'), linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(180, 210, 255, 0.4));
-      background-size: 150px, cover;
-      animation: movePattern 15s linear infinite;
-      z-index: 1;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 100px;
       opacity: 0.6;
+      animation: cloudFloat var(--duration) ease-in-out infinite;
+      box-shadow: 0 5px 30px rgba(147, 197, 253, 0.3);
     }
-    @keyframes movePattern {
-      0% { background-position: 0 0; }
-      100% { background-position: 150px 150px; }
-    }
-    .bg-glow {
+
+    .cloud::before,
+    .cloud::after {
+      content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 80vw;
-      height: 80vw;
-      max-width: 600px;
-      max-height: 600px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      animation: glowPulse 4s ease-in-out infinite;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 100px;
     }
-    @keyframes glowPulse {
-      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
-      50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+
+    .cloud::before {
+      width: 50px;
+      height: 50px;
+      top: -25px;
+      left: 10px;
     }
+
+    .cloud::after {
+      width: 60px;
+      height: 60px;
+      top: -30px;
+      right: 10px;
+    }
+
+    @keyframes cloudFloat {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-20px) translateX(30px); }
+    }
+
+    /* 반짝이는 별 */
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, #93c5fd, transparent);
+      border-radius: 50%;
+      animation: sparkleAnim var(--duration) ease-in-out infinite;
+      opacity: 0;
+      box-shadow: 0 0 10px rgba(147, 197, 253, 0.8);
+    }
+
+    @keyframes sparkleAnim {
+      0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
+    }
+
+    /* 떠다니는 원 */
+    .floating-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid rgba(147, 197, 253, 0.3);
+      animation: floatCircle var(--duration) ease-in-out infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes floatCircle {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+      50% { transform: translate(var(--tx), var(--ty)) scale(1.2); opacity: 0.6; }
+    }
+
+    /* 물방울 효과 */
+    .water-drop {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(147, 197, 253, 0.4));
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(45deg);
+      animation: dropFall var(--duration) ease-in infinite;
+      opacity: 0.7;
+      box-shadow: 0 2px 8px rgba(147, 197, 253, 0.4);
+    }
+
+    @keyframes dropFall {
+      0% { transform: translateY(-20px) rotate(45deg); opacity: 0; }
+      10% { opacity: 0.7; }
+      90% { opacity: 0.7; }
+      100% { transform: translateY(100vh) rotate(45deg); opacity: 0; }
+    }
+
+    /* 타이틀 */
     h1 {
-      color: #2563eb;
-      font-size: 2rem;
+      color: #0ea5e9;
+      font-size: clamp(2rem, 5vw, 3rem);
       font-weight: 800;
       text-align: center;
-      letter-spacing: -0.5px;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      animation: fadeIn 1.5s ease-out forwards;
+      letter-spacing: 1px;
+      text-shadow: 
+        0 2px 10px rgba(14, 165, 233, 0.3),
+        0 0 40px rgba(147, 197, 253, 0.2);
       z-index: 10;
-      margin: 2vh 0;
+      margin: 3vh 0 5vh 0;
+      position: relative;
+      animation: titleFloat 3s ease-in-out infinite;
     }
+
+    @keyframes titleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* 사용자 정보 - 부드러운 글래스 효과 */
+    .user-info {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2px solid rgba(147, 197, 253, 0.3);
+      padding: 12px 20px;
+      border-radius: 25px;
+      box-shadow: 
+        0 8px 32px rgba(14, 165, 233, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideInRight 0.6s ease-out;
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .user-info span {
+      color: #0369a1;
+      font-weight: 700;
+    }
+
+    .user-info button {
+      background: linear-gradient(135deg, #fb7185, #f472b6);
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(244, 114, 182, 0.3);
+    }
+
+    .user-info button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(244, 114, 182, 0.5);
+    }
+
+    /* 게임 카드 그리드 */
     .btn-container {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 2.5vw;
+      gap: clamp(15px, 3vw, 25px);
       width: 90vw;
-      max-width: 600px;
+      max-width: 800px;
       z-index: 10;
-      animation: fadeIn 1.5s ease-out 0.5s forwards;
-      opacity: 0;
+      animation: cardsAppear 0.8s ease-out 0.2s backwards;
     }
+
+    @keyframes cardsAppear {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* 3D 게임 카드 */
     .game-card {
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: linear-gradient(145deg, #ffffff, #e6efff);
-      border-radius: 12px;
-      border: 1px solid rgba(37, 99, 235, 0.3);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      padding: 2vw;
-      transition: transform 0.2s, box-shadow 0.2s;
-      aspect-ratio: 1 / 1.2;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 25px;
+      border: 3px solid rgba(147, 197, 253, 0.4);
+      box-shadow: 
+        0 15px 35px rgba(14, 165, 233, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      padding: clamp(15px, 3vw, 25px);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      aspect-ratio: 1 / 1.1;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
     }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(147, 197, 253, 0.15) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
     .game-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      transform: translateY(-15px) scale(1.03);
+      box-shadow: 
+        0 25px 50px rgba(14, 165, 233, 0.25),
+        0 0 0 4px rgba(147, 197, 253, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+      border-color: rgba(56, 189, 248, 0.6);
     }
+
+    /* 게임 번호 배지 */
+    .game-number {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7dd3fc, #a5b4fc);
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: #fff;
+      text-shadow: 0 2px 5px rgba(14, 165, 233, 0.5);
+      box-shadow: 
+        0 5px 15px rgba(125, 211, 252, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* 게임 버튼 */
     .game-btn {
-      padding: 2.5vw 0;
-      font-size: 1rem;
-      border-radius: 8px;
-      background: linear-gradient(145deg, #60a5fa, #93c5fd);
+      padding: clamp(12px, 3vw, 16px) 0;
+      font-size: clamp(0.9rem, 2vw, 1.05rem);
+      border-radius: 18px;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
       color: #fff;
       border: none;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       width: 100%;
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: 
+        0 8px 20px rgba(56, 189, 248, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.5px;
     }
-    .game-btn:hover {
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-    .game-btn:active {
-      transform: scale(0.95);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-    .game-btn::after {
+
+    .game-btn::before {
       content: '';
       position: absolute;
-      top: 50%;
+      top: 0;
       left: -100%;
-      width: 200%;
+      width: 100%;
       height: 100%;
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-      transform: translateY(-50%);
-      transition: left 0.4s;
+      transition: left 0.5s;
     }
-    .game-btn:active::after {
+
+    .game-btn:hover::before {
       left: 100%;
     }
+
+    .game-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 
+        0 12px 30px rgba(56, 189, 248, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .game-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* 랭킹 리스트 */
     .ranking-list {
-      margin-top: 1vw;
-      font-size: 0.8rem;
-      color: #2563eb;
+      margin-top: clamp(10px, 2vw, 15px);
+      font-size: clamp(0.75rem, 1.5vw, 0.88rem);
+      color: #0369a1;
       text-align: left;
       width: 100%;
-      padding: 0 1vw;
+      padding: 0 clamp(5px, 1vw, 10px);
     }
+
     .ranking-list p {
-      margin: 0.3vw 0;
+      margin: clamp(5px, 1vw, 8px) 0;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      padding: clamp(6px, 1.2vw, 10px) clamp(8px, 1.5vw, 14px);
+      background: rgba(147, 197, 253, 0.15);
+      border-radius: 12px;
+      border: 2px solid rgba(147, 197, 253, 0.25);
+      transition: all 0.3s ease;
     }
+
+    .ranking-list p:hover {
+      background: rgba(147, 197, 253, 0.25);
+      border-color: rgba(56, 189, 248, 0.5);
+      transform: translateX(5px);
+    }
+
     .ranking-list span.rank {
-      font-weight: 600;
+      font-weight: 800;
+      color: #0284c7;
     }
+
     .ranking-list span.score {
-      font-weight: 500;
+      font-weight: 700;
+      color: #7c3aed;
     }
-    .particle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: linear-gradient(45deg, #60a5fa, #a5b4fc);
-      border-radius: 50%;
-      pointer-events: none;
-      animation: particle-float 4s linear infinite;
-      z-index: 5;
-      box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
-    }
-    @keyframes particle-float {
-      0% { transform: translateY(100vh) scale(1); opacity: 0.7; }
-      100% { transform: translateY(-10vh) scale(0.3); opacity: 0; }
-    }
-    .bubble {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent);
-      border-radius: 50%;
-      pointer-events: none;
-      animation: bubble-rise var(--duration) ease-out infinite;
-      z-index: 3;
-    }
-    @keyframes bubble-rise {
-      0% { transform: translateY(100vh) scale(0.5); opacity: 0.5; }
-      50% { opacity: 0.8; }
-      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
-    }
+
+    /* 모달 - 부드럽고 친근한 느낌 */
     .modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
+      background: rgba(186, 230, 253, 0.3);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 100;
       opacity: 0;
-      animation: fadeIn 0.3s forwards;
+      transition: opacity 0.4s;
     }
+
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+
     .modal-content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 40px 30px;
+      border-radius: 30px;
       text-align: center;
-      width: 80%;
-      max-width: 300px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      width: 85%;
+      max-width: 400px;
+      box-shadow: 
+        0 20px 60px rgba(14, 165, 233, 0.2),
+        0 0 0 3px rgba(147, 197, 253, 0.3);
+      animation: modalBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 3px solid rgba(147, 197, 253, 0.5);
     }
+
+    @keyframes modalBounce {
+      0% {
+        transform: scale(0.5) translateY(50px);
+        opacity: 0;
+      }
+      70% {
+        transform: scale(1.05) translateY(-10px);
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-content h2 {
+      color: #0284c7;
+      margin: 0 0 10px 0;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 800;
+    }
+
+    .modal-content p {
+      color: #64748b;
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+      margin: 0 0 25px 0;
+    }
+
     .modal-content input {
-      width: 90%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #2563eb;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-    .modal-content button {
-      padding: 10px 20px;
-      margin: 5px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(145deg, #60a5fa, #93c5fd);
-      color: #fff;
+      width: calc(100% - 30px);
+      padding: 15px 20px;
+      margin: 15px 0;
+      border: 3px solid rgba(147, 197, 253, 0.5);
+      border-radius: 18px;
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      font-family: 'Pretendard', sans-serif;
+      background: rgba(240, 249, 255, 0.8);
+      color: #0c4a6e;
+      outline: none;
+      transition: all 0.3s ease;
       font-weight: 600;
-      cursor: pointer;
     }
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.8rem;
-      }
-      .game-btn {
-        font-size: 0.9rem;
-        padding: 2vw 0;
-      }
+
+    .modal-content input::placeholder {
+      color: #94a3b8;
+    }
+
+    .modal-content input:focus {
+      border-color: #38bdf8;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+    }
+
+    .modal-content .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .modal-content button {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 18px;
+      font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-content button:active {
+      transform: scale(0.95);
+    }
+
+    .modal-content button.primary {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .modal-content button.primary:hover {
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .modal-content button.secondary {
+      background: rgba(226, 232, 240, 0.8);
+      color: #64748b;
+      border: 2px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .modal-content button.secondary:hover {
+      background: rgba(203, 213, 225, 0.9);
+      color: #475569;
+    }
+
+    /* 반응형 */
+    @media (max-width: 768px) {
       .btn-container {
-        gap: 2vw;
-        max-width: 95vw;
+        grid-template-columns: 1fr;
+        max-width: 400px;
       }
-      .bg-glow {
-        width: 90vw;
-        height: 90vw;
-      }
-      .bubble {
-        width: 15px;
-        height: 15px;
-      }
-      .ranking-list {
-        font-size: 0.7rem;
-      }
+      
       .game-card {
-        padding: 1.5vw;
+        aspect-ratio: 1 / 0.85;
       }
+    }
+
+    @media (max-width: 600px) {
+      .user-info {
+        top: 10px;
+        right: 10px;
+        padding: 10px 15px;
+        font-size: 0.85rem;
+      }
+
       .modal-content {
-        width: 90%;
+        padding: 30px 20px;
+      }
+
+      h1 {
+        margin: 2vh 0 4vh 0;
       }
     }
   </style>
 </head>
 <body>
-  <div class="cinematic-container">
-    <div class="bg-pattern"></div>
-    <div class="bg-glow"></div>
+  <!-- 배경 효과 -->
+  <div class="animated-bg"></div>
+  
+  <!-- 사용자 정보 -->
+  <div class="user-info" id="user-info" style="display: none;">
+    <span id="user-name-display"></span>
+    <button id="change-name-btn">변경</button>
   </div>
-  <h1>우리 팀 게임 선택</h1>
+
+  <!-- 타이틀 -->
+  <h1>🎮 게임을 선택하세요</h1>
+
+  <!-- 게임 카드 그리드 -->
   <div class="btn-container">
     <div class="game-card" data-game="game1">
-      <button class="game-btn" data-game="game1">게임 1번</button>
+      <div class="game-number">1</div>
+      <button class="game-btn" data-game="game1">게임 시작</button>
       <div class="ranking-list" id="ranking-game1">
-        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
       </div>
     </div>
+
     <div class="game-card" data-game="game2">
-      <button class="game-btn" data-game="game2">게임 2번</button>
+      <div class="game-number">2</div>
+      <button class="game-btn" data-game="game2">게임 시작</button>
       <div class="ranking-list" id="ranking-game2">
-        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
       </div>
     </div>
+
     <div class="game-card" data-game="game3">
-      <button class="game-btn" data-game="game3">게임 3번</button>
+      <div class="game-number">3</div>
+      <button class="game-btn" data-game="game3">게임 시작</button>
       <div class="ranking-list" id="ranking-game3">
-        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
       </div>
     </div>
+
     <div class="game-card" data-game="game4">
-      <button class="game-btn" data-game="game4">게임 4번</button>
+      <div class="game-number">4</div>
+      <button class="game-btn" data-game="game4">게임 시작</button>
       <div class="ranking-list" id="ranking-game4">
-        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
       </div>
     </div>
+
     <div class="game-card" data-game="game5">
-      <button class="game-btn" data-game="game5">게임 5번</button>
+      <div class="game-number">5</div>
+      <button class="game-btn" data-game="game5">게임 시작</button>
       <div class="ranking-list" id="ranking-game5">
-        <p><span class="rank">1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
       </div>
     </div>
   </div>
-  <div id="name-modal" class="modal" style="display: none;">
+
+  <!-- 이름 입력 모달 -->
+  <div id="name-modal" class="modal">
     <div class="modal-content">
-      <h2>이름 입력</h2>
-      <input type="text" id="player-name-input" placeholder="이름을 입력하세요 (최대 20자)">
-      <div>
-        <button id="save-name-btn">확인</button>
-        <button id="cancel-name-btn">취소</button>
+      <h2>✨ 플레이어 이름</h2>
+      <p>게임 기록에 사용될 이름을 입력해주세요</p>
+      <input type="text" id="player-name-input" placeholder="이름을 입력하세요" maxlength="20">
+      <div class="button-group">
+        <button id="cancel-name-btn" class="secondary">취소</button>
+        <button id="save-name-btn" class="primary">확인</button>
       </div>
     </div>
   </div>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getDatabase, ref, query, orderByChild, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import { getDatabase, ref, query, orderByChild, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const firebaseConfig = {
+            apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+            authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+            databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+            projectId: "gukhyeon-ce3ba",
+            storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+            messagingSenderId: "751956972723",
+            appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+            measurementId: "G-JBBLJNDGY1"
+        };
 
-    function loadRankings(gameId) {
-      const scoresRef = ref(db, 'scores/' + gameId);
-      const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(3));
-      onValue(topScoresQuery, (snapshot) => {
-        const rankings = [];
-        snapshot.forEach((child) => {
-          rankings.unshift(child.val());
-        });
-        const rankingDiv = document.getElementById('ranking-' + gameId);
-        rankingDiv.innerHTML = '';
-        rankings.forEach((entry, index) => {
-          rankingDiv.innerHTML += `<p><span class="rank">${index + 1}위</span> <span>${entry.name || '익명'}</span> <span class="score">${entry.score}</span></p>`;
-        });
-        if (rankings.length === 0) {
-          rankingDiv.innerHTML = '<p>랭킹 데이터 없음</p>';
-        }
-      });
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // 배경 효과 생성
+  function createBackgroundEffects() {
+    const body = document.body;
+    
+    // 구름 생성
+    for (let i = 0; i < 8; i++) {
+      const cloud = document.createElement('div');
+      cloud.className = 'cloud';
+      cloud.style.width = `${Math.random() * 80 + 60}px`;
+      cloud.style.height = `${Math.random() * 30 + 20}px`;
+      cloud.style.left = `${Math.random() * 100}%`;
+      cloud.style.top = `${Math.random() * 80}%`;
+      cloud.style.setProperty('--duration', `${Math.random() * 10 + 15}s`);
+      cloud.style.animationDelay = `${Math.random() * 5}s`;
+      body.appendChild(cloud);
     }
 
-    ['game1', 'game2', 'game3', 'game4', 'game5'].forEach(loadRankings);
-
-    function showNameModal(gameId) {
-      const modal = document.getElementById('name-modal');
-      const input = document.getElementById('player-name-input');
-      const saveBtn = document.getElementById('save-name-btn');
-      const cancelBtn = document.getElementById('cancel-name-btn');
-      modal.style.display = 'flex';
-      input.value = localStorage.getItem('playerName') || '';
-      input.focus();
-
-      function onSave() {
-        const name = input.value.trim();
-        if (!name || name.length > 20) {
-          alert('이름은 1~20자여야 합니다.');
-          input.focus();
-          return;
-        }
-        localStorage.setItem('playerName', name);
-        modal.style.display = 'none';
-        cleanup();
-        location.href = `${gameId}.html`;
-      }
-
-      function onCancel() {
-        modal.style.display = 'none';
-        cleanup();
-      }
-
-      function onKeydown(e) {
-        if (e.key === 'Enter') onSave();
-      }
-
-      function cleanup() {
-        saveBtn.removeEventListener('click', onSave);
-        cancelBtn.removeEventListener('click', onCancel);
-        input.removeEventListener('keydown', onKeydown);
-      }
-
-      saveBtn.addEventListener('click', onSave);
-      cancelBtn.addEventListener('click', onCancel);
-      input.addEventListener('keydown', onKeydown);
+    // 반짝이 생성
+    for (let i = 0; i < 30; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.left = `${Math.random() * 100}%`;
+      sparkle.style.top = `${Math.random() * 100}%`;
+      sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+      sparkle.style.animationDelay = `${Math.random() * 3}s`;
+      body.appendChild(sparkle);
     }
 
-    document.querySelectorAll('.game-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const gameId = btn.getAttribute('data-game');
-        showNameModal(gameId);
+    // 떠다니는 원 생성
+    for (let i = 0; i < 10; i++) {
+      const circle = document.createElement('div');
+      circle.className = 'floating-circle';
+      const size = Math.random() * 80 + 40;
+      circle.style.width = `${size}px`;
+      circle.style.height = `${size}px`;
+      circle.style.left = `${Math.random() * 100}%`;
+      circle.style.top = `${Math.random() * 100}%`;
+      circle.style.setProperty('--duration', `${Math.random() * 8 + 6}s`);
+      circle.style.setProperty('--tx', `${Math.random() * 60 - 30}px`);
+      circle.style.setProperty('--ty', `${Math.random() * 60 - 30}px`);
+      circle.style.animationDelay = `${Math.random() * 4}s`;
+      body.appendChild(circle);
+    }
+
+    // 물방울 생성 (지속적으로)
+    setInterval(() => {
+      const drop = document.createElement('div');
+      drop.className = 'water-drop';
+      drop.style.left = `${Math.random() * 100}%`;
+      drop.style.setProperty('--duration', `${Math.random() * 2 + 3}s`);
+      body.appendChild(drop);
+      setTimeout(() => drop.remove(), 5000);
+    }, 800);
+  }
+
+  // 랭킹 로드
+  function loadRankings(gameId) {
+    const scoresRef = ref(db, 'scores/' + gameId);
+    const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(3));
+    onValue(topScoresQuery, (snapshot) => {
+      const rankings = [];
+      snapshot.forEach((child) => {
+        rankings.unshift(child.val());
       });
+      const rankingDiv = document.getElementById('ranking-' + gameId);
+      const medals = ['🥇', '🥈', '🥉'];
+      rankingDiv.innerHTML = '';
+      rankings.forEach((entry, index) => {
+        rankingDiv.innerHTML += `<p><span class="rank">${medals[index]} ${index + 1}위</span> <span>${entry.name || '익명'}</span> <span class="score">${entry.score}점</span></p>`;
+      });
+      if (rankings.length === 0) {
+        rankingDiv.innerHTML = '<p style="text-align: center; color: #94a3b8;">아직 기록이 없어요</p>';
+      }
     });
+  }
 
-    function createParticles() {
-      for (let i = 0; i < 25; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        particle.style.left = `${Math.random() * 100}vw`;
-        particle.style.animationDelay = `${Math.random() * 3}s`;
-        document.body.appendChild(particle);
-        setTimeout(() => particle.remove(), 4000);
-      }
+  ['game1', 'game2', 'game3', 'game4', 'game5'].forEach(loadRankings);
+
+  // 모달 관리
+  const modal = document.getElementById('name-modal');
+  const input = document.getElementById('player-name-input');
+  const saveBtn = document.getElementById('save-name-btn');
+  const cancelBtn = document.getElementById('cancel-name-btn');
+  const userInfo = document.getElementById('user-info');
+  const userNameDisplay = document.getElementById('user-name-display');
+  const changeNameBtn = document.getElementById('change-name-btn');
+
+  function showNameModal(isCancel = true) {
+    modal.classList.add('show');
+    input.value = '';
+    input.focus();
+    
+    if (!isCancel) {
+      cancelBtn.style.display = 'none';
+    } else {
+      cancelBtn.style.display = 'block';
     }
-    function createBubbles() {
-      for (let i = 0; i < 15; i++) {
-        const bubble = document.createElement('div');
-        bubble.classList.add('bubble');
-        bubble.style.left = `${Math.random() * 100}vw`;
-        bubble.style.animationDelay = `${Math.random() * 2}s`;
-        const duration = Math.random() * 2 + 2;
-        bubble.style.setProperty('--duration', `${duration}s`);
-        document.body.appendChild(bubble);
-        setTimeout(() => bubble.remove(), duration * 1000);
-      }
+  }
+
+  function hideNameModal() {
+    modal.classList.remove('show');
+  }
+
+  function saveName() {
+    const name = input.value.trim();
+    if (!name) {
+      alert('이름을 입력해주세요 😊');
+      input.focus();
+      return;
     }
-    createParticles();
-    createBubbles();
-    setInterval(createParticles, 1500);
-    setInterval(createBubbles, 2000);
-  </script>
+    if (name.length > 20) {
+      alert('이름은 최대 20자까지 입력 가능해요');
+      input.focus();
+      return;
+    }
+    
+    window.playerName = name;
+    localStorage.setItem('playerName', name);
+    userNameDisplay.textContent = name;
+    userInfo.style.display = 'flex';
+    hideNameModal();
+  }
+
+  function updateUserDisplay() {
+    const savedName = window.playerName;
+    if (savedName) {
+      userNameDisplay.textContent = savedName;
+      userInfo.style.display = 'flex';
+    }
+  }
+
+  // 이벤트 리스너
+  saveBtn.addEventListener('click', saveName);
+  
+  cancelBtn.addEventListener('click', () => {
+    if (window.playerName) {
+      hideNameModal();
+    } else {
+      alert('게임을 시작하려면 이름을 입력해주세요 🎮');
+      input.focus();
+    }
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      saveName();
+    }
+  });
+
+  changeNameBtn.addEventListener('click', () => {
+    showNameModal(true);
+    input.value = window.playerName || '';
+  });
+
+  // 게임 버튼 클릭
+  document.querySelectorAll('.game-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const gameId = btn.getAttribute('data-game');
+      
+      if (!window.playerName) {
+        showNameModal(false);
+        return;
+      }
+      
+      location.href = `${gameId}.html`;
+    });
+  });
+
+  // 페이지 로드 시 초기화
+  window.addEventListener('load', () => {
+    createBackgroundEffects();
+    
+    if (!window.playerName) {
+      setTimeout(() => showNameModal(false), 500);
+    } else {
+      updateUserDisplay();
+    }
+  });
+</script>
 </body>
 </html>
