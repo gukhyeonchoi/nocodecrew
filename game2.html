@@ -597,6 +597,12 @@
         // 게임 로직
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        
+        // 이미지 스무딩 비활성화 (픽셀 아트용)
+        ctx.imageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
 
         let gameState = {
             score: 0,
