@@ -283,6 +283,7 @@
             align-items: center;
             justify-content: center;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            overflow: hidden;
         }
 
         .tile::before {
@@ -594,8 +595,8 @@
                 gap: 8px;
             }
             .tile, .empty-slot { width: 55px; height: 55px; }
-            .tile::before { font-size: 55px; }
-            .tile .number { font-size: 1.6em; width: 32px; height: 32px; }
+            .tile::before { font-size: 50px; }
+            .tile .number { font-size: 1.5em; width: 30px; height: 30px; }
         }
 
         /* 작은 모바일 (480px 이하) */
@@ -645,11 +646,11 @@
                 width: 45px; 
                 height: 45px; 
             }
-            .tile::before { font-size: 45px; }
+            .tile::before { font-size: 40px; }
             .tile .number { 
-                font-size: 1.4em; 
-                width: 28px; 
-                height: 28px; 
+                font-size: 1.3em; 
+                width: 26px; 
+                height: 26px; 
             }
             .controls { gap: 10px; }
             .btn { 
@@ -680,11 +681,11 @@
                 width: 40px; 
                 height: 40px; 
             }
-            .tile::before { font-size: 40px; }
+            .tile::before { font-size: 35px; }
             .tile .number { 
-                font-size: 1.2em; 
-                width: 25px; 
-                height: 25px; 
+                font-size: 1.1em; 
+                width: 23px; 
+                height: 23px; 
             }
             h1 { font-size: 1.5em; }
             .welcome-title { font-size: 1.5em; }
