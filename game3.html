@@ -31,6 +31,12 @@
             width: 100%;
         }
 
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+        }
+
         h1 {
             color: #5b7c99;
             font-size: 36px;
@@ -40,7 +46,7 @@
         @media (max-width: 600px) {
             h1 {
                 font-size: 28px;
-                margin-bottom: 10px;
+                margin-bottom: 8px;
             }
         }
 
@@ -54,8 +60,9 @@
 
         @media (max-width: 600px) {
             .battle-arena {
-                padding: 10px;
-                margin-bottom: 10px;
+                padding: 8px;
+                margin-bottom: 8px;
+                border-radius: 10px;
             }
         }
 
@@ -64,6 +71,12 @@
             justify-content: space-between;
             align-items: center;
             gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .combatants {
+                gap: 10px;
+            }
         }
 
         .character {
@@ -85,9 +98,10 @@
 
         @media (max-width: 600px) {
             .character-sprite {
-                width: 60px;
-                height: 60px;
-                font-size: 36px;
+                width: 50px;
+                height: 50px;
+                font-size: 30px;
+                margin: 0 auto 5px;
             }
         }
 
@@ -112,7 +126,8 @@
 
         @media (max-width: 600px) {
             .character-name {
-                font-size: 14px;
+                font-size: 13px;
+                margin-bottom: 3px;
             }
         }
 
@@ -134,6 +149,13 @@
             overflow: hidden;
             margin-bottom: 5px;
             position: relative;
+        }
+
+        @media (max-width: 600px) {
+            .hp-bar-container {
+                height: 16px;
+                margin-bottom: 3px;
+            }
         }
 
         .hp-bar {
@@ -161,10 +183,24 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
+        @media (max-width: 600px) {
+            .hp-text {
+                line-height: 16px;
+                font-size: 10px;
+            }
+        }
+
         .stats {
             font-size: 14px;
             color: #7a99bb;
             margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .stats {
+                font-size: 11px;
+                margin-top: 3px;
+            }
         }
 
         .vs {
@@ -201,8 +237,8 @@
 
         @media (max-width: 600px) {
             .score-container {
-                gap: 10px;
-                margin-bottom: 10px;
+                gap: 8px;
+                margin-bottom: 8px;
             }
         }
 
@@ -214,14 +250,33 @@
             font-weight: bold;
         }
 
+        @media (max-width: 600px) {
+            .score-box {
+                padding: 6px 12px;
+            }
+        }
+
         .score-label {
             font-size: 14px;
             opacity: 0.8;
         }
 
+        @media (max-width: 600px) {
+            .score-label {
+                font-size: 11px;
+            }
+        }
+
         .score-value {
             font-size: 24px;
             margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .score-value {
+                font-size: 18px;
+                margin-top: 3px;
+            }
         }
 
         #game-board {
@@ -235,7 +290,7 @@
         @media (max-width: 600px) {
             #game-board {
                 padding: 10px;
-                margin: 10px 0;
+                margin: 8px 0;
             }
         }
 
@@ -325,7 +380,8 @@
 
         @media (max-width: 600px) {
             .buttons {
-                margin-top: 10px;
+                margin-top: 8px;
+                gap: 8px;
             }
         }
 
@@ -372,6 +428,101 @@
             margin-bottom: 20px;
         }
 
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(168, 192, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            cursor: pointer;
+        }
+
+        .start-screen-content {
+            background: rgba(168, 192, 255, 0.95);
+            padding: 60px 80px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 50px rgba(100,149,237,0.4);
+            transition: all 0.3s ease;
+        }
+
+        .start-screen:hover .start-screen-content {
+            background: rgba(168, 192, 255, 0.98);
+            transform: scale(1.05);
+        }
+
+        .start-screen h2 {
+            font-size: 48px;
+            color: white;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(91, 124, 153, 0.3);
+        }
+
+        .start-screen p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 15px;
+        }
+
+        .ranking-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(227, 242, 253, 0.98);
+            padding: 30px 40px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 150;
+            box-shadow: 0 10px 40px rgba(100,149,237,0.4);
+            min-width: 280px;
+        }
+
+        .ranking-popup h3 {
+            font-size: 28px;
+            color: #5b7c99;
+            margin: 0 0 15px 0;
+        }
+
+        .ranking-popup p {
+            font-size: 18px;
+            color: #7a99bb;
+            margin: 0 0 20px 0;
+        }
+
+        .ranking-popup button {
+            padding: 10px 25px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .start-screen-content {
+                padding: 40px 50px;
+            }
+            .start-screen h2 {
+                font-size: 36px;
+            }
+            .start-screen p {
+                font-size: 16px;
+            }
+            .ranking-popup {
+                padding: 25px 30px;
+                min-width: 240px;
+            }
+            .ranking-popup h3 {
+                font-size: 24px;
+            }
+            .ranking-popup p {
+                font-size: 16px;
+            }
+        }
+
         .instructions {
             margin-top: 15px;
             color: #5b7c99;
@@ -380,8 +531,8 @@
 
         @media (max-width: 600px) {
             .instructions {
-                margin-top: 10px;
-                font-size: 12px;
+                margin-top: 8px;
+                font-size: 11px;
             }
         }
 
@@ -455,12 +606,26 @@
 
         <div class="buttons">
             <button onclick="newGame()">새 게임</button>
+            <button onclick="showRanking()">랭킹</button>
         </div>
 
         <div class="instructions">
             <p>방향키로 타일을 움직이세요!</p>
             <p>점수가 높을수록 더 강한 공격을 합니다!</p>
         </div>
+    </div>
+
+    <div class="start-screen" id="start-screen" onclick="startGame()" style="display: flex;">
+        <div class="start-screen-content">
+            <h2>TOUCH TO START</h2>
+            <p>방향키 또는 스와이프로 플레이</p>
+        </div>
+    </div>
+
+    <div class="ranking-popup" id="ranking-popup">
+        <h3>🏆 랭킹</h3>
+        <p>랭킹 시스템은 준비 중입니다!</p>
+        <button onclick="closeRanking()">닫기</button>
     </div>
 
     <div class="game-over" id="game-over">
@@ -490,6 +655,8 @@
         let bossEmoji = "👹";
 
         let combatInterval = null;
+        let gameStarted = false;
+        let hasPlayedBefore = false;
 
         const bossData = [
             { name: "슬라임 킹", emoji: "👹", hp: 300, atk: 10 },
@@ -514,6 +681,7 @@
             score = 0;
             bossKills = 0;
             gameOver = false;
+            gameStarted = false;
             
             playerHP = 500;
             playerMaxHP = 500;
@@ -530,6 +698,12 @@
             updateBattle();
 
             if (combatInterval) clearInterval(combatInterval);
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            gameStarted = true;
+            hasPlayedBefore = true;
             combatInterval = setInterval(combat, 2000);
         }
 
@@ -709,6 +883,11 @@
         function move(direction) {
             if (gameOver) return;
             
+            // 게임이 시작되지 않았으면 시작
+            if (!gameStarted) {
+                startGame();
+            }
+            
             let moved = false;
 
             if (direction === 'left') {
@@ -860,7 +1039,25 @@
 
         function newGame() {
             document.getElementById('game-over').style.display = 'none';
-            initGame();
+            
+            // 이미 한 번 플레이한 적이 있다면 바로 시작
+            if (hasPlayedBefore) {
+                initGame();
+                gameStarted = true;
+                combatInterval = setInterval(combat, 2000);
+            } else {
+                // 처음이라면 touch to start 팝업 표시
+                document.getElementById('start-screen').style.display = 'flex';
+                initGame();
+            }
+        }
+
+        function showRanking() {
+            document.getElementById('ranking-popup').style.display = 'block';
+        }
+
+        function closeRanking() {
+            document.getElementById('ranking-popup').style.display = 'none';
         }
 
         document.addEventListener('keydown', (e) => {
@@ -878,6 +1075,56 @@
                 move('down');
             }
         });
+
+        // 터치 이벤트 처리 (모바일 스와이프)
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        // 터치 이동 중 스크롤 방지
+        document.addEventListener('touchmove', (e) => {
+            if (gameStarted && !gameOver) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const minSwipeDistance = 30;
+
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                return;
+            }
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // 좌우 스와이프
+                if (deltaX > 0) {
+                    move('right');
+                } else {
+                    move('left');
+                }
+            } else {
+                // 상하 스와이프
+                if (deltaY > 0) {
+                    move('down');
+                } else {
+                    move('up');
+                }
+            }
+        }
 
         initGame();
     </script>
