@@ -9,7 +9,6 @@
         * {
             box-sizing: border-box;
         }
-
         body {
             margin: 0;
             padding: 0;
@@ -28,12 +27,10 @@
             overflow: hidden;
             position: relative;
         }
-
         @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
-
         /* 배경 효과 */
         .sparkle {
             position: absolute;
@@ -46,12 +43,10 @@
             box-shadow: 0 0 10px rgba(147, 197, 253, 0.8);
             pointer-events: none;
         }
-
         @keyframes sparkleAnim {
             0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
             50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
         }
-
         #intro {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
@@ -68,21 +63,18 @@
             position: relative;
             border: 3px solid rgba(147, 197, 253, 0.5);
         }
-
         #intro h1 {
             margin: 0;
             font-size: 36px;
             color: #0284c7;
             font-weight: 800;
         }
-
         #intro p {
             margin: 0;
             font-size: 18px;
             color: #64748b;
             line-height: 1.6;
         }
-
         .game-instructions {
             background: rgba(240, 249, 255, 0.8);
             border-radius: 15px;
@@ -94,13 +86,11 @@
             line-height: 1.5;
             border: 2px solid rgba(147, 197, 253, 0.3);
         }
-
         .game-instructions h3 {
             margin: 0 0 10px 0;
             color: #0284c7;
             font-size: 16px;
         }
-
         .intro-btn {
             background: linear-gradient(135deg, #38bdf8, #818cf8);
             color: #fff;
@@ -116,7 +106,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .intro-btn::before {
             content: '';
             position: absolute;
@@ -127,20 +116,16 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             transition: left 0.5s;
         }
-
         .intro-btn:hover::before {
             left: 100%;
         }
-
         .intro-btn:active {
             transform: scale(0.95);
         }
-
         .intro-btn.btn-home {
             background: linear-gradient(135deg, #94a3b8, #64748b);
             box-shadow: 0 8px 20px rgba(100, 116, 139, 0.3);
         }
-
         .game-container {
             display: none;
             background: rgba(255, 255, 255, 0.9);
@@ -162,7 +147,6 @@
             position: relative;
             border: 3px solid rgba(147, 197, 253, 0.5);
         }
-
         .score-board {
             text-align: center;
             margin-bottom: 8px;
@@ -175,7 +159,6 @@
             box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
             border: 2px solid rgba(147, 197, 253, 0.3);
         }
-
         .stage-progress {
             display: flex;
             justify-content: center;
@@ -192,7 +175,6 @@
             border-radius: 15px;
             border: 2px solid rgba(147, 197, 253, 0.3);
         }
-
         .stage-indicator {
             width: 24px;
             height: 24px;
@@ -208,7 +190,6 @@
             position: relative;
             transition: all 0.3s ease;
         }
-
         .stage-indicator.cleared {
             background: linear-gradient(135deg, #2dd4bf, #14b8a6);
             border-color: #14b8a6;
@@ -216,7 +197,6 @@
             transform: scale(1.1);
             box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
         }
-
         .stage-indicator.current {
             background: linear-gradient(135deg, #38bdf8, #818cf8);
             border-color: #38bdf8;
@@ -225,12 +205,10 @@
             box-shadow: 0 6px 16px rgba(56, 189, 248, 0.5);
             animation: pulse 2s infinite;
         }
-
         @keyframes pulse {
             0%, 100% { transform: scale(1.2); }
             50% { transform: scale(1.3); }
         }
-
         .stage-indicator:not(:last-child)::after {
             content: '-';
             position: absolute;
@@ -238,7 +216,6 @@
             color: #cbd5e1;
             font-size: 12px;
         }
-
         .game-area {
             flex: 1;
             display: flex;
@@ -249,7 +226,6 @@
             width: 100%;
             overflow: hidden;
         }
-
         .target-area {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             border: 3px solid rgba(147, 197, 253, 0.5);
@@ -262,7 +238,6 @@
             margin-bottom: 8px;
             box-shadow: inset 0 2px 8px rgba(56, 189, 248, 0.1), 0 4px 12px rgba(56, 189, 248, 0.2);
         }
-
         .target-title {
             text-align: center;
             font-weight: 700;
@@ -270,7 +245,6 @@
             color: #0284c7;
             font-size: 16px;
         }
-
         .target-lanes {
             display: flex;
             gap: 12px;
@@ -281,7 +255,6 @@
             overflow: hidden;
             position: relative;
         }
-
         .target-lanes::after {
             content: '';
             position: absolute;
@@ -293,7 +266,6 @@
             pointer-events: none;
             z-index: 5;
         }
-
         .target-lane {
             width: 60px;
             display: flex;
@@ -305,7 +277,6 @@
             max-height: calc(33vh - 32px);
             overflow: visible;
         }
-
         .target-block {
             width: 60px;
             height: 60px;
@@ -325,23 +296,19 @@
             background: linear-gradient(135deg, var(--color-start), var(--color-end));
             box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
         }
-
         .target-block.attackable {
             border-color: #fbbf24;
             box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 4px 12px rgba(0,0,0,0.2);
             animation: glow 2s ease-in-out infinite alternate;
         }
-
         @keyframes glow {
             from { box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 4px 12px rgba(0,0,0,0.2); }
             to { box-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 6px 16px rgba(0,0,0,0.3); }
         }
-
         .block-number {
             font-size: 20px;
             line-height: 1;
         }
-
         .queue-area {
             background: linear-gradient(135deg, #bae6fd 0%, #c4b5fd 100%);
             border: 3px solid rgba(147, 197, 253, 0.5);
@@ -357,7 +324,6 @@
             z-index: 30;
             box-shadow: inset 0 2px 8px rgba(56, 189, 248, 0.2), 0 4px 12px rgba(56, 189, 248, 0.2);
         }
-
         .queue-slot {
             width: 60px;
             height: 60px;
@@ -374,7 +340,6 @@
             transition: all 0.3s ease;
             font-weight: 600;
         }
-
         .queue-block {
             width: 60px;
             height: 60px;
@@ -393,16 +358,13 @@
             background: linear-gradient(135deg, var(--color-start), var(--color-end));
             box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
         }
-
         .queue-block.added {
             animation: slideIn 0.4s ease-out;
         }
-
         @keyframes slideIn {
             0% { opacity: 0; transform: scale(0.6) translateY(-20px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-
         .selection-area {
             background: linear-gradient(135deg, #bae6fd 0%, #c4b5fd 100%);
             border-radius: 20px;
@@ -415,7 +377,6 @@
             box-shadow: inset 0 2px 8px rgba(56, 189, 248, 0.2), 0 4px 12px rgba(56, 189, 248, 0.2);
             border: 3px solid rgba(147, 197, 253, 0.5);
         }
-
         .selection-title {
             text-align: center;
             font-weight: 700;
@@ -423,7 +384,6 @@
             font-size: 16px;
             color: #0284c7;
         }
-
         .stacks-container {
             display: flex;
             gap: 12px;
@@ -436,7 +396,6 @@
             position: relative;
             margin-top: 20px;
         }
-
         .stacks-container::before {
             content: '';
             position: absolute;
@@ -448,7 +407,6 @@
             pointer-events: none;
             z-index: 10;
         }
-
         .stack {
             display: flex;
             flex-direction: column;
@@ -459,7 +417,6 @@
             width: 60px;
             overflow: visible;
         }
-
         .stack-block {
             width: 60px;
             height: 60px;
@@ -481,7 +438,6 @@
             background: linear-gradient(135deg, var(--color-start), var(--color-end));
             box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
         }
-
         .stack-block.top-block {
             border-color: #10b981;
             box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 4px 12px rgba(0,0,0,0.3);
@@ -489,21 +445,17 @@
             transform: translateY(-4px);
             animation: breathe 3s ease-in-out infinite;
         }
-
         @keyframes breathe {
             0%, 100% { transform: translateY(-4px); }
             50% { transform: translateY(-8px); }
         }
-
         .stack-block.top-block:active {
             transform: scale(0.9) translateY(-4px);
         }
-
         .stack-block:not(.top-block) {
             opacity: 0.7;
             cursor: not-allowed;
         }
-
         /* 파스텔 색상 */
         .red { 
             --color-start: #fca5a5; 
@@ -527,7 +479,6 @@
             --color-start: #c4b5fd; 
             --color-end: #a78bfa; 
         }
-
         .shooting-particle {
             position: fixed;
             width: 20px;
@@ -539,7 +490,6 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.2), 0 0 20px var(--particle-color);
             background: radial-gradient(circle, var(--particle-color), var(--particle-color-dark));
         }
-
         .damage-text {
             position: fixed;
             color: #f87171;
@@ -550,7 +500,6 @@
             animation: damageFloat 1s ease-out forwards;
             text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
         }
-
         @keyframes damageFloat {
             0% { 
                 opacity: 1; 
@@ -564,7 +513,6 @@
                 transform: translateY(-40px) scale(0.8);
             }
         }
-
         .game-controls {
             text-align: center;
             padding: 8px;
@@ -577,7 +525,6 @@
             backdrop-filter: blur(10px);
             border: 2px solid rgba(147, 197, 253, 0.3);
         }
-
         .btn {
             color: #fff;
             border: none;
@@ -588,7 +535,6 @@
             font-weight: 600;
             cursor: pointer;
         }
-
         .message {
             text-align: center;
             margin-top: 8px;
@@ -598,7 +544,6 @@
             width: 100%;
             color: #0284c7;
         }
-
         .success { 
             color: #10b981; 
             animation: successPulse 0.6s ease-out;
@@ -611,25 +556,21 @@
             color: #f87171; 
             animation: errorShake 0.5s ease-out;
         }
-
         @keyframes successPulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-
         @keyframes warningShake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
-
         @keyframes errorShake {
             0%, 100% { transform: translateX(0); }
             10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
             20%, 40%, 60%, 80% { transform: translateX(3px); }
         }
-
         .modal-backdrop {
             position: fixed;
             left: 0;
@@ -644,12 +585,10 @@
             z-index: 3000;
             animation: fadeIn 0.3s ease-out;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
         .modal {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(30px);
@@ -663,7 +602,6 @@
             border: 3px solid rgba(147, 197, 253, 0.5);
             animation: modalBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
         @keyframes modalBounce {
             0% {
                 transform: scale(0.5) translateY(50px);
@@ -677,27 +615,23 @@
                 opacity: 1;
             }
         }
-
         .modal h2 {
             margin: 8px 0 16px 0;
             font-size: 24px;
             color: #0284c7;
             font-weight: 800;
         }
-
         .modal p {
             margin: 12px 0 20px 0;
             font-size: 16px;
             color: #64748b;
             line-height: 1.5;
         }
-
         .modal .modal-actions {
             display: flex;
             gap: 12px;
             justify-content: center;
         }
-
         /* 모바일 최적화 */
         @media (max-width: 768px) {
             #intro {
@@ -723,7 +657,6 @@
                 font-size: 16px;
             }
         }
-
         @media (max-height: 600px) {
             .target-area {
                 height: 35vh;
@@ -786,10 +719,11 @@
 
     <div id="modalRoot"></div>
 
-        <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-  const firebaseConfig = {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+
+        const firebaseConfig = {
             apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
             authDomain: "gukhyeon-ce3ba.firebaseapp.com",
             databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
@@ -800,855 +734,760 @@ import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "h
             measurementId: "G-JBBLJNDGY1"
         };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-  // 메인 화면에서 전달받은 플레이어 이름
-  let playerName = localStorage.getItem('playerName') || 'Guest';  // null 시 Guest 사용
+        // 메인 화면에서 전달받은 플레이어 이름
+        let playerName = localStorage.getItem('playerName') || 'Guest';
 
-  // 배경 효과 생성
-  function createBackgroundEffects() {
-    for (let i = 0; i < 30; i++) {
-      const sparkle = document.createElement('div');
-      sparkle.className = 'sparkle';
-      sparkle.style.left = `${Math.random() * 100}%`;
-      sparkle.style.top = `${Math.random() * 100}%`;
-      sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
-      sparkle.style.animationDelay = `${Math.random() * 3}s`;
-      document.body.appendChild(sparkle);
-    }
-  }
-
-  class ColorShooterGame {
-    constructor() {
-      this.fullColorPool = ['red', 'blue', 'green', 'yellow', 'purple'];
-      this.stage = 1;
-      this.score = 0;
-      this.clearedStages = new Set();
-      this.stageConfig = {
-        1: { colors: 2, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
-        2: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
-        3: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
-        4: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
-        5: { colors: 4, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
-        6: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60] },
-        7: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
-        8: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
-        9: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75] },
-        10: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] },
-        11: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] },
-        12: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 7, numberRange: [15, 30, 45, 60, 75, 90] },
-        13: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 8, numberRange: [15, 30, 45, 60, 75, 90, 120] },
-        14: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 9, numberRange: [15, 30, 45, 60, 75, 90, 120] },
-        15: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 10, numberRange: [15, 30, 45, 60, 75, 90, 120] }
-      };
-      this.colors = [];
-      this.targetNumbers = [];
-      this.stackNumbers = [];
-      this.targetLanes = [];
-      this.stacks = [];
-      this.attackQueue = [];
-      this.gameRunning = false;
-      this._queueScanTimer = null;
-      this._pendingUpdate = false;
-      this._particleCount = 0;
-      this._maxParticles = 30;
-      this.handleBlockTouch = this.handleBlockTouch.bind(this);
-      this.colorParticleMap = {
-        red: { color: '#fca5a5', dark: '#f87171' },
-        blue: { color: '#93c5fd', dark: '#60a5fa' },
-        green: { color: '#86efac', dark: '#4ade80' },
-        yellow: { color: '#fde047', dark: '#facc15' },
-        purple: { color: '#c4b5fd', dark: '#a78bfa' }
-      };
-    }
-
-    showMessage(text, type = '') {
-      const messageEl = document.getElementById('message');
-      messageEl.textContent = text;
-      messageEl.className = `message ${type}`;
-      setTimeout(() => {
-        if (messageEl.textContent === text) {
-          messageEl.textContent = '';
-          messageEl.className = 'message';
-        }
-      }, 3000);
-    }
-
-    clearAllParticles() {
-      const particles = document.querySelectorAll('.shooting-particle');
-      particles.forEach(p => {
-        if (p.parentNode) {
-          p.parentNode.removeChild(p);
-          this._particleCount = Math.max(0, this._particleCount - 1);
-        }
-      });
-      this._particleCount = 0;
-    }
-
-    initGame() {
-      this.stopQueueScanLoop();
-      this.stage = 1;
-      this.score = 0;
-      this.clearedStages.clear();
-      this._pendingUpdate = false;
-      this.clearAllParticles();
-      this.initStage();
-      this.updateDisplay();
-      this.updateStageProgress();
-      this.showMessage('🎮 새 게임을 시작합니다!', 'success');
-    }
-
-    initStage() {
-      const config = this.stageConfig[this.stage];
-      this.colors = this.fullColorPool.slice(0, config.colors);
-      this.targetNumbers = config.numberRange;
-      this.stackNumbers = config.numberRange;
-      this.targetLanes = Array(config.lanes).fill().map(() => []);
-      this.stacks = Array(config.lanes).fill().map(() => []);
-      this.attackQueue = Array(config.queueSlots).fill(null);
-      this.clearAllParticles();
-      this.generateStageBlocks(config);
-      this.updateQueueUI();
-      this.updateStageProgress();
-    }
-
-    generateStageBlocks(config) {
-      const colorTotals = {};
-      this.colors.forEach(color => colorTotals[color] = 0);
-
-      for (let lane = 0; lane < config.lanes; lane++) {
-        this.targetLanes[lane] = [];
-        for (let i = 0; i < config.blocksPerLane; i++) {
-          const color = this.colors[Math.floor(Math.random() * this.colors.length)];
-          const number = this.targetNumbers[Math.floor(Math.random() * this.targetNumbers.length)];
-          this.targetLanes[lane].push({ color, number, id: Date.now() + lane * 1000 + i });
-          colorTotals[color] += number;
-        }
-      }
-
-      const stackBlocks = [];
-      this.colors.forEach(color => {
-        let remaining = colorTotals[color];
-        while (remaining > 0) {
-          const number = Math.min(
-            this.stackNumbers[Math.floor(Math.random() * this.stackNumbers.length)],
-            remaining
-          );
-          stackBlocks.push({ color, number, id: Date.now() + Math.random() });
-          remaining -= number;
-        }
-      });
-
-      stackBlocks.sort(() => Math.random() - 0.5);
-      const blocksPerStack = Math.ceil(stackBlocks.length / config.lanes);
-      for (let s = 0; s < config.lanes; s++) {
-        this.stacks[s] = stackBlocks.slice(s * blocksPerStack, (s + 1) * blocksPerStack);
-      }
-    }
-
-    startGame() {
-      this.gameRunning = true;
-      this.clearAllParticles();
-      this.showMessage(`🚀 스테이지 ${this.stage} 시작!`, 'success');
-      this.updateDisplay();
-      this.updateStageProgress();
-      this.startQueueScanLoop();
-    }
-
-    resetGame() {
-      this.stopQueueScanLoop();
-      this.gameRunning = false;
-      this._pendingUpdate = false;
-      this.clearAllParticles();
-      this.initGame();
-      this.startGame();
-    }
-
-    getAvailableQueueSlot() {
-      return this.attackQueue.findIndex(slot => slot === null || slot.number <= 0);
-    }
-
-    selectBlock(stackIndex) {
-      if (!this.gameRunning) {
-        this.showMessage('❌ 게임이 시작되지 않았습니다!', 'error');
-        return false;
-      }
-
-      if (stackIndex < 0 || stackIndex >= this.stacks.length) {
-        this.showMessage(`❌ 잘못된 스택: ${stackIndex + 1}`, 'error');
-        return false;
-      }
-
-      const slotIndex = this.getAvailableQueueSlot();
-      if (slotIndex === -1) {
-        this.showMessage('⚠️ 대기열이 가득 찼습니다!', 'warning');
-        return false;
-      }
-
-      const stack = this.stacks[stackIndex];
-      if (!stack || stack.length === 0) {
-        this.showMessage(`❌ 스택 ${stackIndex + 1}이 비었습니다!`, 'error');
-        return false;
-      }
-
-      const topBlock = stack[0];
-      const queueBlock = { 
-        ...topBlock, 
-        stackIndex, 
-        id: Date.now() + Math.random(), 
-        isFiring: false,
-        queuePosition: slotIndex 
-      };
-      this.attackQueue[slotIndex] = queueBlock;
-      this.stacks[stackIndex].shift();
-
-      this.showMessage(`✅ ${topBlock.color} 블록 (${topBlock.number}) 추가`, 'success');
-      this.updateQueue();
-      this.scheduleUpdate(() => {
-        this.scanAndFireOnce();
-        this.checkStageClear();
-      });
-
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
-      return true;
-    }
-
-    startQueueScanLoop() {
-      if (this._queueScanTimer) {
-        clearInterval(this._queueScanTimer);
-        this._queueScanTimer = null;
-      }
-      this._queueScanTimer = setInterval(() => {
-        if (!this.gameRunning) return;
-        this.scanAndFireOnce();
-      }, 120);
-    }
-
-    stopQueueScanLoop() {
-      if (this._queueScanTimer) {
-        clearInterval(this._queueScanTimer);
-        this._queueScanTimer = null;
-      }
-      this.clearAllParticles();
-    }
-
-    scanAndFireOnce() {
-      if (!this.gameRunning) return;
-
-      const firingColors = new Set();
-      for (let qIndex = 0; qIndex < this.attackQueue.length; qIndex++) {
-        const q = this.attackQueue[qIndex];
-        if (!q || q.isFiring || q.number <= 0) {
-          if (q && q.isFiring) firingColors.add(q.color);
-          continue;
-        }
-
-        if (firingColors.has(q.color)) continue;
-
-        let foundLane = -1;
-        for (let laneIndex = 0; laneIndex < this.targetLanes.length; laneIndex++) {
-          const lane = this.targetLanes[laneIndex];
-          if (lane.length > 0 && lane[0].color === q.color) {
-            foundLane = laneIndex;
-            break;
-          }
-        }
-
-        if (foundLane !== -1) {
-          this.attackQueue[qIndex].isFiring = true;
-          firingColors.add(q.color);
-          this.fireFromQueueIndex(qIndex, foundLane);
-        }
-      }
-
-      this.checkQueueStuck();
-    }
-
-    fireFromQueueIndex(queueIndex, laneIndex) {
-      const queued = this.attackQueue[queueIndex];
-      if (!queued || queued.number <= 0) {
-        this.attackQueue[queueIndex] = null;
-        this.scheduleUpdate();
-        return;
-      }
-      const lane = this.targetLanes[laneIndex];
-      if (!lane || lane.length === 0) {
-        this.attackQueue[queueIndex].isFiring = false;
-        this.scheduleUpdate();
-        return;
-      }
-      const shotInterval = 1000 / 27;
-      let shotsFired = 0;
-      let lastShotTime = performance.now();
-      const fireLoop = (now) => {
-        if (!this.gameRunning) {
-          if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-          this.scheduleUpdate();
-          return;
-        }
-        const lane = this.targetLanes[laneIndex];
-        if (!lane || lane.length === 0 || lane[0].color !== queued.color) {
-          if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-          this.scheduleUpdate();
-          return;
-        }
-        const currentBottom = lane[0];
-        if (!currentBottom) {
-          if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-          this.scheduleUpdate();
-          return;
-        }
-        if (now - lastShotTime >= shotInterval) {
-          if (this._particleCount < this._maxParticles) {
-            this.createSingleParticle(queueIndex, laneIndex, queued.color);
-            this._particleCount++;
-          }
-          currentBottom.number -= 1;
-          queued.number -= 1;
-          shotsFired++;
-          this.score += 1;
-          this.updateDisplay();
-          lastShotTime = now;
-          this.updateTargetLanes();
-          this.updateQueue();
-          if (currentBottom.number <= 0) {
-            this.targetLanes[laneIndex].shift();
-            if (lane.length > 0 && lane[0].color === queued.color) {
-              this.updateTargetLanes();
+        // 배경 효과 생성
+        function createBackgroundEffects() {
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.top = `${Math.random() * 100}%`;
+                sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                sparkle.style.animationDelay = `${Math.random() * 3}s`;
+                document.body.appendChild(sparkle);
             }
-          }
-          if ('vibrate' in navigator) {
-            navigator.vibrate(30);
-          }
         }
-        if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
-          requestAnimationFrame(fireLoop);
-        } else {
-          this.showDamageText(laneIndex, shotsFired);
-          this.showMessage(`🎯 매칭 성공! +${shotsFired}점`, 'success');
-          if (queued.number <= 0) {
-            this.attackQueue[queueIndex] = null;
-          }
-          if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-          this.updateTargetLanes();
-          this.scheduleUpdate(() => {
-            this.checkStageClear();
-          });
+
+        class ColorShooterGame {
+            constructor() {
+                this.fullColorPool = ['red', 'blue', 'green', 'yellow', 'purple'];
+                this.stage = 1;
+                this.score = 0;
+                this.clearedStages = new Set();
+                this.stageConfig = {
+                    1: { colors: 2, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
+                    2: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
+                    3: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 3, numberRange: [15, 30, 45] },
+                    4: { colors: 3, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
+                    5: { colors: 4, queueSlots: 3, lanes: 3, blocksPerLane: 4, numberRange: [15, 30, 45, 60] },
+                    6: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60] },
+                    7: { colors: 4, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
+                    8: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 5, numberRange: [15, 30, 45, 60, 75] },
+                    9: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75] },
+                    10: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] },
+                    11: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 6, numberRange: [15, 30, 45, 60, 75, 90] },
+                    12: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 7, numberRange: [15, 30, 45, 60, 75, 90] },
+                    13: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 8, numberRange: [15, 30, 45, 60, 75, 90, 120] },
+                    14: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 9, numberRange: [15, 30, 45, 60, 75, 90, 120] },
+                    15: { colors: 5, queueSlots: 4, lanes: 4, blocksPerLane: 10, numberRange: [15, 30, 45, 60, 75, 90, 120] }
+                };
+                this.colors = [];
+                this.targetNumbers = [];
+                this.stackNumbers = [];
+                this.targetLanes = [];
+                this.stacks = [];
+                this.attackQueue = [];
+                this.gameRunning = false;
+                this._queueScanTimer = null;
+                this._pendingUpdate = false;
+                this._particleCount = 0;
+                this._maxParticles = 30;
+                this.handleBlockTouch = this.handleBlockTouch.bind(this);
+                this.colorParticleMap = {
+                    red: { color: '#fca5a5', dark: '#f87171' },
+                    blue: { color: '#93c5fd', dark: '#60a5fa' },
+                    green: { color: '#86efac', dark: '#4ade80' },
+                    yellow: { color: '#fde047', dark: '#facc15' },
+                    purple: { color: '#c4b5fd', dark: '#a78bfa' }
+                };
+            }
+            showMessage(text, type = '') {
+                const messageEl = document.getElementById('message');
+                messageEl.textContent = text;
+                messageEl.className = `message ${type}`;
+                setTimeout(() => {
+                    if (messageEl.textContent === text) {
+                        messageEl.textContent = '';
+                        messageEl.className = 'message';
+                    }
+                }, 3000);
+            }
+            clearAllParticles() {
+                const particles = document.querySelectorAll('.shooting-particle');
+                particles.forEach(p => {
+                    if (p.parentNode) {
+                        p.parentNode.removeChild(p);
+                        this._particleCount = Math.max(0, this._particleCount - 1);
+                    }
+                });
+                this._particleCount = 0;
+            }
+            initGame() {
+                this.stopQueueScanLoop();
+                this.stage = 1;
+                this.score = 0;
+                this.clearedStages.clear();
+                this._pendingUpdate = false;
+                this.clearAllParticles();
+                this.initStage();
+                this.updateDisplay();
+                this.updateStageProgress();
+                this.showMessage('🎮 새 게임을 시작합니다!', 'success');
+            }
+            initStage() {
+                const config = this.stageConfig[this.stage];
+                this.colors = this.fullColorPool.slice(0, config.colors);
+                this.targetNumbers = config.numberRange;
+                this.stackNumbers = config.numberRange;
+                this.targetLanes = Array(config.lanes).fill().map(() => []);
+                this.stacks = Array(config.lanes).fill().map(() => []);
+                this.attackQueue = Array(config.queueSlots).fill(null);
+                this.clearAllParticles();
+                this.generateStageBlocks(config);
+                this.updateQueueUI();
+                this.updateStageProgress();
+            }
+            generateStageBlocks(config) {
+                const colorTotals = {};
+                this.colors.forEach(color => colorTotals[color] = 0);
+                for (let lane = 0; lane < config.lanes; lane++) {
+                    this.targetLanes[lane] = [];
+                    for (let i = 0; i < config.blocksPerLane; i++) {
+                        const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                        const number = this.targetNumbers[Math.floor(Math.random() * this.targetNumbers.length)];
+                        this.targetLanes[lane].push({ color, number, id: Date.now() + lane * 1000 + i });
+                        colorTotals[color] += number;
+                    }
+                }
+                const stackBlocks = [];
+                this.colors.forEach(color => {
+                    let remaining = colorTotals[color];
+                    while (remaining > 0) {
+                        const number = Math.min(
+                            this.stackNumbers[Math.floor(Math.random() * this.stackNumbers.length)],
+                            remaining
+                        );
+                        stackBlocks.push({ color, number, id: Date.now() + Math.random() });
+                        remaining -= number;
+                    }
+                });
+                stackBlocks.sort(() => Math.random() - 0.5);
+                const blocksPerStack = Math.ceil(stackBlocks.length / config.lanes);
+                for (let s = 0; s < config.lanes; s++) {
+                    this.stacks[s] = stackBlocks.slice(s * blocksPerStack, (s + 1) * blocksPerStack);
+                }
+            }
+            startGame() {
+                this.gameRunning = true;
+                this.clearAllParticles();
+                this.showMessage(`🚀 스테이지 ${this.stage} 시작!`, 'success');
+                this.updateDisplay();
+                this.updateStageProgress();
+                this.startQueueScanLoop();
+            }
+            resetGame() {
+                this.stopQueueScanLoop();
+                this.gameRunning = false;
+                this._pendingUpdate = false;
+                this.clearAllParticles();
+                this.initGame();
+                this.startGame();
+            }
+            getAvailableQueueSlot() {
+                return this.attackQueue.findIndex(slot => slot === null || slot.number <= 0);
+            }
+            selectBlock(stackIndex) {
+                if (!this.gameRunning) {
+                    this.showMessage('❌ 게임이 시작되지 않았습니다!', 'error');
+                    return false;
+                }
+                if (stackIndex < 0 || stackIndex >= this.stacks.length) {
+                    this.showMessage(`❌ 잘못된 스택: ${stackIndex + 1}`, 'error');
+                    return false;
+                }
+                const slotIndex = this.getAvailableQueueSlot();
+                if (slotIndex === -1) {
+                    this.showMessage('⚠️ 대기열이 가득 찼습니다!', 'warning');
+                    return false;
+                }
+                const stack = this.stacks[stackIndex];
+                if (!stack || stack.length === 0) {
+                    this.showMessage(`❌ 스택 ${stackIndex + 1}이 비었습니다!`, 'error');
+                    return false;
+                }
+                const topBlock = stack[0];
+                const queueBlock = {
+                    ...topBlock,
+                    stackIndex,
+                    id: Date.now() + Math.random(),
+                    isFiring: false,
+                    queuePosition: slotIndex
+                };
+                this.attackQueue[slotIndex] = queueBlock;
+                this.stacks[stackIndex].shift();
+                this.showMessage(`✅ ${topBlock.color} 블록 (${topBlock.number}) 추가`, 'success');
+                console.log(`블록(${topBlock.color}, ${topBlock.number}) 추가`);
+                this.updateQueue();
+                this.scheduleUpdate(() => {
+                    this.scanAndFireOnce();
+                    this.checkStageClear();
+                });
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+                return true;
+            }
+            startQueueScanLoop() {
+                if (this._queueScanTimer) {
+                    clearInterval(this._queueScanTimer);
+                    this._queueScanTimer = null;
+                }
+                this._queueScanTimer = setInterval(() => {
+                    if (!this.gameRunning) return;
+                    this.scanAndFireOnce();
+                }, 120);
+            }
+            stopQueueScanLoop() {
+                if (this._queueScanTimer) {
+                    clearInterval(this._queueScanTimer);
+                    this._queueScanTimer = null;
+                }
+                this.clearAllParticles();
+            }
+            scanAndFireOnce() {
+                if (!this.gameRunning) return;
+                const firingColors = new Set();
+                for (let qIndex = 0; qIndex < this.attackQueue.length; qIndex++) {
+                    const q = this.attackQueue[qIndex];
+                    if (!q || q.isFiring || q.number <= 0) {
+                        if (q && q.isFiring) firingColors.add(q.color);
+                        continue;
+                    }
+                    if (firingColors.has(q.color)) continue;
+                    let foundLane = -1;
+                    for (let laneIndex = 0; laneIndex < this.targetLanes.length; laneIndex++) {
+                        const lane = this.targetLanes[laneIndex];
+                        if (lane.length > 0 && lane[0].color === q.color) {
+                            foundLane = laneIndex;
+                            break;
+                        }
+                    }
+                    if (foundLane !== -1) {
+                        this.attackQueue[qIndex].isFiring = true;
+                        firingColors.add(q.color);
+                        this.fireFromQueueIndex(qIndex, foundLane);
+                    }
+                }
+                this.checkQueueStuck();
+            }
+            fireFromQueueIndex(queueIndex, laneIndex) {
+                const queued = this.attackQueue[queueIndex];
+                if (!queued || queued.number <= 0) {
+                    this.attackQueue[queueIndex] = null;
+                    this.scheduleUpdate();
+                    return;
+                }
+                const lane = this.targetLanes[laneIndex];
+                if (!lane || lane.length === 0) {
+                    this.attackQueue[queueIndex].isFiring = false;
+                    this.scheduleUpdate();
+                    return;
+                }
+                const shotInterval = 1000 / 27;
+                let shotsFired = 0;
+                let lastShotTime = performance.now();
+                const fireLoop = (now) => {
+                    if (!this.gameRunning) {
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+                        this.scheduleUpdate();
+                        return;
+                    }
+                    const lane = this.targetLanes[laneIndex];
+                    if (!lane || lane.length === 0 || lane[0].color !== queued.color) {
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+                        this.scheduleUpdate();
+                        return;
+                    }
+                    const currentBottom = lane[0];
+                    if (!currentBottom) {
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+                        this.scheduleUpdate();
+                        return;
+                    }
+                    if (now - lastShotTime >= shotInterval) {
+                        if (this._particleCount < this._maxParticles) {
+                            this.createSingleParticle(queueIndex, laneIndex, queued.color);
+                            this._particleCount++;
+                        }
+                        currentBottom.number -= 1;
+                        queued.number -= 1;
+                        shotsFired++;
+                        this.score += 1;
+                        this.updateDisplay();
+                        lastShotTime = now;
+                        this.updateTargetLanes();
+                        this.updateQueue();
+                        if (currentBottom.number <= 0) {
+                            this.targetLanes[laneIndex].shift();
+                            if (lane.length > 0 && lane[0].color === queued.color) {
+                                this.updateTargetLanes();
+                            }
+                        }
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(30);
+                        }
+                    }
+                    if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
+                        requestAnimationFrame(fireLoop);
+                    } else {
+                        this.showDamageText(laneIndex, shotsFired);
+                        this.showMessage(`🎯 매칭 성공! +${shotsFired}점`, 'success');
+                        console.log(`매칭 성공! +${shotsFired}점`);
+                        if (queued.number > 0) {
+                            console.log(`잔여값 ${queued.number} 남음`);
+                        } else {
+                            this.attackQueue[queueIndex] = null;
+                        }
+                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+                        this.updateTargetLanes();
+                        this.scheduleUpdate(() => {
+                            this.checkStageClear();
+                        });
+                    }
+                };
+                requestAnimationFrame(fireLoop);
+            }
+            createSingleParticle(queueIndex, laneIndex, color) {
+                const queueArea = document.getElementById('queueArea');
+                const targetLanes = document.getElementById('targetLanes');
+                const slotEl = queueArea.children[queueIndex];
+                if (!slotEl) {
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
+                const slotRect = slotEl.getBoundingClientRect();
+                const startX = slotRect.left + slotRect.width / 2 + window.scrollX;
+                const startY = slotRect.top + slotRect.height / 2 + window.scrollY;
+                const laneEl = targetLanes.children[laneIndex];
+                if (!laneEl) {
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
+                const bottomBlock = laneEl.children[0];
+                if (!bottomBlock) {
+                    this._particleCount = Math.max(0, this._particleCount - 1);
+                    return;
+                }
+                const targetRect = bottomBlock.getBoundingClientRect();
+                const targetX = targetRect.left + targetRect.width / 2 + window.scrollX;
+                const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
+                const p = document.createElement('div');
+                p.className = 'shooting-particle';
+                const particleColors = this.colorParticleMap[color];
+                if (particleColors) {
+                    p.style.setProperty('--particle-color', particleColors.color);
+                    p.style.setProperty('--particle-color-dark', particleColors.dark);
+                } else {
+                    p.style.setProperty('--particle-color', '#ffffff');
+                    p.style.setProperty('--particle-color-dark', '#cccccc');
+                }
+                p.style.left = startX + 'px';
+                p.style.top = startY + 'px';
+                p.style.opacity = '1';
+                document.body.appendChild(p);
+                const duration = 250;
+                const start = performance.now();
+                function easeOutCubic(t) {
+                    return 1 - Math.pow(1 - t, 3);
+                }
+                const frame = (now) => {
+                    const t = Math.min(1, (now - start) / duration);
+                    const eased = easeOutCubic(t);
+                    const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 2;
+                    const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 2;
+                    p.style.left = curX + 'px';
+                    p.style.top = curY + 'px';
+                    p.style.opacity = String(1 - eased * 0.3);
+                    const scale = 1 - 0.4 * eased;
+                    p.style.transform = `translate(-50%,-50%) scale(${scale})`;
+                    if (t < 1) {
+                        requestAnimationFrame(frame);
+                    } else {
+                        if (p.parentNode) {
+                            p.parentNode.removeChild(p);
+                            this._particleCount = Math.max(0, this._particleCount - 1);
+                        }
+                    }
+                };
+                requestAnimationFrame(frame.bind(this));
+                setTimeout(() => {
+                    if (p.parentNode) {
+                        p.parentNode.removeChild(p);
+                        this._particleCount = Math.max(0, this._particleCount - 1);
+                    }
+                }, duration + 100);
+            }
+            showDamageText(laneIndex, damage) {
+                const targetLanesEl = document.getElementById('targetLanes');
+                const laneEl = targetLanesEl.children[laneIndex];
+                if (!laneEl) return;
+                const bottomBlock = laneEl.children[0];
+                if (!bottomBlock) return;
+                const rect = bottomBlock.getBoundingClientRect();
+                const tx = rect.left + rect.width / 2;
+                const ty = rect.top + rect.height / 2;
+                const d = document.createElement('div');
+                d.className = 'damage-text';
+                d.textContent = `-${damage}`;
+                d.style.left = tx + 'px';
+                d.style.top = ty + 'px';
+                document.body.appendChild(d);
+                setTimeout(() => {
+                    if (d.parentNode) d.parentNode.removeChild(d);
+                }, 1000);
+            }
+            checkStageClear() {
+                const allCleared = this.targetLanes.every(lane => lane.length === 0);
+                if (allCleared) {
+                    this.clearedStages.add(this.stage);
+                    this.gameRunning = false;
+                    this.stopQueueScanLoop();
+                    this.clearAllParticles();
+                    console.log(`Stage ${this.stage} cleared, targetLanes: ${JSON.stringify(this.targetLanes)}`);
+                    if (this.stage < 15) {
+                        this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
+                    } else {
+                        this.saveScoreAndFinish();
+                    }
+                }
+            }
+            async saveScoreAndAdvance() {
+                try {
+                    const scoreData = {
+                        name: playerName || '익명',
+                        score: Number(this.score),
+                        timestamp: Date.now()
+                    };
+                    await push(ref(db, 'scores/game1'), scoreData);
+                    this.advanceStage();
+                } catch (error) {
+                    console.error('Stage score save error:', error);
+                    this.showMessage(`⚠️ 점수 저장 실패: ${error.message}`, 'error');
+                    this.advanceStage();
+                }
+            }
+            async saveScoreAndFinish() {
+                try {
+                    console.log('Saving final score:', this.score, 'for player:', playerName);
+                    const scoreData = {
+                        name: playerName || '익명',
+                        score: Number(this.score),
+                        timestamp: Date.now()
+                    };
+                    console.log('Score data to save:', scoreData);
+                    await push(ref(db, 'scores/game1'), scoreData);
+                    console.log('Score saved successfully');
+                    const rankings = await this.fetchRankings();
+                    this.showGameOverModal(`🎉 모든 스테이지 완료!\n최종 점수: ${this.score}점\n\n랭킹에 등록되었습니다!`, rankings);
+                } catch (error) {
+                    console.error('Score save error:', error);
+                    console.error('Error details:', error.message, error.code);
+                    this.showGameOverModal(`🎉 모든 스테이지 완료!\n최종 점수: ${this.score}점\n\n⚠️ 랭킹 등록 실패: ${error.message}`, []);
+                }
+            }
+            showStageClearModal(message) {
+                console.log('Showing stage clear modal');
+                const root = document.getElementById('modalRoot');
+                root.innerHTML = '';
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `<h2>🎉 스테이지 클리어!</h2><p>${message}</p>`;
+                const actions = document.createElement('div');
+                actions.className = 'modal-actions';
+                const retry = document.createElement('button');
+                retry.className = 'btn btn-retry';
+                retry.textContent = '🏠 홈으로';
+                retry.addEventListener('click', () => {
+                    console.log('Home button clicked');
+                    root.innerHTML = '';
+                    window.location.href = 'index.html';
+                });
+                const next = document.createElement('button');
+                next.className = 'btn btn-next';
+                next.textContent = '▶️ 다음 스테이지';
+                next.addEventListener('click', () => {
+                    console.log('Next stage button clicked');
+                    root.innerHTML = '';
+                    this.saveScoreAndAdvance();
+                });
+                actions.appendChild(retry);
+                actions.appendChild(next);
+                modal.appendChild(actions);
+                backdrop.appendChild(modal);
+                root.appendChild(backdrop);
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
+                setTimeout(() => {
+                    if (root.children.length > 0) {
+                        console.log('Auto-advancing to next stage after timeout');
+                        root.innerHTML = '';
+                        this.saveScoreAndAdvance();
+                    }
+                }, 3000);
+            }
+            showGameOverModal(message, rankings) {
+                const root = document.getElementById('modalRoot');
+                root.innerHTML = '';
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `<h2>🎮 게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
+                // 랭킹 표시
+                const rankingDiv = document.createElement('div');
+                rankingDiv.style.margin = '20px 0';
+                rankingDiv.style.textAlign = 'left';
+                rankingDiv.style.fontSize = '14px';
+                rankingDiv.style.color = '#0284c7';
+                rankingDiv.innerHTML = '<h3 style="margin: 0 0 10px 0; font-size: 16px;">🏆 랭킹</h3>';
+                if (rankings.length === 0) {
+                    rankingDiv.innerHTML += '<p>랭킹 데이터 없음</p>';
+                } else {
+                    rankings.forEach((entry, index) => {
+                        rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${index + 1}위</span> ${entry.name || '익명'} - ${entry.score}점</p>`;
+                    });
+                }
+                modal.appendChild(rankingDiv);
+                const actions = document.createElement('div');
+                actions.className = 'modal-actions';
+                const retry = document.createElement('button');
+                retry.className = 'btn btn-retry';
+                retry.textContent = '🔄 재도전';
+                retry.onclick = () => {
+                    root.innerHTML = '';
+                    this.resetGame();
+                };
+                const home = document.createElement('button');
+                home.className = 'btn btn-home';
+                home.textContent = '🏠 홈으로';
+                home.onclick = () => {
+                    window.location.href = 'index.html';
+                };
+                actions.appendChild(retry);
+                actions.appendChild(home);
+                modal.appendChild(actions);
+                backdrop.appendChild(modal);
+                root.appendChild(backdrop);
+            }
+            advanceStage() {
+                this.stage++;
+                console.log(`Advancing to stage ${this.stage}`);
+                this.clearAllParticles();
+                this.initStage();
+                this.updateQueueUI();
+                this.updateStacksAndQueue();
+                this.updateTargetLanes();
+                this.updateStageProgress();
+                this.updateDisplay();
+                this.gameRunning = true;
+                this.startQueueScanLoop();
+                this.showMessage(`🚀 스테이지 ${this.stage} 시작!`, 'success');
+            }
+            checkQueueStuck() {
+                if (this.getAvailableQueueSlot() !== -1) {
+                    this.scheduleUpdate();
+                    return;
+                }
+                for (let q of this.attackQueue) {
+                    if (!q || q.number <= 0) continue;
+                    for (let lane of this.targetLanes) {
+                        if (lane.length > 0 && lane[0].color === q.color) {
+                            this.scheduleUpdate();
+                            return;
+                        }
+                    }
+                }
+                this.gameRunning = false;
+                this.stopQueueScanLoop();
+                this.showMessage('❌ 대기열이 가득 차 매칭 불가!', 'error');
+                this.saveScoreAndGameOver();
+            }
+            async saveScoreAndGameOver() {
+                try {
+                    console.log('Saving game over score:', this.score, 'for player:', playerName);
+                    const scoreData = {
+                        name: playerName || '익명',
+                        score: Number(this.score),
+                        timestamp: Date.now()
+                    };
+                    console.log('Score data to save:', scoreData);
+                    await push(ref(db, 'scores/game1'), scoreData);
+                    console.log('Score saved successfully');
+                    const rankings = await this.fetchRankings();
+                    this.showGameOverModal(`게임 오버!\n최종 점수: ${this.score}점\n\n랭킹에 등록되었습니다!`, rankings);
+                } catch (error) {
+                    console.error('Score save error:', error);
+                    console.error('Error details:', error.message, error.code);
+                    this.showGameOverModal(`게임 오버!\n최종 점수: ${this.score}점\n\n⚠️ 랭킹 등록 실패: ${error.message}`, []);
+                }
+            }
+            async fetchRankings() {
+                try {
+                    const scoresRef = ref(db, 'scores/game1');
+                    const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(3));
+                    const snapshot = await get(topScoresQuery);
+                    const rankings = [];
+                    snapshot.forEach((child) => {
+                        rankings.unshift(child.val());
+                    });
+                    return rankings;
+                } catch (error) {
+                    console.error('Error fetching rankings:', error);
+                    return [];
+                }
+            }
+            updateStageProgress() {
+                const stageProgress = document.getElementById('stageProgress');
+                stageProgress.innerHTML = '';
+                for (let i = 1; i <= 15; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = `stage-indicator ${
+                        i === this.stage ? 'current' : this.clearedStages.has(i) ? 'cleared' : ''
+                    }`;
+                    indicator.dataset.stage = i;
+                    indicator.textContent = i;
+                    stageProgress.appendChild(indicator);
+                }
+            }
+            updateDisplay() {
+                document.getElementById('stage').textContent = this.stage;
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('colorCount').textContent = this.stageConfig[this.stage].colors;
+                this.updateTargetLanes();
+                this.updateStageProgress();
+                this.scheduleUpdate();
+            }
+            updateTargetLanes() {
+                const targetContainer = document.getElementById('targetLanes');
+                targetContainer.innerHTML = '';
+                this.targetLanes.forEach((lane, laneIndex) => {
+                    const laneEl = document.createElement('div');
+                    laneEl.className = 'target-lane';
+                    lane.forEach((block, idx) => {
+                        const blockEl = document.createElement('div');
+                        blockEl.className = `target-block ${block.color}`;
+                        blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
+                        if (idx === 0) {
+                            blockEl.classList.add('attackable');
+                        }
+                        laneEl.appendChild(blockEl);
+                    });
+                    targetContainer.appendChild(laneEl);
+                });
+            }
+            updateQueueUI() {
+                const queueArea = document.getElementById('queueArea');
+                queueArea.innerHTML = '';
+                const config = this.stageConfig[this.stage];
+                for (let i = 0; i < config.queueSlots; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'queue-slot';
+                    slot.id = `queue${i}`;
+                    slot.textContent = 'Empty';
+                    queueArea.appendChild(slot);
+                }
+                this.updateQueue();
+            }
+            scheduleUpdate(callback = null) {
+                if (this._pendingUpdate) return;
+                this._pendingUpdate = true;
+                requestAnimationFrame(() => {
+                    this.updateStacksAndQueue();
+                    this._pendingUpdate = false;
+                    if (callback) callback();
+                    this.checkStageClear();
+                });
+            }
+            updateStacksAndQueue() {
+                const stacksContainer = document.getElementById('stacksContainer');
+                stacksContainer.innerHTML = '';
+                this.stacks.forEach((stack, stackIndex) => {
+                    const stackEl = document.createElement('div');
+                    stackEl.className = 'stack';
+                    for (let blockIndex = 0; blockIndex < stack.length; blockIndex++) {
+                        const block = stack[blockIndex];
+                        const blockEl = document.createElement('div');
+                        blockEl.className = `stack-block ${block.color}`;
+                        blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
+                        blockEl.dataset.stackIndex = stackIndex;
+                        if (blockIndex === 0 && this.gameRunning && this.getAvailableQueueSlot() !== -1) {
+                            blockEl.classList.add('top-block');
+                            blockEl.addEventListener('pointerdown', (e) => {
+                                e.preventDefault();
+                                this.handleBlockTouch(stackIndex);
+                            }, { passive: false, once: true });
+                        } else {
+                            blockEl.style.cursor = 'not-allowed';
+                        }
+                        stackEl.appendChild(blockEl);
+                    }
+                    stacksContainer.appendChild(stackEl);
+                });
+                this.updateQueue();
+            }
+            updateQueue() {
+                const queueArea = document.getElementById('queueArea');
+                for (let i = 0; i < this.attackQueue.length; i++) {
+                    const slot = queueArea.children[i];
+                    if (!slot) continue;
+                    slot.innerHTML = '';
+                    slot.className = 'queue-slot';
+                    if (this.attackQueue[i] && this.attackQueue[i].number > 0) {
+                        const block = this.attackQueue[i];
+                        slot.className = `queue-block ${block.color} ${!block.isFiring ? 'added' : ''}`;
+                        slot.innerHTML = `<div class="block-number">${block.number}</div>`;
+                    } else {
+                        slot.innerHTML = 'Empty';
+                        if (this.attackQueue[i]) {
+                            this.attackQueue[i] = null;
+                        }
+                    }
+                }
+            }
+            handleBlockTouch(stackIndex) {
+                this.selectBlock(stackIndex);
+            }
         }
-      };
-      requestAnimationFrame(fireLoop);
-    }
-
-    createSingleParticle(queueIndex, laneIndex, color) {
-      const queueArea = document.getElementById('queueArea');
-      const targetLanes = document.getElementById('targetLanes');
-
-      const slotEl = queueArea.children[queueIndex];
-      if (!slotEl) {
-        this._particleCount = Math.max(0, this._particleCount - 1);
-        return;
-      }
-      const slotRect = slotEl.getBoundingClientRect();
-      const startX = slotRect.left + slotRect.width / 2 + window.scrollX;
-      const startY = slotRect.top + slotRect.height / 2 + window.scrollY;
-
-      const laneEl = targetLanes.children[laneIndex];
-      if (!laneEl) {
-        this._particleCount = Math.max(0, this._particleCount - 1);
-        return;
-      }
-      const bottomBlock = laneEl.children[0];
-      if (!bottomBlock) {
-        this._particleCount = Math.max(0, this._particleCount - 1);
-        return;
-      }
-      const targetRect = bottomBlock.getBoundingClientRect();
-      const targetX = targetRect.left + targetRect.width / 2 + window.scrollX;
-      const targetY = targetRect.top + targetRect.height / 2 + window.scrollY;
-
-      const p = document.createElement('div');
-      p.className = 'shooting-particle';
-      const particleColors = this.colorParticleMap[color];
-      if (particleColors) {
-        p.style.setProperty('--particle-color', particleColors.color);
-        p.style.setProperty('--particle-color-dark', particleColors.dark);
-      } else {
-        p.style.setProperty('--particle-color', '#ffffff');
-        p.style.setProperty('--particle-color-dark', '#cccccc');
-      }
-      p.style.left = startX + 'px';
-      p.style.top = startY + 'px';
-      p.style.opacity = '1';
-
-      document.body.appendChild(p);
-
-      const duration = 250;
-      const start = performance.now();
-
-      function easeOutCubic(t) {
-        return 1 - Math.pow(1 - t, 3);
-      }
-
-      const frame = (now) => {
-        const t = Math.min(1, (now - start) / duration);
-        const eased = easeOutCubic(t);
-        const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 2;
-        const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 2;
-        p.style.left = curX + 'px';
-        p.style.top = curY + 'px';
-        p.style.opacity = String(1 - eased * 0.3);
-        const scale = 1 - 0.4 * eased;
-        p.style.transform = `translate(-50%,-50%) scale(${scale})`;
-
-        if (t < 1) {
-          requestAnimationFrame(frame);
-        } else {
-          if (p.parentNode) {
-            p.parentNode.removeChild(p);
-            this._particleCount = Math.max(0, this._particleCount - 1);
-          }
+        let game;
+        function startIntroGame() {
+            playerName = localStorage.getItem('playerName') || 'Guest';
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'flex';
+            if (!game) {
+                game = new ColorShooterGame();
+                game.initGame();
+            }
+            game.startGame();
         }
-      };
-
-      requestAnimationFrame(frame.bind(this));
-
-      setTimeout(() => {
-        if (p.parentNode) {
-          p.parentNode.removeChild(p);
-          this._particleCount = Math.max(0, this._particleCount - 1);
+        function resetGame() {
+            if (game) game.resetGame();
         }
-      }, duration + 100);
-    }
-
-    showDamageText(laneIndex, damage) {
-      const targetLanesEl = document.getElementById('targetLanes');
-      const laneEl = targetLanesEl.children[laneIndex];
-      if (!laneEl) return;
-
-      const bottomBlock = laneEl.children[0];
-      if (!bottomBlock) return;
-
-      const rect = bottomBlock.getBoundingClientRect();
-      const tx = rect.left + rect.width / 2;
-      const ty = rect.top + rect.height / 2;
-
-      const d = document.createElement('div');
-      d.className = 'damage-text';
-      d.textContent = `-${damage}`;
-      d.style.left = tx + 'px';
-      d.style.top = ty + 'px';
-      document.body.appendChild(d);
-
-      setTimeout(() => {
-        if (d.parentNode) d.parentNode.removeChild(d);
-      }, 1000);
-    }
-
-    async fetchRankings() {
-      try {
-        const scoresRef = ref(db, 'scores/game1');
-        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(3));
-        const snapshot = await get(topScoresQuery);
-        const rankings = [];
-        snapshot.forEach((child) => {
-          rankings.unshift(child.val());
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            createBackgroundEffects();
+            document.getElementById('intro').style.display = 'flex';
+            document.getElementById('gameContainer').style.display = 'none';
+            const nameDisplay = document.createElement('p');
+            nameDisplay.style.color = '#0284c7';
+            nameDisplay.style.fontWeight = '700';
+            nameDisplay.textContent = `👤 플레이어: ${playerName}`;
+            document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
+            document.getElementById('startGameBtn').addEventListener('click', startIntroGame);
+            document.getElementById('goHomeBtn').addEventListener('click', goHome);
+            document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+            document.getElementById('goHomeBtn2').addEventListener('click', goHome);
+            console.log('Game loaded at', new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }));
         });
-        return rankings;
-      } catch (error) {
-        console.error('Error fetching rankings:', error);
-        return [];
-      }
-    }
-
-   checkStageClear() {
-  const allCleared = this.targetLanes.every(lane => lane.length === 0);
-  if (allCleared) {
-    this.clearedStages.add(this.stage);
-    this.gameRunning = false;
-    this.stopQueueScanLoop();
-    this.clearAllParticles();
-    console.log(`Stage ${this.stage} cleared, targetLanes: ${JSON.stringify(this.targetLanes)}`);
-    if (this.stage < 15) {
-      this.showStageClearModal(`스테이지 ${this.stage} 클리어! 점수: ${this.score}`);
-    } else {
-      this.saveScoreAndFinish();
-    }
-  }
-}
-
-async saveScoreAndAdvance() {
-    try {
-      const scoreData = {
-        name: playerName || '익명',
-        score: Number(this.score),
-        timestamp: Date.now()
-      };
-      await push(ref(db, 'scores/game1'), scoreData);
-      this.advanceStage();  // 성공 시 바로 진행
-    } catch (error) {
-      console.error('Stage score save error:', error);
-      this.showMessage(`⚠️ 점수 저장 실패: ${error.message}`, 'error');
-      this.advanceStage();  // 에러 시에도 강제 진행 (수정: requestAnimationFrame 제거, 직접 호출)
-    }
-  }
-
-async saveScoreAndFinish() {
-  try {
-    console.log('Saving final score:', this.score, 'for player:', playerName);
-    const scoreData = {
-      name: playerName || '익명',
-      score: Number(this.score),
-      timestamp: Date.now()
-    };
-    console.log('Score data to save:', scoreData);
-    
-    await push(ref(db, 'scores/game1'), scoreData);
-    console.log('Score saved successfully');
-    
-    const rankings = await this.fetchRankings();
-    this.showGameOverModal(`🎉 모든 스테이지 완료!\n최종 점수: ${this.score}점\n\n랭킹에 등록되었습니다!`, rankings);
-  } catch (error) {
-    console.error('Score save error:', error);
-    console.error('Error details:', error.message, error.code);
-    this.showGameOverModal(`🎉 모든 스테이지 완료!\n최종 점수: ${this.score}점\n\n⚠️ 랭킹 등록 실패: ${error.message}`, []);
-  }
-}
-
-showStageClearModal(message, rankings) {
-  // 이 메서드는 더 이상 사용되지 않으므로 삭제 가능
-  // 필요 시 기존 코드를 참고로 유지할 수 있음
-}
-
-    showGameOverModal(message, rankings) {
-      const root = document.getElementById('modalRoot');
-      root.innerHTML = '';
-      const backdrop = document.createElement('div');
-      backdrop.className = 'modal-backdrop';
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.innerHTML = `<h2>🎮 게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
-
-      // 랭킹 표시
-      const rankingDiv = document.createElement('div');
-      rankingDiv.style.margin = '20px 0';
-      rankingDiv.style.textAlign = 'left';
-      rankingDiv.style.fontSize = '14px';
-      rankingDiv.style.color = '#0284c7';
-      rankingDiv.innerHTML = '<h3 style="margin: 0 0 10px 0; font-size: 16px;">🏆 랭킹</h3>';
-      
-      if (rankings.length === 0) {
-        rankingDiv.innerHTML += '<p>랭킹 데이터 없음</p>';
-      } else {
-        rankings.forEach((entry, index) => {
-          rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${index + 1}위</span> ${entry.name || '익명'} - ${entry.score}점</p>`;
-        });
-      }
-      modal.appendChild(rankingDiv);
-
-      const actions = document.createElement('div');
-      actions.className = 'modal-actions';
-      const retry = document.createElement('button');
-      retry.className = 'btn btn-retry';
-      retry.textContent = '🔄 재도전';
-      retry.onclick = () => {
-        root.innerHTML = '';
-        this.resetGame();
-      };
-      const home = document.createElement('button');
-      home.className = 'btn btn-home';
-      home.textContent = '🏠 홈으로';
-      home.onclick = () => {
-        window.location.href = 'index.html';
-      };
-      actions.appendChild(retry);
-      actions.appendChild(home);
-      modal.appendChild(actions);
-      backdrop.appendChild(modal);
-      root.appendChild(backdrop);
-    }
-
-advanceStage() {
-  this.stage++;
-  console.log(`Advancing to stage ${this.stage}`);
-  this.clearAllParticles();
-  this.initStage();
-  this.updateQueueUI();
-  this.updateStacksAndQueue();
-  this.updateTargetLanes();
-  this.updateStageProgress();
-  this.updateDisplay();
-  this.gameRunning = true;
-  this.startQueueScanLoop();
-  this.showMessage(`🚀 스테이지 ${this.stage} 시작!`, 'success');
-}
-
-showStageClearModal(message) {
-  console.log('Showing stage clear modal');
-  const root = document.getElementById('modalRoot');
-  root.innerHTML = '';
-  const backdrop = document.createElement('div');
-  backdrop.className = 'modal-backdrop';
-  const modal = document.createElement('div');
-  modal.className = 'modal';
-  modal.innerHTML = `<h2>🎉 스테이지 클리어!</h2><p>${message}</p>`;
-  const actions = document.createElement('div');
-  actions.className = 'modal-actions';
-  const retry = document.createElement('button');
-  retry.className = 'btn btn-retry';
-  retry.textContent = '🏠 홈으로';
-  retry.addEventListener('click', () => {
-    console.log('Home button clicked');
-    root.innerHTML = '';
-    window.location.href = 'index.html';
-  });
-  const next = document.createElement('button');
-  next.className = 'btn btn-next';
-  next.textContent = '▶️ 다음 스테이지';
-  next.addEventListener('click', () => {
-    console.log('Next stage button clicked');
-    root.innerHTML = '';
-    this.saveScoreAndAdvance();
-  });
-  actions.appendChild(retry);
-  actions.appendChild(next);
-  modal.appendChild(actions);
-  backdrop.appendChild(modal);
-  root.appendChild(backdrop);
-  if ('vibrate' in navigator) {
-    navigator.vibrate([200, 100, 200]);
-  }
-  setTimeout(() => {
-    if (root.children.length > 0) {
-      console.log('Auto-advancing to next stage after timeout');
-      root.innerHTML = '';
-      this.saveScoreAndAdvance();
-    }
-  }, 3000);
-}
-
-    checkQueueStuck() {
-      if (this.getAvailableQueueSlot() !== -1) {
-        this.scheduleUpdate();
-        return;
-      }
-      for (let q of this.attackQueue) {
-        if (!q || q.number <= 0) continue;
-        for (let lane of this.targetLanes) {
-          if (lane.length > 0 && lane[0].color === q.color) {
-            this.scheduleUpdate();
-            return;
-          }
-        }
-      }
-      this.gameRunning = false;
-      this.stopQueueScanLoop();
-      this.showMessage('❌ 대기열이 가득 차 매칭 불가!', 'error');
-      this.saveScoreAndGameOver();
-    }
-
-    async saveScoreAndGameOver() {
-      try {
-        console.log('Saving game over score:', this.score, 'for player:', playerName);
-        const scoreData = {
-          name: playerName || '익명',
-          score: Number(this.score),
-          timestamp: Date.now()
-        };
-        console.log('Score data to save:', scoreData);
-        
-        await push(ref(db, 'scores/game1'), scoreData);
-        console.log('Score saved successfully');
-        
-        const rankings = await this.fetchRankings();
-        this.showGameOverModal(`게임 오버!\n최종 점수: ${this.score}점\n\n랭킹에 등록되었습니다!`, rankings);
-      } catch (error) {
-        console.error('Score save error:', error);
-        console.error('Error details:', error.message, error.code);
-        this.showGameOverModal(`게임 오버!\n최종 점수: ${this.score}점\n\n⚠️ 랭킹 등록 실패: ${error.message}`, []);
-      }
-    }
-
-    updateStageProgress() {
-      const stageProgress = document.getElementById('stageProgress');
-      stageProgress.innerHTML = '';
-      for (let i = 1; i <= 15; i++) {
-        const indicator = document.createElement('div');
-        indicator.className = `stage-indicator ${
-          i === this.stage ? 'current' : this.clearedStages.has(i) ? 'cleared' : ''
-        }`;
-        indicator.dataset.stage = i;
-        indicator.textContent = i;
-        stageProgress.appendChild(indicator);
-      }
-    }
-
-    updateDisplay() {
-      document.getElementById('stage').textContent = this.stage;
-      document.getElementById('score').textContent = this.score;
-      document.getElementById('colorCount').textContent = this.stageConfig[this.stage].colors;
-      this.updateTargetLanes();
-      this.updateStageProgress();
-      this.scheduleUpdate();
-    }
-
-    updateTargetLanes() {
-      const targetContainer = document.getElementById('targetLanes');
-      targetContainer.innerHTML = '';
-      
-      this.targetLanes.forEach((lane, laneIndex) => {
-        const laneEl = document.createElement('div');
-        laneEl.className = 'target-lane';
-        lane.forEach((block, idx) => {
-          const blockEl = document.createElement('div');
-          blockEl.className = `target-block ${block.color}`;
-          blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
-          if (idx === 0) {
-            blockEl.classList.add('attackable');
-          }
-          laneEl.appendChild(blockEl);
-        });
-        targetContainer.appendChild(laneEl);
-      });
-    }
-
-    updateQueueUI() {
-      const queueArea = document.getElementById('queueArea');
-      queueArea.innerHTML = '';
-      const config = this.stageConfig[this.stage];
-      for (let i = 0; i < config.queueSlots; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'queue-slot';
-        slot.id = `queue${i}`;
-        slot.textContent = 'Empty';
-        queueArea.appendChild(slot);
-      }
-      this.updateQueue();
-    }
-
-    scheduleUpdate(callback = null) {
-      if (this._pendingUpdate) return;
-      this._pendingUpdate = true;
-      requestAnimationFrame(() => {
-        this.updateStacksAndQueue();
-        this._pendingUpdate = false;
-        if (callback) callback();
-        this.checkStageClear();
-      });
-    }
-
-    updateStacksAndQueue() {
-      const stacksContainer = document.getElementById('stacksContainer');
-      stacksContainer.innerHTML = '';
-      
-      this.stacks.forEach((stack, stackIndex) => {
-        const stackEl = document.createElement('div');
-        stackEl.className = 'stack';
-        for (let blockIndex = 0; blockIndex < stack.length; blockIndex++) {
-          const block = stack[blockIndex];
-          const blockEl = document.createElement('div');
-          blockEl.className = `stack-block ${block.color}`;
-          blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
-          blockEl.dataset.stackIndex = stackIndex;
-          if (blockIndex === 0 && this.gameRunning && this.getAvailableQueueSlot() !== -1) {
-            blockEl.classList.add('top-block');
-            blockEl.addEventListener('pointerdown', (e) => {
-              e.preventDefault();
-              this.handleBlockTouch(stackIndex);
-            }, { passive: false, once: true });
-          } else {
-            blockEl.style.cursor = 'not-allowed';
-          }
-          stackEl.appendChild(blockEl);
-        }
-        stacksContainer.appendChild(stackEl);
-      });
-      this.updateQueue();
-    }
-
-    updateQueue() {
-      const queueArea = document.getElementById('queueArea');
-      for (let i = 0; i < this.attackQueue.length; i++) {
-        const slot = queueArea.children[i];
-        if (!slot) continue;
-        slot.innerHTML = '';
-        slot.className = 'queue-slot';
-        if (this.attackQueue[i] && this.attackQueue[i].number > 0) {
-          const block = this.attackQueue[i];
-          slot.className = `queue-block ${block.color} ${!block.isFiring ? 'added' : ''}`;
-          slot.innerHTML = `<div class="block-number">${block.number}</div>`;
-        } else {
-          slot.innerHTML = 'Empty';
-          if (this.attackQueue[i]) {
-            this.attackQueue[i] = null;
-          }
-        }
-      }
-    }
-
-    handleBlockTouch(stackIndex) {
-      this.selectBlock(stackIndex);
-    }
-  }
-
-  let game;
-
-function startIntroGame() {
-  playerName = localStorage.getItem('playerName') || 'Guest';  // 모달 없이 기본값 사용
-  // 이름 표시 (intro에)
-  const nameDisplay = document.createElement('p');
-  nameDisplay.style.color = '#0284c7';
-  nameDisplay.style.fontWeight = '700';
-  nameDisplay.textContent = `👤 플레이어: ${playerName}`;
-  document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
-  
-  document.getElementById('intro').style.display = 'none';
-  document.getElementById('gameContainer').style.display = 'flex';
-  if (!game) {
-    game = new ColorShooterGame();
-    game.initGame();
-  }
-  game.startGame();
-}
-
-  function resetGame() {
-    if (game) game.resetGame();
-  }
-
-  function goHome() {
-    window.location.href = 'index.html';
-  }
-
-  // 이벤트 리스너 등록
-  document.addEventListener('DOMContentLoaded', function() {
-    createBackgroundEffects();
-    
-    document.getElementById('intro').style.display = 'flex';
-    document.getElementById('gameContainer').style.display = 'none';
-    
-    // 플레이어 이름 확인
-    if (!playerName || playerName === '익명') {
-      const nameDisplay = document.createElement('p');
-      nameDisplay.style.color = '#f87171';
-      nameDisplay.style.fontWeight = '700';
-      nameDisplay.textContent = '⚠️ 메인 화면에서 이름을 먼저 입력해주세요!';
-      document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
-    } else {
-      const nameDisplay = document.createElement('p');
-      nameDisplay.style.color = '#0284c7';
-      nameDisplay.style.fontWeight = '700';
-      nameDisplay.textContent = `👤 플레이어: ${playerName}`;
-      document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
-    }
-    
-    // 버튼 이벤트 연결
-    document.getElementById('startGameBtn').addEventListener('click', startIntroGame);
-    document.getElementById('goHomeBtn').addEventListener('click', goHome);
-    document.getElementById('resetGameBtn').addEventListener('click', resetGame);
-    document.getElementById('goHomeBtn2').addEventListener('click', goHome);
-  });
-</script>
+    </script>
 </body>
 </html>
