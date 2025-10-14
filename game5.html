@@ -268,7 +268,8 @@
             padding: 20px;
             border-radius: 15px;
             position: relative;
-            touch-action: none;  
+            touch-action: none;
+            justify-items: center;
         }
 
         /* Apple emoji tile styling */
@@ -593,6 +594,7 @@
                 grid-template-columns: repeat(6, 1fr);
                 padding: 25px;
                 gap: 8px;
+                justify-items: center;
             }
             .tile, .empty-slot { width: 55px; height: 55px; }
             .tile::before { font-size: 50px; }
@@ -601,94 +603,128 @@
 
         /* 작은 모바일 (480px 이하) */
         @media (max-width: 480px) {
-            body { padding: 20px; }
+            body { padding: 15px; }
             .welcome-content { 
-                padding: 25px 15px; 
-                width: 80%;
+                padding: 20px 15px; 
+                width: 85%;
             }
             .welcome-title { font-size: 1.8em; }
             .game-rules { 
-                font-size: 0.9em; 
-                padding: 15px;
-                margin-bottom: 20px;
+                font-size: 0.85em; 
+                padding: 12px;
+                margin-bottom: 15px;
             }
-            .rule-item { margin-bottom: 10px; }
+            .rule-item { margin-bottom: 8px; }
             .start-button { 
-                padding: 15px 30px; 
-                font-size: 1.2em; 
+                padding: 12px 25px; 
+                font-size: 1.1em; 
             }
             .ranking-button { 
-                padding: 12px 25px; 
-                font-size: 1em; 
+                padding: 10px 20px; 
+                font-size: 0.95em; 
             }
             .game-container { 
-                padding: 15px; 
-                border-radius: 15px;
-                width: 80%;
-            }
-            h1 { font-size: 1.8em; }
-            .stage-info { 
-                font-size: 1em; 
                 padding: 12px; 
+                border-radius: 15px;
+                width: 85%;
+            }
+            h1 { font-size: 1.6em; margin-bottom: 8px; }
+            .stage-info { 
+                font-size: 0.95em; 
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+            .timer-text { font-size: 0.95em; margin-bottom: 8px; }
+            .timer-bar-container { 
+                height: 16px;
+                margin-bottom: 12px;
             }
             .score-board { 
-                padding: 12px; 
-                gap: 10px;
+                padding: 10px; 
+                gap: 8px;
+                margin-bottom: 15px;
             }
-            .score-label { font-size: 0.8em; }
-            .score-value { font-size: 1.5em; }
+            .score-label { font-size: 0.75em; }
+            .score-value { font-size: 1.4em; }
             .game-board { 
                 grid-template-columns: repeat(6, 1fr);
-                padding: 20px;
-                gap: 6px;
+                padding: 12px;
+                gap: 5px;
+                margin-bottom: 15px;
+                justify-items: center;
             }
             .tile, .empty-slot { 
-                width: 45px; 
-                height: 45px; 
+                width: 48px; 
+                height: 48px; 
             }
-            .tile::before { font-size: 40px; }
+            .tile::before { font-size: 42px; }
             .tile .number { 
-                font-size: 1.3em; 
-                width: 26px; 
-                height: 26px; 
+                font-size: 1.35em; 
+                width: 27px; 
+                height: 27px; 
             }
-            .controls { gap: 10px; }
+            .controls { gap: 8px; }
             .btn { 
-                padding: 10px 18px; 
-                font-size: 0.9em; 
+                padding: 8px 15px; 
+                font-size: 0.85em; 
             }
             .message { 
-                font-size: 1em; 
-                padding: 12px; 
+                font-size: 0.9em; 
+                padding: 10px;
+                margin-top: 12px;
             }
-            .timer-text { font-size: 1em; }
             .popup-content { 
-                padding: 25px 20px; 
+                padding: 20px 15px; 
                 width: 90%;
             }
-            .popup-title { font-size: 1.5em; }
-            .popup-score { font-size: 1.2em; }
+            .popup-title { font-size: 1.4em; }
+            .popup-score { font-size: 1.1em; margin-bottom: 20px; }
         }
 
         /* 아주 작은 모바일 (360px 이하) */
         @media (max-width: 360px) {
+            body { padding: 10px; }
+            .game-container { padding: 10px; width: 90%; }
+            h1 { font-size: 1.4em; margin-bottom: 6px; }
+            .stage-info { font-size: 0.9em; padding: 8px; margin-bottom: 10px; }
+            .timer-text { font-size: 0.9em; margin-bottom: 6px; }
+            .timer-bar-container { height: 14px; margin-bottom: 10px; }
+            .score-board { padding: 8px; gap: 6px; margin-bottom: 12px; }
+            .score-label { font-size: 0.7em; }
+            .score-value { font-size: 1.2em; }
             .game-board { 
                 grid-template-columns: repeat(6, 1fr);
                 gap: 4px;
-                padding: 15px;
+                padding: 10px;
+                margin-bottom: 12px;
+                justify-items: center;
             }
             .tile, .empty-slot { 
-                width: 40px; 
-                height: 40px; 
+                width: 42px; 
+                height: 42px; 
             }
-            .tile::before { font-size: 35px; }
+            .tile::before { font-size: 37px; }
             .tile .number { 
-                font-size: 1.1em; 
-                width: 23px; 
-                height: 23px; 
+                font-size: 1.2em; 
+                width: 24px; 
+                height: 24px; 
             }
-            h1 { font-size: 1.5em; }
-            .welcome-title { font-size: 1.5em; }
+            .controls { gap: 6px; }
+            .btn { 
+                padding: 7px 12px; 
+                font-size: 0.8em; 
+            }
+            .message { 
+                font-size: 0.85em; 
+                padding: 8px;
+                margin-top: 10px;
+            }
+            .welcome-title { font-size: 1.4em; }
+            .welcome-content { padding: 18px 12px; width: 90%; }
+            .game-rules { font-size: 0.8em; padding: 10px; margin-bottom: 12px; }
+            .rule-item { margin-bottom: 6px; }
+            .start-button { padding: 10px 20px; font-size: 1em; }
+            .ranking-button { padding: 8px 16px; font-size: 0.9em; }
         }
     </style>
 </head>
@@ -813,9 +849,9 @@ class AppleNumberGame {
         this.infiniteScore = 0;
         
         this.stageConfig = {
-            1: { rows: 8, cols: 6, gravity: false, name: "일반 모드" },
-            2: { rows: 8, cols: 6, gravity: true, name: "중력 모드" },
-            3: { rows: 8, cols: 6, gravity: true, name: "무한 모드", isInfinite: true }
+            1: { rows: 6, cols: 6, gravity: false, name: "일반 모드" },
+            2: { rows: 6, cols: 6, gravity: true, name: "중력 모드" },
+            3: { rows: 6, cols: 6, gravity: true, name: "무한 모드", isInfinite: true }
         };
         
         this.init();
