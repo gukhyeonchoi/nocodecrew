@@ -262,10 +262,10 @@
 
         .game-board {
             display: grid;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 30px;
             background: #ecf0f1;
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
             position: relative;
             touch-action: none;
@@ -274,8 +274,8 @@
 
         /* Apple emoji tile styling */
         .tile {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             position: relative;
             cursor: pointer;
             user-select: none;
@@ -290,7 +290,7 @@
         .tile::before {
             content: '🍎';
             position: absolute;
-            font-size: 60px;
+            font-size: 48px;
             z-index: 1;
             transition: all 0.3s ease;
         }
@@ -298,14 +298,14 @@
         .tile .number {
             position: relative;
             z-index: 3;
-            font-size: 1.8em;
+            font-size: 1.6em;
             font-weight: bold;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             background: rgba(0,0,0,0.4);
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -338,8 +338,8 @@
         }
 
         .empty-slot {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: transparent;
             border-radius: 10px;
         }
@@ -592,13 +592,13 @@
             h1 { font-size: 2em; }
             .game-board { 
                 grid-template-columns: repeat(6, 1fr);
-                padding: 25px;
-                gap: 8px;
+                padding: 20px;
+                gap: 7px;
                 justify-items: center;
             }
-            .tile, .empty-slot { width: 55px; height: 55px; }
-            .tile::before { font-size: 50px; }
-            .tile .number { font-size: 1.5em; width: 30px; height: 30px; }
+            .tile, .empty-slot { width: 48px; height: 48px; }
+            .tile::before { font-size: 44px; }
+            .tile .number { font-size: 1.5em; width: 28px; height: 28px; }
         }
 
         /* 작은 모바일 (480px 이하) */
@@ -700,14 +700,14 @@
                 justify-items: center;
             }
             .tile, .empty-slot { 
-                width: 42px; 
-                height: 42px; 
+                width: 38px; 
+                height: 38px; 
             }
-            .tile::before { font-size: 37px; }
+            .tile::before { font-size: 33px; }
             .tile .number { 
-                font-size: 1.2em; 
-                width: 24px; 
-                height: 24px; 
+                font-size: 1.1em; 
+                width: 22px; 
+                height: 22px; 
             }
             .controls { gap: 6px; }
             .btn { 
@@ -1288,15 +1288,8 @@ class AppleNumberGame {
         popup.className = 'stage-complete-popup';
         
         const isLastStage = this.currentStage === 2;
-        const prevBest = this.stageScores[this.currentStage] || 0;
-        const isNewRecord = score > prevBest;
         
         let scoreText = `이번 점수: ${score.toLocaleString()}점`;
-        if (prevBest > 0 && !isNewRecord) {
-            scoreText += `<br>최고 기록: ${prevBest.toLocaleString()}점`;
-        } else if (isNewRecord && prevBest > 0) {
-            scoreText += `<br>🎉 신기록! (이전: ${prevBest.toLocaleString()}점)`;
-        }
         scoreText += `<br>누적 총점: ${this.totalScore.toLocaleString()}점`;
         
         if (isLastStage) {
