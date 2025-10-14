@@ -268,6 +268,7 @@
             padding: 20px;
             border-radius: 15px;
             position: relative;
+            touch-action: none;  
         }
 
         /* Apple emoji tile styling */
@@ -585,7 +586,7 @@
     .welcome-title { font-size: 2.2em; }
     .game-rules { font-size: 1em; padding: 20px; }
     .stage-preview { flex-direction: column; }
-    .game-container { padding: 20px; max-width: 100%; width: 70%; }
+    .game-container { padding: 20px; max-width: 100%; width: 80%; }
     h1 { font-size: 2em; }
     .game-board { 
         grid-template-columns: repeat(6, 1fr);
@@ -852,14 +853,14 @@ class AppleNumberGame {
         
         this.gameBoard.addEventListener('touchstart', (e) => {
             this.startDrag(e.touches[0]);
-        });
+        }, { passive: false });
         
         document.addEventListener('touchmove', (e) => {
             if(this.isDragging) { 
                 e.preventDefault(); 
                 this.moveDrag(e.touches[0]); 
             }
-        });
+        }, { passive: false });
         
         document.addEventListener('touchend', (e) => {
             this.endDrag(e.changedTouches[0]);
