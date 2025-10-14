@@ -1,2184 +1,885 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Evo2048 - 몬스터 합체 & 전투</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
-      background: linear-gradient(135deg, #faf8ef 0%, #e4dede 100%);
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      user-select: none;
-    }
-    
-    h1 {
-      color: #776e65;
-      margin-bottom: 15px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-    
-    .stats-container {
-      display: flex;
-      gap: 20px;
-      margin: 10px 0;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .stat-item {
-      background: rgba(255,255,255,0.8);
-      padding: 10px 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      font-weight: bold;
-      color: #776e65;
-    }
-    
-    .stat-item.unlock {
-      background: linear-gradient(145deg, #3498db, #2980b9);
-      color: white;
-      animation: unlock-pulse 0.8s ease;
-    }
-    
-    @keyframes unlock-pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(52, 152, 219, 0.5); }
-      100% { transform: scale(1); }
-    }
-    
-    #battle-container {
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #ffffff, #f0f0f0);
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-      margin-bottom: 20px;
-    }
-    
-    #battle-log-container {
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-    
-    #battle-log-container h3 {
-      color: #776e65;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-    
-    #battle-field {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      background: linear-gradient(145deg, #bbada0, #a8998f);
-      padding: 15px;
-      border-radius: 12px;
-    }
-    
-    .battle-tile {
-      width: 100%;
-      height: 120px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      border-radius: 10px;
-      background: rgba(238, 228, 218, 0.3);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      padding: 8px;
-    }
-    
-    .battle-tile.player {
-      box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4);
-    }
-    
-    /* 아군 몬스터별 타입에 맞는 배경색 (모든 레벨 대응) */
-    .battle-tile.player.slime { 
-      background: linear-gradient(145deg, #2ecc71, #27ae60) !important; 
-      box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4) !important;
-    }
-    .battle-tile.player.slime.level-2 { 
-      background: linear-gradient(145deg, #27ae60, #1e8449) !important; 
-      box-shadow: 0 6px 12px rgba(39, 174, 96, 0.4) !important;
-    }
-    .battle-tile.player.slime.level-3 { 
-      background: linear-gradient(145deg, #1e8449, #145a32) !important; 
-      box-shadow: 0 6px 12px rgba(30, 132, 73, 0.4) !important;
-    }
-    /* 레벨 4 이상 슬라임 */
-    .battle-tile.player.slime.level-4,
-    .battle-tile.player.slime.level-5,
-    .battle-tile.player.slime.level-6,
-    .battle-tile.player.slime.level-7,
-    .battle-tile.player.slime.level-8,
-    .battle-tile.player.slime.level-9,
-    .battle-tile.player.slime.level-10 { 
-      background: linear-gradient(145deg, #145a32, #0d3d22) !important; 
-      box-shadow: 0 6px 12px rgba(20, 90, 50, 0.4) !important;
-    }
-    
-    .battle-tile.player.mushroom { 
-      background: linear-gradient(145deg, #e74c3c, #c0392b) !important; 
-      box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4) !important;
-    }
-    .battle-tile.player.mushroom.level-2 { 
-      background: linear-gradient(145deg, #c0392b, #962d22) !important; 
-      box-shadow: 0 6px 12px rgba(192, 57, 43, 0.4) !important;
-    }
-    .battle-tile.player.mushroom.level-3 { 
-      background: linear-gradient(145deg, #962d22, #641e16) !important; 
-      box-shadow: 0 6px 12px rgba(150, 45, 34, 0.4) !important;
-    }
-    /* 레벨 4 이상 버섯 */
-    .battle-tile.player.mushroom.level-4,
-    .battle-tile.player.mushroom.level-5,
-    .battle-tile.player.mushroom.level-6,
-    .battle-tile.player.mushroom.level-7,
-    .battle-tile.player.mushroom.level-8,
-    .battle-tile.player.mushroom.level-9,
-    .battle-tile.player.mushroom.level-10 { 
-      background: linear-gradient(145deg, #641e16, #4a170f) !important; 
-      box-shadow: 0 6px 12px rgba(100, 30, 22, 0.4) !important;
-    }
-    
-    .battle-tile.player.golem { 
-      background: linear-gradient(145deg, #95a5a6, #7f8c8d) !important; 
-      box-shadow: 0 6px 12px rgba(149, 165, 166, 0.4) !important;
-    }
-    .battle-tile.player.golem.level-2 { 
-      background: linear-gradient(145deg, #7f8c8d, #566573) !important; 
-      box-shadow: 0 6px 12px rgba(127, 140, 141, 0.4) !important;
-    }
-    .battle-tile.player.golem.level-3 { 
-      background: linear-gradient(145deg, #566573, #2c3e50) !important; 
-      box-shadow: 0 6px 12px rgba(86, 101, 115, 0.4) !important;
-    }
-    /* 레벨 4 이상 골렘 */
-    .battle-tile.player.golem.level-4,
-    .battle-tile.player.golem.level-5,
-    .battle-tile.player.golem.level-6,
-    .battle-tile.player.golem.level-7,
-    .battle-tile.player.golem.level-8,
-    .battle-tile.player.golem.level-9,
-    .battle-tile.player.golem.level-10 { 
-      background: linear-gradient(145deg, #2c3e50, #1a252f) !important; 
-      box-shadow: 0 6px 12px rgba(44, 62, 80, 0.4) !important;
-    }
-    
-    .battle-tile.player.dragon { 
-      background: linear-gradient(145deg, #3498db, #2980b9) !important; 
-      box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4) !important;
-    }
-    .battle-tile.player.dragon.level-2 { 
-      background: linear-gradient(145deg, #2980b9, #1f618d) !important; 
-      box-shadow: 0 6px 12px rgba(41, 128, 185, 0.4) !important;
-    }
-    .battle-tile.player.dragon.level-3 { 
-      background: linear-gradient(145deg, #1f618d, #154360) !important; 
-      box-shadow: 0 6px 12px rgba(31, 97, 141, 0.4) !important;
-    }
-    /* 레벨 4 이상 드래곤 */
-    .battle-tile.player.dragon.level-4,
-    .battle-tile.player.dragon.level-5,
-    .battle-tile.player.dragon.level-6,
-    .battle-tile.player.dragon.level-7,
-    .battle-tile.player.dragon.level-8,
-    .battle-tile.player.dragon.level-9,
-    #commander-container {
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #3498db, #2980b9);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
-      margin-bottom: 15px;
-      color: white;
-      text-align: center;
-    }
-    
-    #commander-info {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      background: rgba(0,0,0,0.2);
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-    
-    .commander-icon {
-      font-size: 2.5rem;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-    }
-    
-    .commander-stats {
-      flex: 1;
-      text-align: left;
-    }
-    
-    .commander-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-      color: #f1c40f;
-    }
-    
-    .commander-hp-container {
-      width: 100%;
-    }
-    
-    .commander-hp-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid rgba(241, 196, 15, 0.5);
-    }
-    
-    .commander-hp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f1c40f, #f39c12);
-      transition: width 0.5s ease;
-      border-radius: 6px;
-    }
-    
-    .commander-hp-text {
-      color: rgba(255,255,255,0.9);
-      margin-top: 4px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-    
-    .battle-tile.enemy {
-      background: linear-gradient(145deg, #e74c3c, #c0392b);
-      box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
-    }
-    
-    .battle-tile.player:hover, .battle-tile.enemy:hover {
-      transform: scale(1.05);
-    }
-    
-    .monster-level {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.95);
-      font-weight: bold;
-      margin-bottom: 2px;
-    }
-    
-    .monster-icon {
-      font-size: 2.8rem;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4));
-      margin: 5px 0;
-    }
-    
-    .monster-stats {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-    }
-    
-    .hp-container {
-      width: 90%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .hp-bar {
-      width: 100%;
-      height: 8px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.5);
-      margin-bottom: 2px;
-    }
-    
-    .hp-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #27ae60, #2ecc71);
-      transition: width 0.5s ease;
-      border-radius: 8px;
-    }
-    
-    .stats-row {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      gap: 5px;
-    }
-    
-    .hp-text {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.95);
-      font-weight: bold;
-      flex: 1;
-      text-align: center;
-    }
-    
-    .attack-text {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.85);
-      font-weight: bold;
-      flex: 1;
-      text-align: center;
-    }
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #3498db, #2980b9);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
-      margin-bottom: 15px;
-      color: white;
-      text-align: center;
-    }
-    
-    #commander-info {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      background: rgba(0,0,0,0.2);
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-    
-    .commander-icon {
-      font-size: 2.5rem;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-    }
-    
-    .commander-stats {
-      flex: 1;
-      text-align: left;
-    }
-    
-    .commander-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-      color: #f1c40f;
-    }
-    
-    .commander-hp-container {
-      width: 100%;
-    }
-    
-    .commander-hp-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid rgba(241, 196, 15, 0.5);
-    }
-    
-    .commander-hp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f1c40f, #f39c12);
-      transition: width 0.5s ease;
-      border-radius: 6px;
-    }
-    
-    .commander-hp-text {
-      color: rgba(255,255,255,0.9);
-      margin-top: 4px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #2c3e50, #34495e);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(44, 62, 80, 0.3);
-      margin-bottom: 15px;
-      color: white;
-      text-align: center;
-    }
-    
-    #commander-container {
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #3498db, #2980b9);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
-      margin-bottom: 15px;
-      color: white;
-      text-align: center;
-    }
-    
-    #commander-info {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      background: rgba(0,0,0,0.2);
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-    
-    .commander-icon {
-      font-size: 2.5rem;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-    }
-    
-    .commander-stats {
-      flex: 1;
-      text-align: left;
-    }
-    
-    .commander-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-      color: #f1c40f;
-    }
-    
-    .commander-hp-container {
-      width: 100%;
-    }
-    
-    .commander-hp-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid rgba(241, 196, 15, 0.5);
-    }
-    
-    .commander-hp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f1c40f, #f39c12);
-      transition: width 0.5s ease;
-      border-radius: 6px;
-    }
-    
-    .commander-hp-text {
-      color: rgba(255,255,255,0.9);
-      margin-top: 4px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 0.9rem;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전투형 2048 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    #game-container {
-      background: linear-gradient(145deg, #bbada0, #a8998f);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      max-width: 380px;
-      width: 100%;
-    }
-    
-    #game {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      background: transparent;
-      padding: 0;
-    }
-    
-    .tile {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-      font-size: 2.2rem;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      min-height: 70px;
-    }
-    
-    .tile::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-    
-    .tile:hover::before {
-      opacity: 1;
-    }
-    
-    .tile.empty {
-      background: rgba(238, 228, 218, 0.35);
-      border: 2px dashed rgba(119, 110, 101, 0.3);
-    }
-    
-    /* 몬스터별 그라데이션 색상 개선 */
-    .tile.slime.level-1 { background: linear-gradient(145deg, #2ecc71, #27ae60); }
-    .tile.slime.level-2 { background: linear-gradient(145deg, #27ae60, #1e8449); }
-    .tile.slime.level-3 { background: linear-gradient(145deg, #1e8449, #145a32); }
-    
-    .tile.mushroom.level-1 { background: linear-gradient(145deg, #e74c3c, #c0392b); }
-    .tile.mushroom.level-2 { background: linear-gradient(145deg, #c0392b, #962d22); }
-    .tile.mushroom.level-3 { background: linear-gradient(145deg, #962d22, #641e16); }
-    
-    .tile.golem.level-1 { background: linear-gradient(145deg, #95a5a6, #7f8c8d); }
-    .tile.golem.level-2 { background: linear-gradient(145deg, #7f8c8d, #566573); }
-    .tile.golem.level-3 { background: linear-gradient(145deg, #566573, #2c3e50); }
-    
-    .tile.dragon.level-1 { background: linear-gradient(145deg, #3498db, #2980b9); }
-    .tile.dragon.level-2 { background: linear-gradient(145deg, #2980b9, #1f618d); }
-    .tile.dragon.level-3 { background: linear-gradient(145deg, #1f618d, #154360); }
-    
-    .tile-merged {
-      animation: merge 0.4s ease;
-      z-index: 10;
-    }
-    
-    @keyframes merge {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
-      100% { transform: scale(1); }
-    }
-    
-    .tile-new {
-      animation: appear 0.3s ease;
-    }
-    
-    @keyframes appear {
-      0% { transform: scale(0); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    
-    #commander-info {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      background: rgba(0,0,0,0.2);
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-    
-    .commander-icon {
-      font-size: 2.5rem;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-    }
-    
-    .commander-stats {
-      flex: 1;
-      text-align: left;
-    }
-    
-    .commander-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-      color: #f1c40f;
-    }
-    
-    .commander-hp-container {
-      width: 100%;
-    }
-    
-    .commander-hp-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid rgba(241, 196, 15, 0.5);
-    }
-    
-    .commander-hp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f1c40f, #f39c12);
-      transition: width 0.5s ease;
-      border-radius: 6px;
-    }
-    
-    .commander-hp-text {
-      color: rgba(255,255,255,0.9);
-      margin-top: 4px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 0.9rem;
-    }
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #a8c0ff 0%, #c3cfe2 100%);
+            padding: 10px;
+        }
 
-    #boss-container {
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #2c3e50, #34495e);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(44, 62, 80, 0.3);
-      margin-bottom: 15px;
-      color: white;
-      text-align: center;
-    }
-    
-    #boss-monster {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      background: rgba(0,0,0,0.2);
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-    
-    .boss-icon {
-      font-size: 2.5rem;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-    }
-    
-    .boss-info {
-      flex: 1;
-      text-align: left;
-    }
-    
-    .boss-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-      color: #e74c3c;
-    }
-    
-    .boss-hp-container {
-      width: 100%;
-    }
-    
-    .boss-hp-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid rgba(231, 76, 60, 0.5);
-    }
-    
-    .boss-hp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #e74c3c, #c0392b);
-      transition: width 0.5s ease;
-      border-radius: 6px;
-    }
-    
-    .boss-hp-text {
-      color: rgba(255,255,255,0.9);
-      margin-top: 4px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-    
-    #battle-container {
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #ffffff, #f0f0f0);
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      background: linear-gradient(145deg, #bbada0, #a8998f);
-      padding: 15px;
-      border-radius: 12px;
-    }
-    
-    .battle-tile {
-      width: 100%;
-      height: 120px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      border-radius: 10px;
-      background: rgba(238, 228, 218, 0.3);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      padding: 8px;
-    }
-    
-    .battle-tile.player {
-      background: linear-gradient(145deg, #2ecc71, #27ae60);
-      box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4);
-    }
-    
-    .battle-tile.enemy {
-      background: linear-gradient(145deg, #e74c3c, #c0392b);
-      box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
-    }
-    
-    .battle-tile.player:hover, .battle-tile.enemy:hover {
-      transform: scale(1.05);
-    }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
 
-    .battle-tile.level-up {
-      animation: level-up 0.8s ease;
-    }
-    
-    @keyframes level-up {
-      0% { transform: scale(1); background: linear-gradient(145deg, #2ecc71, #27ae60); }
-      25% { transform: scale(1.15); background: linear-gradient(145deg, #f1c40f, #f39c12); box-shadow: 0 0 20px rgba(241, 196, 15, 0.7); }
-      50% { transform: scale(1.1); background: linear-gradient(145deg, #e74c3c, #c0392b); box-shadow: 0 0 25px rgba(231, 76, 60, 0.8); }
-      75% { transform: scale(1.05); background: linear-gradient(145deg, #9b59b6, #8e44ad); box-shadow: 0 0 30px rgba(155, 89, 182, 0.9); }
-      100% { transform: scale(1); box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4); }
-    }
-    
-    .monster-level {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.95);
-      font-weight: bold;
-      margin-bottom: 2px;
-    }
-    
-    .monster-icon {
-      font-size: 2.8rem;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4));
-      margin: 5px 0;
-    }
-    
-    .monster-stats {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-    }
-    
-    .hp-container {
-      width: 90%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .hp-bar {
-      width: 100%;
-      height: 8px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.5);
-      margin-bottom: 2px;
-    }
-    
-    .hp-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #27ae60, #2ecc71);
-      transition: width 0.5s ease;
-      border-radius: 8px;
-    }
-    
-    .stats-row {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      gap: 5px;
-    }
-    
-    .hp-text {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.95);
-      font-weight: bold;
-      flex: 1;
-      text-align: center;
-    }
-    
-    .attack-text {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.85);
-      font-weight: bold;
-      flex: 1;
-      text-align: center;
-    }
-    
-    #battle-log {
-      max-height: 140px;
-      overflow-y: auto;
-      font-size: 0.95rem;
-      color: #776e65;
-      text-align: left;
-      padding: 15px;
-      background: rgba(238, 228, 218, 0.6);
-      border-radius: 8px;
-      border: 2px solid rgba(187, 173, 160, 0.3);
-      line-height: 1.5;
-    }
-    
-    #battle-log::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    #battle-log::-webkit-scrollbar-track {
-      background: rgba(187, 173, 160, 0.3);
-      border-radius: 3px;
-    }
-    
-    #battle-log::-webkit-scrollbar-thumb {
-      background: #bbada0;
-      border-radius: 3px;
-    }
-    
-    #battle-log {
-      max-height: 140px;
-      overflow-y: auto;
-      font-size: 0.95rem;
-      color: #776e65;
-      text-align: left;
-      padding: 15px;
-      background: rgba(238, 228, 218, 0.6);
-      border-radius: 8px;
-      border: 2px solid rgba(187, 173, 160, 0.3);
-      line-height: 1.5;
-    }
-    
-    #battle-log::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    #battle-log::-webkit-scrollbar-track {
-      background: rgba(187, 173, 160, 0.3);
-      border-radius: 3px;
-    }
-    
-    #battle-log::-webkit-scrollbar-thumb {
-      background: #bbada0;
-      border-radius: 3px;
-    }
+        h1 {
+            color: #5b7c99;
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
 
-    #commander-container {
-      max-width: 500px;
-      width: 100%;
-      background: linear-gradient(145deg, #3498db, #2980b9);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
-      margin-bottom: 15px;
-      color: white;
-      text-align: center;
-    }
-      background: linear-gradient(145deg, #bbada0, #a8998f);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      max-width: 380px;
-      width: 100%;
-    }
-    
-    #game {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      background: transparent;
-      padding: 0;
-    }
-    
-    .tile {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-      font-size: 2.2rem;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      min-height: 70px;
-    }
-    
-    .tile::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-    
-    .tile:hover::before {
-      opacity: 1;
-    }
-    
-    .tile.empty {
-      background: rgba(238, 228, 218, 0.35);
-      border: 2px dashed rgba(119, 110, 101, 0.3);
-    }
-    
-    /* 몬스터별 그라데이션 색상 개선 */
-    .tile.slime.level-1 { background: linear-gradient(145deg, #2ecc71, #27ae60); }
-    .tile.slime.level-2 { background: linear-gradient(145deg, #27ae60, #1e8449); }
-    .tile.slime.level-3 { background: linear-gradient(145deg, #1e8449, #145a32); }
-    
-    .tile.mushroom.level-1 { background: linear-gradient(145deg, #e74c3c, #c0392b); }
-    .tile.mushroom.level-2 { background: linear-gradient(145deg, #c0392b, #962d22); }
-    .tile.mushroom.level-3 { background: linear-gradient(145deg, #962d22, #641e16); }
-    
-    .tile.golem.level-1 { background: linear-gradient(145deg, #95a5a6, #7f8c8d); }
-    .tile.golem.level-2 { background: linear-gradient(145deg, #7f8c8d, #566573); }
-    .tile.golem.level-3 { background: linear-gradient(145deg, #566573, #2c3e50); }
-    
-    .tile.dragon.level-1 { background: linear-gradient(145deg, #3498db, #2980b9); }
-    .tile.dragon.level-2 { background: linear-gradient(145deg, #2980b9, #1f618d); }
-    .tile.dragon.level-3 { background: linear-gradient(145deg, #1f618d, #154360); }
-    
-    .tile-merged {
-      animation: merge 0.4s ease;
-      z-index: 10;
-    }
-    
-    @keyframes merge {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
-      100% { transform: scale(1); }
-    }
-    
-    .tile-new {
-      animation: appear 0.3s ease;
-    }
-    
-    @keyframes appear {
-      0% { transform: scale(0); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    
-    .buttons-container {
-      display: flex;
-      gap: 15px;
-      margin: 20px 0;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    button {
-      background: linear-gradient(145deg, #8f7a66, #776e65);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-    }
-    
-    button:active {
-      transform: translateY(0);
-    }
-    
-    #undo {
-      background: linear-gradient(145deg, #3498db, #2980b9);
-    }
-    
-    #instructions {
-      font-size: 0.95rem;
-      color: #776e65;
-      max-width: 500px;
-      margin: 15px auto;
-      line-height: 1.5;
-      background: rgba(255,255,255,0.7);
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .game-over-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .game-over-overlay.show {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .game-over-content {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      max-width: 300px;
-    }
-    
-    @media (max-width: 500px) {
-      body { padding: 10px; }
-      #game, #battle-field { gap: 8px; }
-      .tile { font-size: 1.8rem; min-height: 60px; }
-      .monster-icon { font-size: 2.2rem; }
-      .battle-tile { height: 100px; padding: 6px; }
-      .hp-bar { height: 6px; }
-      #battle-container { padding: 15px; }
-      .stats-container { gap: 10px; }
-      .stat-item { padding: 8px 12px; font-size: 0.9rem; }
-      .boss-icon { font-size: 2rem; }
-      #game-container { max-width: 320px; padding: 12px; }
-      .hp-text, .attack-text { font-size: 0.6rem; }
-      .monster-level { font-size: 0.7rem; }
-    }
-  </style>
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .battle-arena {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 10px rgba(100,149,237,0.15);
+        }
+
+        @media (max-width: 600px) {
+            .battle-arena {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .combatants {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .character {
+            flex: 1;
+            text-align: center;
+        }
+
+        .character-sprite {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            transition: transform 0.3s;
+        }
+
+        @media (max-width: 600px) {
+            .character-sprite {
+                width: 60px;
+                height: 60px;
+                font-size: 36px;
+            }
+        }
+
+        .character-sprite.attacking {
+            transform: scale(1.2);
+        }
+
+        .player-sprite {
+            background: linear-gradient(135deg, #a8c0ff 0%, #89a5d6 100%);
+        }
+
+        .boss-sprite {
+            background: linear-gradient(135deg, #fbc2eb 0%, #d4a5d3 100%);
+        }
+
+        .character-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #5b7c99;
+        }
+
+        @media (max-width: 600px) {
+            .character-name {
+                font-size: 14px;
+            }
+        }
+
+        .player-level {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .hp-bar-container {
+            background: #ddd;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .hp-bar {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .player-hp {
+            background: linear-gradient(90deg, #a8c0ff 0%, #89a5d6 100%);
+        }
+
+        .boss-hp {
+            background: linear-gradient(90deg, #fbc2eb 0%, #d4a5d3 100%);
+        }
+
+        .hp-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .stats {
+            font-size: 14px;
+            color: #7a99bb;
+            margin-top: 5px;
+        }
+
+        .vs {
+            font-size: 36px;
+            font-weight: bold;
+            color: #89a5d6;
+            text-shadow: 2px 2px 4px rgba(100,149,237,0.3);
+        }
+
+        @media (max-width: 600px) {
+            .vs {
+                font-size: 24px;
+            }
+        }
+
+        .boss-level {
+            background: #f5576c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .score-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .score-container {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .score-box {
+            background: #b3cde0;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .score-value {
+            font-size: 24px;
+            margin-top: 5px;
+        }
+
+        #game-board {
+            background: #b3cde0;
+            border-radius: 10px;
+            padding: 15px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 600px) {
+            #game-board {
+                padding: 10px;
+                margin: 10px 0;
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(4, 70px);
+                grid-template-rows: repeat(4, 70px);
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .grid {
+                grid-template-columns: repeat(4, 60px);
+                grid-template-rows: repeat(4, 60px);
+                gap: 8px;
+            }
+        }
+
+        .cell {
+            background: rgba(227, 242, 253, 0.5);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #5b7c99;
+            transition: all 0.15s ease;
+        }
+
+        .cell[data-value="2"] { background: #e3f2fd; }
+        .cell[data-value="4"] { background: #bbdefb; }
+        .cell[data-value="8"] { background: #90caf9; color: #fff; }
+        .cell[data-value="16"] { background: #64b5f6; color: #fff; }
+        .cell[data-value="32"] { background: #42a5f5; color: #fff; }
+        .cell[data-value="64"] { background: #2196f3; color: #fff; }
+        .cell[data-value="128"] { background: #1e88e5; color: #fff; font-size: 32px; }
+        .cell[data-value="256"] { background: #1976d2; color: #fff; font-size: 32px; }
+        .cell[data-value="512"] { background: #1565c0; color: #fff; font-size: 32px; }
+        .cell[data-value="1024"] { background: #0d47a1; color: #fff; font-size: 28px; }
+        .cell[data-value="2048"] { background: #0a2f6e; color: #fff; font-size: 28px; }
+
+        @media (max-width: 600px) {
+            .cell {
+                font-size: 28px;
+            }
+            .cell[data-value="128"], 
+            .cell[data-value="256"], 
+            .cell[data-value="512"] { 
+                font-size: 24px; 
+            }
+            .cell[data-value="1024"], 
+            .cell[data-value="2048"] { 
+                font-size: 20px; 
+            }
+        }
+
+        @media (max-width: 400px) {
+            .cell {
+                font-size: 24px;
+            }
+            .cell[data-value="128"], 
+            .cell[data-value="256"], 
+            .cell[data-value="512"] { 
+                font-size: 20px; 
+            }
+            .cell[data-value="1024"], 
+            .cell[data-value="2048"] { 
+                font-size: 18px; 
+            }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .buttons {
+                margin-top: 10px;
+            }
+        }
+
+        button {
+            background: #8f7a66;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        @media (max-width: 600px) {
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        button:hover {
+            background: #9f8a76;
+        }
+
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(227, 242, 253, 0.98);
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 50px rgba(100,149,237,0.3);
+        }
+
+        .game-over h2 {
+            font-size: 48px;
+            color: #5b7c99;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            margin-top: 15px;
+            color: #5b7c99;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .instructions {
+                margin-top: 10px;
+                font-size: 12px;
+            }
+        }
+
+        .damage-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 24px;
+            color: #89a5d6;
+            animation: floatUp 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>🎮 Evo2048 - 몬스터 합체 & 전투</h1>
-  
-  <div class="stats-container">
-    <div class="stat-item" id="score">점수: 0</div>
-    <div class="stat-item" id="high-score">최고 점수: 0</div>
-    <div class="stat-item" id="monsters-count">소환된 몬스터: 0</div>
-    <div class="stat-item" id="unlock-status">언락: 슬라임, 버섯 (2/4)</div>
-  </div>
-  
-  <div id="boss-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-      <h3 style="margin: 0;">👑 보스 몬스터</h3>
-      <div id="boss-kill-count" style="background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 15px; font-size: 0.9rem; font-weight: bold;">처치: 0마리</div>
-    </div>
-    <div id="boss-monster">
-      <div class="boss-icon" id="boss-icon">🐲</div>
-      <div class="boss-info">
-        <div class="boss-name" id="boss-name">전설 드래곤</div>
-        <div class="boss-hp-container">
-          <div class="boss-hp-bar">
-            <div class="boss-hp-fill" id="boss-hp-fill" style="width: 100%"></div>
-          </div>
-          <div class="boss-hp-text" id="boss-hp-text">1000/1000</div>
+    <div class="container">
+        <h1>전투형 2048</h1>
+        
+        <div class="battle-arena">
+            <div class="combatants">
+                <div class="character">
+                    <div class="player-level" id="player-level">LV.1</div>
+                    <div class="character-sprite player-sprite" id="player-sprite">🗡️</div>
+                    <div class="character-name">플레이어</div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar player-hp" id="player-hp-bar"></div>
+                        <div class="hp-text" id="player-hp-text"></div>
+                    </div>
+                    <div class="stats">공격력: <span id="player-atk">0</span></div>
+                </div>
+
+                <div class="vs">⚔️</div>
+
+                <div class="character">
+                    <div class="boss-level" id="boss-level">BOSS LV.1</div>
+                    <div class="character-sprite boss-sprite" id="boss-sprite">👹</div>
+                    <div class="character-name" id="boss-name">슬라임 킹</div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar boss-hp" id="boss-hp-bar"></div>
+                        <div class="hp-text" id="boss-hp-text"></div>
+                    </div>
+                    <div class="stats">공격력: <span id="boss-atk">0</span></div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
-  
-  <div id="battle-container">
-    <div id="battle-field"></div>
-  </div>
-  
-  <div id="commander-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-      <h3 style="margin: 0;">🛡️ 아군 대장</h3>
-    </div>
-    <div id="commander-info">
-      <div class="commander-icon" id="commander-icon">🛡️</div>
-      <div class="commander-stats">
-        <div class="commander-name" id="commander-name">용감한 지휘관</div>
-        <div class="commander-hp-container">
-          <div class="commander-hp-bar">
-            <div class="commander-hp-fill" id="commander-hp-fill" style="width: 100%"></div>
-          </div>
-          <div class="commander-hp-text" id="commander-hp-text">1000/1000</div>
+
+        <div class="score-container">
+            <div class="score-box">
+                <div class="score-label">점수</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-label">처치한 보스</div>
+                <div class="score-value" id="boss-kills">0</div>
+            </div>
         </div>
-      </div>
+
+        <div id="game-board">
+            <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="buttons">
+            <button onclick="newGame()">새 게임</button>
+        </div>
+
+        <div class="instructions">
+            <p>방향키로 타일을 움직이세요!</p>
+            <p>점수가 높을수록 더 강한 공격을 합니다!</p>
+        </div>
     </div>
-  </div>
-  
-  <div id="battle-log-container">
-    <h3>📜 전투 상황</h3>
-    <div id="battle-log"></div>
-  </div>
-  
-  <div id="game-container">
-    <div id="game"></div>
-  </div>
-  
-  <div id="instructions">
-    🎯 <strong>게임 방법:</strong> 화살표 키나 스와이프로 2048을 플레이해 레벨 3 몬스터를 소환하세요!<br>
-    ⚔️ <strong>전투 순서:</strong> 보스 → 아군 몬스터 → 아군 대장 순으로 공격!<br>
-    🔓 <strong>언락:</strong> 3000점에 골렘, 5000점에 드래곤 언락!<br>
-    🐲 <strong>몬스터 특성:</strong> 슬라임(체력형), 버섯(독공격), 골렘(방어형), 드래곤(균형형)<br>
-    🛡️ <strong>대장 보호:</strong> 아군 대장이 죽으면 즉시 게임 오버! 몬스터로 대장을 지키세요!<br>
-    🏆 <strong>목표:</strong> 같은 타입을 강화해서 특화 몬스터를 만들고 보스를 물리치세요!
-  </div>
-  
-  <div class="buttons-container">
-    <button id="restart">🔄 게임 재시작</button>
-    <button id="undo">↩️ 되돌리기</button>
-  </div>
 
-  <div class="game-over-overlay" id="game-over-overlay">
-    <div class="game-over-content">
-      <h2>🎯 게임 오버!</h2>
-      <p id="final-score"></p>
-      <button onclick="restartGame(); hideGameOver();">다시 시작</button>
+    <div class="game-over" id="game-over">
+        <h2>게임 오버!</h2>
+        <p style="font-size: 20px; margin-bottom: 10px;">최종 점수: <span id="final-score"></span></p>
+        <p style="font-size: 18px; margin-bottom: 20px;">처치한 보스: <span id="final-boss-kills"></span></p>
+        <button onclick="newGame()">다시 시작</button>
     </div>
-  </div>
 
-  <script>
-    // 게임 상수
-    const GAME_CONFIG = {
-      SIZE: 4,
-      MAX_BATTLE_MONSTERS: 3,
-      BASE_HP: 50,
-      BASE_ATTACK: 10,
-      SCORE_MULTIPLIER: 10,
-      DEFEAT_BONUS: 100,
-      BOSS_AOE_TURNS: 4 // 보스 광역 공격 주기 (턴)
-    };
+    <script>
+        let board = [];
+        let score = 0;
+        let bossKills = 0;
+        let gameOver = false;
 
-    // 게임 상태
-    const gameState = {
-      score: 0,
-      highScore: parseInt(localStorage.getItem('evo2048-highScore') || '0'),
-      board: [],
-      battleMonsters: [],
-      enemyMonster: null,
-      bossMonster: null,
-      bossLevel: 1, // 보스 단계 추가
-      bossKillCount: 0, // 보스 처치 횟수 추가
-      bossTurnCounter: 0, // 보스 턴 카운터 추가
-      commander: null, // 아군 대장 추가
-      monstersSpawned: 0,
-      // 되돌리기용 상태
-      previous: {
-        board: [],
-        score: 0,
-        battleMonsters: [],
-        enemyMonster: null,
-        bossMonster: null,
-        bossLevel: 1,
-        bossKillCount: 0,
-        bossTurnCounter: 0,
-        commander: null,
-        monstersSpawned: 0
-      }
-    };
+        let playerHP = 500;
+        let playerMaxHP = 500;
+        let playerAtk = 0;
+        let playerLevel = 1;
+        let previousPlayerLevel = 1;
 
-    // 몬스터 데이터 최적화 (특성 추가)
-    const MONSTERS = {
-      slime: { 
-        1: '🟢', 2: '💚', 3: '🐸', 
-        name: '슬라임',
-        hpMultiplier: 1.5,  // 체력 150%
-        attackMultiplier: 0.8,  // 공격력 80%
-        specialty: '체력형',
-        description: '높은 체력과 회복력을 가진 탱커'
-      },
-      mushroom: { 
-        1: '🍄', 2: '🍄‍🟫', 3: '🔴', 
-        name: '버섯',
-        hpMultiplier: 0.8,  // 체력 80%
-        attackMultiplier: 1.3,  // 공격력 130%
-        specialty: '독 공격',
-        description: '강력한 독 공격으로 높은 데미지'
-      },
-      golem: { 
-        1: '🪨', 2: '🗿', 3: '⚫', 
-        name: '골렘',
-        hpMultiplier: 1.8,  // 체력 180%
-        attackMultiplier: 0.6,  // 공격력 60%
-        specialty: '방어형',
-        description: '최강의 방어력과 체력을 자랑'
-      },
-      dragon: { 
-        1: '🦎', 2: '🐉', 3: '🐲', 
-        name: '드래곤',
-        hpMultiplier: 1.0,  // 체력 100%
-        attackMultiplier: 1.5,  // 공격력 150%
-        specialty: '균형형',
-        description: '강력한 공격력과 적당한 체력'
-      }
-    };
-    const MONSTER_TYPES = Object.keys(MONSTERS);
+        let bossLevel = 1;
+        let bossHP = 500;
+        let bossMaxHP = 500;
+        let bossAtk = 10;
+        let bossName = "슬라임 킹";
+        let bossEmoji = "👹";
 
-    // DOM 요소 캐싱
-    const elements = {
-      game: document.getElementById("game"),
-      score: document.getElementById("score"),
-      highScore: document.getElementById("high-score"),
-      monstersCount: document.getElementById("monsters-count"),
-      unlockStatus: document.getElementById("unlock-status"),
-      battleField: document.getElementById("battle-field"),
-      battleLog: document.getElementById("battle-log"),
-      gameOverOverlay: document.getElementById("game-over-overlay"),
-      finalScore: document.getElementById("final-score"),
-      bossIcon: document.getElementById("boss-icon"),
-      bossName: document.getElementById("boss-name"),
-      bossHpFill: document.getElementById("boss-hp-fill"),
-      bossHpText: document.getElementById("boss-hp-text"),
-      bossKillCount: document.getElementById("boss-kill-count"),
-      commanderIcon: document.getElementById("commander-icon"),
-      commanderName: document.getElementById("commander-name"),
-      commanderHpFill: document.getElementById("commander-hp-fill"),
-      commanderHpText: document.getElementById("commander-hp-text")
-    };
+        let combatInterval = null;
 
-    // 유틸리티 함수들
-    const utils = {
-      deepClone: (obj) => JSON.parse(JSON.stringify(obj)),
-      
-      getRandomMonsterType: () => {
-        // 점수에 따라 사용 가능한 몬스터 종류 결정
-        let availableTypes = [];
-        
-        if (gameState.score < 3000) {
-          // 3000점 미만: 2종류만 (슬라임, 버섯)
-          availableTypes = ['slime', 'mushroom'];
-        } else if (gameState.score < 5000) {
-          // 3000-4999점: 3종류 (골렘 추가)
-          availableTypes = ['slime', 'mushroom', 'golem'];
-        } else {
-          // 5000점 이상: 모든 4종류
-          availableTypes = MONSTER_TYPES;
-        }
-        
-        return availableTypes[Math.floor(Math.random() * availableTypes.length)];
-      },
-      
-      getEmptyTiles: () => {
-        const empties = [];
-        for (let r = 0; r < GAME_CONFIG.SIZE; r++) {
-          for (let c = 0; c < GAME_CONFIG.SIZE; c++) {
-            if (!gameState.board[r][c]) empties.push([r, c]);
-          }
-        }
-        return empties;
-      },
-      
-      addBattleLog: (message) => {
-        const p = document.createElement("p");
-        p.textContent = `⚔️ ${message}`;
-        p.style.margin = "5px 0";
-        elements.battleLog.appendChild(p);
-        elements.battleLog.scrollTop = elements.battleLog.scrollHeight;
-        
-        // 로그가 너무 많으면 오래된 것 제거
-        if (elements.battleLog.children.length > 20) {
-          elements.battleLog.removeChild(elements.battleLog.firstChild);
-        }
-      }
-    };
+        const bossData = [
+            { name: "슬라임 킹", emoji: "👹", hp: 300, atk: 10 },
+            { name: "고블린 전사", emoji: "👺", hp: 600, atk: 20 },
+            { name: "오크 대장", emoji: "🧟", hp: 1000, atk: 35 },
+            { name: "다크 나이트", emoji: "⚔️", hp: 1500, atk: 50 },
+            { name: "드래곤 로드", emoji: "🐉", hp: 2500, atk: 75 },
+            { name: "리치 킹", emoji: "💀", hp: 4000, atk: 100 },
+            { name: "악마 군주", emoji: "😈", hp: 6000, atk: 150 },
+            { name: "고대 드래곤", emoji: "🔥", hp: 9000, atk: 200 },
+            { name: "파괴의 신", emoji: "👿", hp: 13000, atk: 300 },
+            { name: "절대자", emoji: "💫", hp: 20000, atk: 500 }
+        ];
 
-    // 게임 초기화
-    function initBoard() {
-      gameState.board = Array(GAME_CONFIG.SIZE).fill(null).map(() => Array(GAME_CONFIG.SIZE).fill(null));
-      gameState.battleMonsters = [];
-      gameState.enemyMonster = null;
-      gameState.bossLevel = 1; // 보스 레벨 초기화
-      gameState.bossKillCount = 0; // 보스 처치 횟수 초기화
-      gameState.bossTurnCounter = 0; // 보스 턴 카운터 초기화
-      gameState.monstersSpawned = 0;
-      elements.battleLog.innerHTML = "<p style='color: #3498db; font-weight: bold;'>🎮 게임 시작! 몬스터를 소환하여 전투를 준비하세요!</p>";
-      
-      // 아군 대장 초기화
-      createCommander();
-      
-      // 보스 몬스터 초기화
-      createBossMonster();
-      
-      addRandomTile();
-      addRandomTile();
-      // 게임 시작 시에는 일반 적을 생성하지 않음 (몬스터 소환 후 시작)
-      updateDisplay();
-    }
-
-    // 아군 대장 생성
-    function createCommander() {
-      gameState.commander = {
-        name: '용감한 지휘관',
-        icon: '🛡️',
-        hp: 1000,
-        maxHp: 1000
-      };
-      
-      updateCommanderDisplay();
-      utils.addBattleLog(`🛡️ 아군 대장 ${gameState.commander.name} 준비 완료! (HP: 1000)`);
-    }
-
-    // 아군 대장 표시 업데이트
-    function updateCommanderDisplay() {
-      if (!gameState.commander) return;
-      
-      const commander = gameState.commander;
-      elements.commanderIcon.textContent = commander.icon;
-      elements.commanderName.textContent = commander.name;
-      
-      // 대장 HP에 따른 색상 변경
-      const commanderHpPercent = (commander.hp / commander.maxHp) * 100;
-      let commanderHpColor;
-      
-      if (commanderHpPercent > 75) {
-        commanderHpColor = 'linear-gradient(90deg, #f1c40f, #f39c12)';
-      } else if (commanderHpPercent > 50) {
-        commanderHpColor = 'linear-gradient(90deg, #e67e22, #d35400)';
-      } else if (commanderHpPercent > 25) {
-        commanderHpColor = 'linear-gradient(90deg, #e74c3c, #c0392b)';
-      } else {
-        commanderHpColor = 'linear-gradient(90deg, #8e44ad, #9b59b6)';
-      }
-      
-      elements.commanderHpFill.style.width = `${commanderHpPercent}%`;
-      elements.commanderHpFill.style.background = commanderHpColor;
-      elements.commanderHpText.textContent = `${commander.hp}/${commander.maxHp}`;
-    }
-
-    // 보스 몬스터 생성
-    function createBossMonster() {
-      const bossTypes = [
-        { type: 'dragon', name: '드래곤', icon: '🐲' },
-        { type: 'golem', name: '골렘', icon: '🗿' },
-        { type: 'slime', name: '슬라임', icon: '👑' },
-        { type: 'mushroom', name: '버섯', icon: '☠️' }
-      ];
-      
-      const boss = bossTypes[Math.floor(Math.random() * bossTypes.length)];
-      
-      // 보스 레벨에 따른 이름과 능력치 증가
-      let bossName, bossHp, bossIcon;
-      
-      if (gameState.bossLevel === 1) {
-        bossName = `${boss.name} 보스`;
-        bossHp = 1000;
-        bossIcon = boss.icon;
-      } else if (gameState.bossLevel <= 3) {
-        bossName = `강화된 ${boss.name}`;
-        bossHp = 1000 + (gameState.bossLevel - 1) * 500;
-        bossIcon = boss.icon;
-      } else if (gameState.bossLevel <= 5) {
-        bossName = `전설의 ${boss.name}`;
-        bossHp = 2000 + (gameState.bossLevel - 3) * 800;
-        bossIcon = boss.icon;
-      } else {
-        bossName = `궁극의 ${boss.name}`;
-        bossHp = 4000 + (gameState.bossLevel - 5) * 1000;
-        bossIcon = boss.icon;
-      }
-      
-      gameState.bossMonster = {
-        type: boss.type,
-        level: Math.min(5 + Math.floor(gameState.bossLevel / 3), 10), // 레벨도 증가
-        name: bossName,
-        icon: bossIcon,
-        hp: bossHp,
-        maxHp: bossHp
-      };
-      
-      updateBossDisplay();
-      utils.addBattleLog(`👑 ${gameState.bossLevel}단계 보스 ${bossName} 등장! (HP: ${bossHp})`);
-    }
-
-    // 보스 몬스터 표시 업데이트
-    function updateBossDisplay() {
-      if (!gameState.bossMonster) return;
-      
-      const boss = gameState.bossMonster;
-      elements.bossIcon.textContent = boss.icon;
-      elements.bossName.textContent = boss.name;
-      
-      // 보스 처치 횟수 업데이트
-      elements.bossKillCount.textContent = `처치: ${gameState.bossKillCount}마리`;
-      
-      // 보스 HP에 따른 색상 변경
-      const bossHpPercent = (boss.hp / boss.maxHp) * 100;
-      let bossHpColor;
-      
-      if (bossHpPercent > 75) {
-        bossHpColor = 'linear-gradient(90deg, #e74c3c, #c0392b)';
-      } else if (bossHpPercent > 50) {
-        bossHpColor = 'linear-gradient(90deg, #e67e22, #d35400)';
-      } else if (bossHpPercent > 25) {
-        bossHpColor = 'linear-gradient(90deg, #f39c12, #f1c40f)';
-      } else {
-        bossHpColor = 'linear-gradient(90deg, #8e44ad, #9b59b6)';
-      }
-      
-      elements.bossHpFill.style.width = `${bossHpPercent}%`;
-      elements.bossHpFill.style.background = bossHpColor;
-      elements.bossHpText.textContent = `${boss.hp}/${boss.maxHp}`;
-    }
-
-    // 랜덤 타일 추가 (애니메이션 개선)
-    function addRandomTile() {
-      const empties = utils.getEmptyTiles();
-      if (empties.length === 0) return;
-      
-      const [r, c] = empties[Math.floor(Math.random() * empties.length)];
-      const type = utils.getRandomMonsterType();
-      gameState.board[r][c] = { type, level: 1, merged: false, isNew: true };
-    }
-
-    // 화면 업데이트 최적화
-    function updateDisplay() {
-      drawBoard();
-      updateStats();
-      updateBattleField();
-      updateCommanderDisplay();
-      updateBossDisplay();
-    }
-
-    function drawBoard() {
-      elements.game.innerHTML = "";
-      for (let r = 0; r < GAME_CONFIG.SIZE; r++) {
-        for (let c = 0; c < GAME_CONFIG.SIZE; c++) {
-          const div = document.createElement("div");
-          div.className = "tile";
-          
-          if (gameState.board[r][c]) {
-            const monster = gameState.board[r][c];
-            div.textContent = MONSTERS[monster.type][monster.level];
-            div.classList.add(monster.type, `level-${monster.level}`);
+        function initGame() {
+            board = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
+            score = 0;
+            bossKills = 0;
+            gameOver = false;
             
-            if (monster.merged) {
-              div.classList.add("tile-merged");
-              setTimeout(() => monster.merged = false, 400);
+            playerHP = 500;
+            playerMaxHP = 500;
+            playerLevel = 1;
+            previousPlayerLevel = 1;
+            bossLevel = 1;
+            
+            spawnBoss(1);
+            
+            addNewTile();
+            addNewTile();
+            updateBoard();
+            updateScore();
+            updateBattle();
+
+            if (combatInterval) clearInterval(combatInterval);
+            combatInterval = setInterval(combat, 2000);
+        }
+
+        function spawnBoss(level) {
+            const bossIndex = Math.min(level - 1, bossData.length - 1);
+            const boss = bossData[bossIndex];
+            
+            bossLevel = level;
+            bossName = boss.name;
+            bossEmoji = boss.emoji;
+            bossMaxHP = boss.hp;
+            bossHP = boss.hp;
+            bossAtk = boss.atk;
+            
+            document.getElementById('boss-level').textContent = `BOSS LV.${level}`;
+            document.getElementById('boss-name').textContent = bossName;
+            document.getElementById('boss-sprite').textContent = bossEmoji;
+            
+            updateBattle();
+        }
+
+        function combat() {
+            if (gameOver) return;
+
+            playerAtk = Math.floor(score / 2) + 20;
+            playerLevel = Math.floor(playerAtk / 50) + 1;
+
+            // 점수가 0이면 플레이어는 공격하지 않음
+            if (score === 0) {
+                // 보스만 공격
+                setTimeout(() => {
+                    const bossSprite = document.getElementById('boss-sprite');
+                    bossSprite.classList.add('attacking');
+                    setTimeout(() => bossSprite.classList.remove('attacking'), 300);
+                    
+                    const playerSprite = document.getElementById('player-sprite');
+                    playerHP -= bossAtk;
+                    showDamage(playerSprite, bossAtk);
+                    
+                    if (playerHP <= 0) {
+                        playerHP = 0;
+                        endGame();
+                    }
+                    
+                    updateBattle();
+                }, 1000);
+                return;
+            }
+
+            const playerSprite = document.getElementById('player-sprite');
+            const bossSprite = document.getElementById('boss-sprite');
+            
+            playerSprite.classList.add('attacking');
+            setTimeout(() => playerSprite.classList.remove('attacking'), 300);
+            
+            bossHP -= playerAtk;
+            showDamage(bossSprite, playerAtk);
+
+            if (bossHP <= 0) {
+                bossHP = 0;
+                bossKills++;
+                setTimeout(() => {
+                    spawnBoss(bossLevel + 1);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    bossSprite.classList.add('attacking');
+                    setTimeout(() => bossSprite.classList.remove('attacking'), 300);
+                    
+                    playerHP -= bossAtk;
+                    showDamage(playerSprite, bossAtk);
+                    
+                    if (playerHP <= 0) {
+                        playerHP = 0;
+                        endGame();
+                    }
+                    
+                    updateBattle();
+                }, 1000);
+                
+                return;
+            }
+
+            updateBattle();
+        }
+
+        function showDamage(element, damage) {
+            const rect = element.getBoundingClientRect();
+            const damageText = document.createElement('div');
+            damageText.className = 'damage-text';
+            damageText.textContent = `-${damage}`;
+            damageText.style.left = rect.left + rect.width / 2 + 'px';
+            damageText.style.top = rect.top + 'px';
+            damageText.style.position = 'fixed';
+            document.body.appendChild(damageText);
+            
+            setTimeout(() => damageText.remove(), 1000);
+        }
+
+        function updateBattle() {
+            const playerHPPercent = (playerHP / playerMaxHP) * 100;
+            const bossHPPercent = (bossHP / bossMaxHP) * 100;
+            
+            playerAtk = score === 0 ? 0 : Math.floor(score / 2) + 20;
+            playerLevel = Math.floor(playerAtk / 50) + 1;
+            
+            // 레벨업 체크 및 HP 회복
+            if (playerLevel > previousPlayerLevel) {
+                const levelDiff = playerLevel - previousPlayerLevel;
+                playerHP = Math.min(playerHP + (levelDiff * 5), playerMaxHP);
+                previousPlayerLevel = playerLevel;
             }
             
-            if (monster.isNew) {
-              div.classList.add("tile-new");
-              setTimeout(() => monster.isNew = false, 300);
-            }
-          } else {
-            div.classList.add("empty");
-          }
-          elements.game.appendChild(div);
-        }
-      }
-    }
-
-    function updateStats() {
-      const previousScore = parseInt(elements.score.textContent.split(': ')[1].replace(/,/g, '')) || 0;
-      
-      elements.score.textContent = `점수: ${gameState.score.toLocaleString()}`;
-      elements.highScore.textContent = `최고 점수: ${gameState.highScore.toLocaleString()}`;
-      elements.monstersCount.textContent = `소환된 몬스터: ${gameState.monstersSpawned}`;
-      
-      // 언락 상태 업데이트
-      updateUnlockStatus(previousScore);
-      
-      if (gameState.score > gameState.highScore) {
-        gameState.highScore = gameState.score;
-        localStorage.setItem('evo2048-highScore', gameState.highScore);
-        elements.highScore.style.color = '#e74c3c';
-        setTimeout(() => elements.highScore.style.color = '', 1000);
-      }
-    }
-
-    // 언락 상태 업데이트 함수
-    function updateUnlockStatus(previousScore) {
-      let unlockText = "";
-      let unlockCount = 0;
-      let newUnlock = false;
-      
-      if (gameState.score >= 5000) {
-        unlockText = "언락: 슬라임, 버섯, 골렘, 드래곤 (4/4) 🎉";
-        unlockCount = 4;
-        newUnlock = previousScore < 5000 && gameState.score >= 5000;
-      } else if (gameState.score >= 3000) {
-        unlockText = "언락: 슬라임, 버섯, 골렘 (3/4)";
-        unlockCount = 3;
-        newUnlock = previousScore < 3000 && gameState.score >= 3000;
-      } else {
-        unlockText = "언락: 슬라임, 버섯 (2/4)";
-        unlockCount = 2;
-      }
-      
-      elements.unlockStatus.textContent = unlockText;
-      
-      // 새로운 몬스터 언락 시 특별 효과
-      if (newUnlock) {
-        elements.unlockStatus.classList.add('unlock');
-        setTimeout(() => elements.unlockStatus.classList.remove('unlock'), 800);
-        
-        if (gameState.score >= 5000) {
-          utils.addBattleLog("🐲 드래곤 몬스터 언락! 모든 몬스터 사용 가능!");
-        } else if (gameState.score >= 3000) {
-          utils.addBattleLog("🪨 골렘 몬스터 언락! 더 강한 방어형 몬스터 등장!");
-        }
-      }
-    }
-
-    // 슬라이드 로직 최적화
-    function slideRow(row) {
-      // null 제거
-      let filtered = row.filter(cell => cell !== null);
-      
-      // 합치기
-      for (let i = 0; i < filtered.length - 1; i++) {
-        const current = filtered[i];
-        const next = filtered[i + 1];
-        
-        if (current && next && 
-            current.type === next.type && 
-            current.level === next.level && 
-            !current.merged && !next.merged) {
-          
-          const newLevel = current.level + 1;
-          const points = Math.pow(newLevel, 2) * GAME_CONFIG.SCORE_MULTIPLIER;
-          gameState.score += points;
-          
-          if (newLevel === 3) {
-            // 레벨 3 몬스터 소환 또는 강화
-            const newMonster = {
-              type: current.type,
-              level: newLevel,
-              hp: Math.floor(newLevel * GAME_CONFIG.BASE_HP * MONSTERS[current.type].hpMultiplier),
-              maxHp: Math.floor(newLevel * GAME_CONFIG.BASE_HP * MONSTERS[current.type].hpMultiplier),
-              attack: Math.floor(newLevel * GAME_CONFIG.BASE_ATTACK * MONSTERS[current.type].attackMultiplier)
-            };
+            document.getElementById('player-level').textContent = `LV.${playerLevel}`;
+            document.getElementById('player-hp-bar').style.width = playerHPPercent + '%';
+            document.getElementById('player-hp-text').textContent = `${playerHP}/${playerMaxHP}`;
+            document.getElementById('player-atk').textContent = playerAtk;
             
-            if (addOrUpgradeMonster(newMonster)) {
-              gameState.monstersSpawned++;
-              utils.addBattleLog(`레벨 ${newLevel} ${MONSTERS[current.type].name} 소환! (+${points}점)`);
+            document.getElementById('boss-hp-bar').style.width = bossHPPercent + '%';
+            document.getElementById('boss-hp-text').textContent = `${bossHP}/${bossMaxHP}`;
+            document.getElementById('boss-atk').textContent = bossAtk;
+            
+            document.getElementById('boss-kills').textContent = bossKills;
+        }
+
+        function endGame() {
+            gameOver = true;
+            if (combatInterval) {
+                clearInterval(combatInterval);
             }
             
-            filtered[i] = null; // 레벨 3은 보드에서 제거
-          } else {
-            filtered[i] = { type: current.type, level: newLevel, merged: true };
-          }
-          filtered[i + 1] = null;
-          i++; // 다음 타일 건너뛰기
+            setTimeout(() => {
+                document.getElementById('final-score').textContent = score;
+                document.getElementById('final-boss-kills').textContent = bossKills;
+                document.getElementById('game-over').style.display = 'block';
+            }, 500);
         }
-      }
-      
-      // null 제거 및 빈 자리 채우기
-      filtered = filtered.filter(cell => cell !== null);
-      while (filtered.length < GAME_CONFIG.SIZE) {
-        filtered.push(null);
-      }
-      
-      return filtered;
-    }
 
-    // 몬스터 추가 또는 업그레이드 함수
-    function addOrUpgradeMonster(newMonster) {
-      // 같은 타입의 기존 몬스터 찾기
-      const existingIndex = gameState.battleMonsters.findIndex(monster => monster.type === newMonster.type);
-      
-      if (existingIndex !== -1) {
-        // 기존 몬스터가 있으면 레벨업
-        const existingMonster = gameState.battleMonsters[existingIndex];
-        const oldLevel = existingMonster.level;
-        existingMonster.level += 1;
-        
-        // 몬스터 타입별 특성 적용
-        const monsterData = MONSTERS[existingMonster.type];
-        existingMonster.maxHp = Math.floor(existingMonster.level * GAME_CONFIG.BASE_HP * monsterData.hpMultiplier);
-        existingMonster.attack = Math.floor(existingMonster.level * GAME_CONFIG.BASE_ATTACK * monsterData.attackMultiplier);
-        
-        // HP 회복 (타입별 회복량 다름)
-        const healAmount = Math.floor(GAME_CONFIG.BASE_HP * monsterData.hpMultiplier);
-        existingMonster.hp = Math.min(existingMonster.hp + healAmount, existingMonster.maxHp);
-        
-        utils.addBattleLog(`🔥 ${monsterData.name} 레벨업! Lv.${oldLevel} → Lv.${existingMonster.level}`);
-        utils.addBattleLog(`   📊 공격력: ${Math.floor(oldLevel * GAME_CONFIG.BASE_ATTACK * monsterData.attackMultiplier)} → ${existingMonster.attack} (${monsterData.specialty})`);
-        return false; // 새 몬스터를 추가하지 않았으므로 false
-      } else if (gameState.battleMonsters.length < GAME_CONFIG.MAX_BATTLE_MONSTERS) {
-        // 새 몬스터 추가
-        gameState.battleMonsters.push(newMonster);
-        return true; // 새 몬스터를 추가했으므로 true
-      } else {
-        // 최대 몬스터 수 초과 - 가장 약한 몬스터와 교체
-        let weakestIndex = 0;
-        let weakestPower = gameState.battleMonsters[0].level * gameState.battleMonsters[0].attack + gameState.battleMonsters[0].hp;
-        
-        for (let i = 1; i < gameState.battleMonsters.length; i++) {
-          const monster = gameState.battleMonsters[i];
-          const power = monster.level * monster.attack + monster.hp;
-          if (power < weakestPower) {
-            weakestIndex = i;
-            weakestPower = power;
-          }
+        function addNewTile() {
+            const emptyCells = [];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (board[i][j] === 0) {
+                        emptyCells.push({row: i, col: j});
+                    }
+                }
+            }
+            
+            if (emptyCells.length > 0) {
+                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                board[randomCell.row][randomCell.col] = Math.random() < 0.9 ? 2 : 4;
+            }
         }
-        
-        const oldMonster = gameState.battleMonsters[weakestIndex];
-        gameState.battleMonsters[weakestIndex] = newMonster;
-        utils.addBattleLog(`💫 ${MONSTERS[oldMonster.type].name} (Lv.${oldMonster.level})이(가) 새로운 ${MONSTERS[newMonster.type].name} (Lv.${newMonster.level})로 교체됨!`);
-        return true; // 교체했으므로 true
-      }
-    }
 
-    // 보드 회전 최적화
-    function rotateBoard(board, clockwise = true) {
-      const size = GAME_CONFIG.SIZE;
-      const result = Array(size).fill(null).map(() => Array(size).fill(null));
-      
-      for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-          if (clockwise) {
-            result[c][size - 1 - r] = board[r][c] ? { ...board[r][c] } : null;
-          } else {
-            result[size - 1 - c][r] = board[r][c] ? { ...board[r][c] } : null;
-          }
+        function updateBoard() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    const value = board[i][j];
+                    if (value !== 0) {
+                        cell.textContent = value;
+                        cell.setAttribute('data-value', value);
+                    }
+                    grid.appendChild(cell);
+                }
+            }
         }
-      }
-      return result;
-    }
 
-    // 이동 처리 최적화
-    function move(direction) {
-      // 이전 상태 저장
-      gameState.previous = {
-        board: utils.deepClone(gameState.board),
-        score: gameState.score,
-        battleMonsters: utils.deepClone(gameState.battleMonsters),
-        enemyMonster: gameState.enemyMonster ? utils.deepClone(gameState.enemyMonster) : null,
-        bossMonster: gameState.bossMonster ? utils.deepClone(gameState.bossMonster) : null,
-        bossLevel: gameState.bossLevel,
-        bossKillCount: gameState.bossKillCount,
-        bossTurnCounter: gameState.bossTurnCounter,
-        commander: gameState.commander ? utils.deepClone(gameState.commander) : null,
-        monstersSpawned: gameState.monstersSpawned
-      };
-
-      let newBoard;
-      switch (direction) {
-        case "left":
-          newBoard = gameState.board.map(row => slideRow([...row]));
-          break;
-        case "right":
-          newBoard = gameState.board.map(row => slideRow([...row].reverse()).reverse());
-          break;
-        case "up":
-          newBoard = rotateBoard(gameState.board, false);
-          newBoard = newBoard.map(row => slideRow([...row]));
-          newBoard = rotateBoard(newBoard, true);
-          break;
-        case "down":
-          newBoard = rotateBoard(gameState.board, true);
-          newBoard = newBoard.map(row => slideRow([...row]));
-          newBoard = rotateBoard(newBoard, false);
-          break;
-      }
-
-              // 보드가 변했는지 확인
-      if (JSON.stringify(newBoard) !== JSON.stringify(gameState.board)) {
-        gameState.board = newBoard;
-        addRandomTile();
-        updateDisplay();
-        
-        // 매 이동마다 보스 공격 (일반 적보다 우선)
-        if (gameState.bossMonster && gameState.bossMonster.hp > 0) {
-          setTimeout(() => bossAttackPlayer(), 300);
+        function updateScore() {
+            document.getElementById('score').textContent = score;
         }
-        // 일반 적 전투 (보스 공격 후)
-        else if (gameState.battleMonsters.length > 0 && gameState.enemyMonster) {
-          setTimeout(() => battleStep(), 500);
+
+        function move(direction) {
+            if (gameOver) return;
+            
+            let moved = false;
+
+            if (direction === 'left') {
+                moved = moveLeft();
+            } else if (direction === 'right') {
+                moved = moveRight();
+            } else if (direction === 'up') {
+                moved = moveUp();
+            } else if (direction === 'down') {
+                moved = moveDown();
+            }
+
+            if (moved) {
+                addNewTile();
+                updateBoard();
+                updateScore();
+                
+                playerAtk = score === 0 ? 0 : Math.floor(score / 2) + 20;
+                playerLevel = Math.floor(playerAtk / 50) + 1;
+                
+                updateBattle();
+                
+                if (checkGameOver()) {
+                    endGame();
+                }
+            }
         }
-        
-        // 게임 오버 체크
-        if (isGameOver()) {
-          setTimeout(() => showGameOver(), 700);
+
+        function moveLeft() {
+            let moved = false;
+            for (let i = 0; i < 4; i++) {
+                let row = board[i].filter(val => val !== 0);
+                for (let j = 0; j < row.length - 1; j++) {
+                    if (row[j] === row[j + 1]) {
+                        row[j] *= 2;
+                        score += row[j];
+                        row.splice(j + 1, 1);
+                    }
+                }
+                while (row.length < 4) {
+                    row.push(0);
+                }
+                if (JSON.stringify(board[i]) !== JSON.stringify(row)) {
+                    moved = true;
+                }
+                board[i] = row;
+            }
+            return moved;
         }
-      }
-    }
 
-    // 보스가 플레이어를 공격하는 함수
-    function bossAttackPlayer() {
-      if (!gameState.bossMonster || gameState.bossMonster.hp <= 0) {
-        return false;
-      }
-
-      // 보스 레벨에 따른 공격력 조정 (초반 약하게)
-      let bossAttack;
-      if (gameState.bossLevel === 1) {
-        bossAttack = 15; // 1단계 보스: 고정 15 데미지
-      } else if (gameState.bossLevel <= 3) {
-        bossAttack = 10 + (gameState.bossLevel * 10); // 2-3단계: 20-30 데미지
-      } else if (gameState.bossLevel <= 5) {
-        bossAttack = 20 + (gameState.bossLevel * 15); // 4-5단계: 80-95 데미지
-      } else {
-        bossAttack = gameState.bossMonster.level * 8; // 6단계 이후: 기존 공식
-      }
-
-      // 아군 몬스터가 있으면 첫 번째 몬스터 공격
-      if (gameState.battleMonsters.length > 0) {
-        const player = gameState.battleMonsters[0];
-        player.hp -= bossAttack;
-        utils.addBattleLog(`👑 보스 ${gameState.bossMonster.name}이(가) ${MONSTERS[player.type].name}에게 ${bossAttack} 데미지!`);
-        
-        if (player.hp <= 0) {
-          utils.addBattleLog(`${MONSTERS[player.type].name} (Lv.${player.level}) 전멸!`);
-          gameState.battleMonsters.shift();
+        function moveRight() {
+            let moved = false;
+            for (let i = 0; i < 4; i++) {
+                let row = board[i].filter(val => val !== 0);
+                for (let j = row.length - 1; j > 0; j--) {
+                    if (row[j] === row[j - 1]) {
+                        row[j] *= 2;
+                        score += row[j];
+                        row.splice(j - 1, 1);
+                        j--;
+                    }
+                }
+                while (row.length < 4) {
+                    row.unshift(0);
+                }
+                if (JSON.stringify(board[i]) !== JSON.stringify(row)) {
+                    moved = true;
+                }
+                board[i] = row;
+            }
+            return moved;
         }
-      } 
-      // 아군 몬스터가 없으면 대장 공격
-      else if (gameState.commander && gameState.commander.hp > 0) {
-        gameState.commander.hp -= bossAttack;
-        utils.addBattleLog(`💥 보스가 아군 대장을 공격! ${bossAttack} 데미지!`);
-        
-        if (gameState.commander.hp <= 0) {
-          gameState.commander.hp = 0;
-          utils.addBattleLog(`💀 아군 대장이 쓰러졌습니다! 게임 오버!`);
-          updateDisplay();
-          setTimeout(() => showGameOver(), 1000);
-          return false;
+
+        function moveUp() {
+            let moved = false;
+            for (let j = 0; j < 4; j++) {
+                let col = [];
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== 0) {
+                        col.push(board[i][j]);
+                    }
+                }
+                for (let i = 0; i < col.length - 1; i++) {
+                    if (col[i] === col[i + 1]) {
+                        col[i] *= 2;
+                        score += col[i];
+                        col.splice(i + 1, 1);
+                    }
+                }
+                while (col.length < 4) {
+                    col.push(0);
+                }
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== col[i]) {
+                        moved = true;
+                    }
+                    board[i][j] = col[i];
+                }
+            }
+            return moved;
         }
-      }
 
-      updateDisplay();
-      
-      // 보스 공격 후 아군의 반격 (아군이 있을 때만)
-      if (gameState.battleMonsters.length > 0) {
-        setTimeout(() => playerAttackBoss(), 500);
-      }
-      
-      return true;
-    }
+        function moveDown() {
+            let moved = false;
+            for (let j = 0; j < 4; j++) {
+                let col = [];
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== 0) {
+                        col.push(board[i][j]);
+                    }
+                }
+                for (let i = col.length - 1; i > 0; i--) {
+                    if (col[i] === col[i - 1]) {
+                        col[i] *= 2;
+                        score += col[i];
+                        col.splice(i - 1, 1);
+                        i--;
+                    }
+                }
+                while (col.length < 4) {
+                    col.unshift(0);
+                }
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== col[i]) {
+                        moved = true;
+                    }
+                    board[i][j] = col[i];
+                }
+            }
+            return moved;
+        }
 
-    // 아군이 보스를 공격하는 함수
-    function playerAttackBoss() {
-      if (gameState.battleMonsters.length === 0 || !gameState.bossMonster || gameState.bossMonster.hp <= 0) {
-        return false;
-      }
+        function checkGameOver() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (board[i][j] === 0) {
+                        return false;
+                    }
+                    if (j < 3 && board[i][j] === board[i][j + 1]) {
+                        return false;
+                    }
+                    if (i < 3 && board[i][j] === board[i + 1][j]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
 
-      const player = gameState.battleMonsters[0];
-      const playerAttack = player.attack || Math.floor(player.level * GAME_CONFIG.BASE_ATTACK * MONSTERS[player.type].attackMultiplier);
+        function newGame() {
+            document.getElementById('game-over').style.display = 'none';
+            initGame();
+        }
 
-      // 플레이어 공격
-      gameState.bossMonster.hp -= playerAttack;
-      utils.addBattleLog(`⚔️ ${MONSTERS[player.type].name} (Lv.${player.level})이(가) 보스에게 ${playerAttack} 데미지!`);
-      
-      if (gameState.bossMonster.hp <= 0) {
-        const bossBonus = 1000 * gameState.bossLevel;
-        gameState.score += bossBonus;
-        gameState.bossKillCount++; // 보스 처치 횟수 증가
-        utils.addBattleLog(`🎉 ${gameState.bossLevel}단계 보스 ${gameState.bossMonster.name} 처치! +${bossBonus}점`);
-        utils.addBattleLog(`🏆 총 보스 처치 횟수: ${gameState.bossKillCount}마리`);
-        
-        // 다음 보스 생성
-        gameState.bossLevel++;
-        gameState.bossTurnCounter = 0;
-        gameState.bossMonster.hp = 0;
-        updateDisplay();
-        
-        setTimeout(() => {
-          utils.addBattleLog(`⚡ ${gameState.bossLevel}단계 보스 준비 중...`);
-          createBossMonster();
-          updateDisplay();
-        }, 1000);
-        
-        return true;
-      }
-
-      updateDisplay();
-      return true;
-    }
-
-    // 보스 전투 시스템
-    function battleBoss() {
-      if (gameState.battleMonsters.length === 0 || !gameState.bossMonster || gameState.bossMonster.hp <= 0) {
-        return false;
-      }
-
-      // 보스 턴 카운터 증가
-      gameState.bossTurnCounter++;
-      
-      const player = gameState.battleMonsters[0];
-      const playerAttack = player.attack || Math.floor(player.level * GAME_CONFIG.BASE_ATTACK * MONSTERS[player.type].attackMultiplier);
-      const bossAttack = gameState.bossMonster.level * 8; // 보스는 더 강함
-
-      // 플레이어 공격
-      gameState.bossMonster.hp -= playerAttack;
-      utils.addBattleLog(`👑 ${MONSTERS[player.type].name} (Lv.${player.level})이(가) 보스에게 ${playerAttack} 데미지!`);
-      
-      if (gameState.bossMonster.hp <= 0) {
-        const bossBonus = 1000 * gameState.bossLevel; // 보스 단계에 따른 보너스
-        gameState.score += bossBonus;
-        utils.addBattleLog(`🎉 ${gameState.bossLevel}단계 보스 ${gameState.bossMonster.name} 처치! +${bossBonus}점`);
-        
-        // 다음 보스 생성
-        gameState.bossLevel++;
-        gameState.bossTurnCounter = 0; // 턴 카운터 리셋
-        gameState.bossMonster.hp = 0;
-        updateDisplay();
-        
-        setTimeout(() => {
-          utils.addBattleLog(`⚡ ${gameState.bossLevel}단계 보스 준비 중...`);
-          createBossMonster();
-          updateDisplay();
-        }, 1000);
-        
-        return true;
-      }
-
-      // 보스 공격 (광역 공격 체크)
-      if (gameState.bossTurnCounter % GAME_CONFIG.BOSS_AOE_TURNS === 0) {
-        // 광역 공격 - 모든 아군에게 데미지
-        const aoeAttack = Math.floor(bossAttack * 0.7); // 광역 공격은 70% 데미지
-        utils.addBattleLog(`💥 보스 ${gameState.bossMonster.name}이(가) 광역 공격! 모든 아군에게 ${aoeAttack} 데미지!`);
-        
-        // 모든 아군 몬스터에게 데미지
-        const deadMonsters = [];
-        gameState.battleMonsters.forEach((monster, index) => {
-          monster.hp -= aoeAttack;
-          if (monster.hp <= 0) {
-            deadMonsters.push(index);
-          }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                move('left');
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                move('right');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                move('up');
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                move('down');
+            }
         });
-        
-        // 전멸한 몬스터들 제거 (뒤에서부터 제거해야 인덱스가 꼬이지 않음)
-        deadMonsters.reverse().forEach(index => {
-          const deadMonster = gameState.battleMonsters[index];
-          utils.addBattleLog(`💀 ${MONSTERS[deadMonster.type].name} (Lv.${deadMonster.level}) 광역 공격으로 전멸!`);
-          gameState.battleMonsters.splice(index, 1);
-        });
-        
-      } else {
-        // 일반 공격 - 첫 번째 아군에게만, 아군이 없으면 대장에게
-        if (gameState.battleMonsters.length > 0) {
-          const player = gameState.battleMonsters[0];
-          player.hp -= bossAttack;
-          utils.addBattleLog(`👑 보스 ${gameState.bossMonster.name}이(가) ${MONSTERS[player.type].name}에게 ${bossAttack} 데미지!`);
-          
-          if (player.hp <= 0) {
-            utils.addBattleLog(`${MONSTERS[player.type].name} (Lv.${player.level}) 전멸!`);
-            gameState.battleMonsters.shift();
-          }
-        } else if (gameState.commander && gameState.commander.hp > 0) {
-          // 아군이 없으면 대장 공격
-          gameState.commander.hp -= bossAttack;
-          utils.addBattleLog(`💥 보스가 아군 대장을 공격! ${bossAttack} 데미지!`);
-          
-          if (gameState.commander.hp <= 0) {
-            gameState.commander.hp = 0;
-            utils.addBattleLog(`💀 아군 대장이 쓰러졌습니다! 게임 오버!`);
-            updateDisplay();
-            setTimeout(() => showGameOver(), 1000);
-            return false;
-          }
-        }
-      }
 
-      // 다음 광역 공격까지 남은 턴 표시
-      const turnsUntilAoe = GAME_CONFIG.BOSS_AOE_TURNS - (gameState.bossTurnCounter % GAME_CONFIG.BOSS_AOE_TURNS);
-      if (turnsUntilAoe === GAME_CONFIG.BOSS_AOE_TURNS) {
-        utils.addBattleLog(`⚠️ 다음 광역 공격까지 ${GAME_CONFIG.BOSS_AOE_TURNS}턴!`);
-      } else if (turnsUntilAoe <= 2) {
-        utils.addBattleLog(`🚨 광역 공격까지 ${turnsUntilAoe}턴 남음!`);
-      }
-
-      updateDisplay();
-      return true;
-    }
-
-    // 전투 시스템 개선
-    function battleStep() {
-      if (gameState.battleMonsters.length === 0) {
-        utils.addBattleLog("모든 몬스터가 전멸했습니다!");
-        return false;
-      }
-
-      if (!gameState.enemyMonster) {
-        // 일반 적이 없으면 새로 생성 (보스 전투 전까지)
-        if (gameState.bossMonster && gameState.bossMonster.hp > 0) {
-          createEnemy();
-          return true;
-        }
-        return false;
-      }
-
-      const player = gameState.battleMonsters[0];
-      const playerAttack = player.attack || Math.floor(player.level * GAME_CONFIG.BASE_ATTACK * MONSTERS[player.type].attackMultiplier);
-      const enemyAttack = gameState.enemyMonster.level * GAME_CONFIG.BASE_ATTACK;
-
-      // 플레이어 공격
-      gameState.enemyMonster.hp -= playerAttack;
-      utils.addBattleLog(`${MONSTERS[player.type].name} (Lv.${player.level})이(가) ${playerAttack} 데미지!`);
-      
-      if (gameState.enemyMonster.hp <= 0) {
-        const bonus = GAME_CONFIG.DEFEAT_BONUS * gameState.enemyMonster.level;
-        gameState.score += bonus;
-        utils.addBattleLog(`적 ${MONSTERS[gameState.enemyMonster.type].name} 처치! +${bonus}점`);
-        gameState.enemyMonster = null;
-        // 적을 처치했지만 바로 새 적을 생성하지 않음 (보스 전투로 넘어가기 위해)
-        updateDisplay();
-        return true;
-      }
-
-      // 적 공격
-      player.hp -= enemyAttack;
-      utils.addBattleLog(`적이 ${MONSTERS[player.type].name}에게 ${enemyAttack} 데미지!`);
-      
-      if (player.hp <= 0) {
-        utils.addBattleLog(`${MONSTERS[player.type].name} (Lv.${player.level}) 전멸!`);
-        gameState.battleMonsters.shift();
-      }
-
-      updateDisplay();
-      return true;
-    }
-
-    // 적 생성 개선
-    function createEnemy() {
-      const type = utils.getRandomMonsterType();
-      const level = Math.min(3, Math.floor(Math.random() * 3) + 1);
-      const hp = level * GAME_CONFIG.BASE_HP;
-      
-      gameState.enemyMonster = { type, level, hp, maxHp: hp };
-      utils.addBattleLog(`새로운 적 ${MONSTERS[type].name} (Lv.${level}) 등장!`);
-    }
-
-    // 전투 필드 업데이트 개선
-    function updateBattleField() {
-      elements.battleField.innerHTML = "";
-
-      // 4칸 모두 아군 몬스터용으로 사용 (적군 타일 제거)
-      for (let i = 0; i < 4; i++) {
-        const tile = document.createElement("div");
-        tile.className = "battle-tile";
-
-        if (i < gameState.battleMonsters.length) {
-          // 플레이어 몬스터 (최대 3마리, 4칸 중 앞쪽부터 배치)
-          const monster = gameState.battleMonsters[i];
-          tile.classList.add("player");
-          
-          // 몬스터 타입과 레벨에 맞는 클래스 추가
-          tile.classList.add(monster.type, `level-${monster.level}`);
-          
-          const levelDiv = document.createElement("div");
-          levelDiv.className = "monster-level";
-          levelDiv.textContent = `Lv.${monster.level}`;
-          
-          const icon = document.createElement("div");
-          icon.className = "monster-icon";
-          icon.textContent = MONSTERS[monster.type][Math.min(monster.level, 3)]; // 레벨 3까지의 아이콘 사용
-          
-          const statsDiv = document.createElement("div");
-          statsDiv.className = "monster-stats";
-          
-          const hpContainer = document.createElement("div");
-          hpContainer.className = "hp-container";
-          
-          const hpBar = document.createElement("div");
-          hpBar.className = "hp-bar";
-          
-          const hpFill = document.createElement("div");
-          hpFill.className = "hp-bar-fill";
-          
-          // HP 비율에 따른 색상 계산
-          const hpPercent = (monster.hp / monster.maxHp) * 100;
-          let hpColor;
-          
-          if (hpPercent > 75) {
-            hpColor = 'linear-gradient(90deg, #27ae60, #2ecc71)';
-          } else if (hpPercent > 50) {
-            hpColor = 'linear-gradient(90deg, #f1c40f, #f39c12)';
-          } else if (hpPercent > 25) {
-            hpColor = 'linear-gradient(90deg, #e67e22, #d35400)';
-          } else {
-            hpColor = 'linear-gradient(90deg, #e74c3c, #c0392b)';
-          }
-          
-          hpFill.style.width = `${hpPercent}%`;
-          hpFill.style.background = hpColor;
-          
-          const statsRow = document.createElement("div");
-          statsRow.className = "stats-row";
-          
-          const hpText = document.createElement("div");
-          hpText.className = "hp-text";
-          hpText.textContent = `💚 ${monster.hp}/${monster.maxHp}`;
-          
-          // 공격력 표시
-          const attackText = document.createElement("div");
-          attackText.className = "attack-text";
-          attackText.textContent = `⚔️ ${monster.attack || Math.floor(monster.level * GAME_CONFIG.BASE_ATTACK * MONSTERS[monster.type].attackMultiplier)}`;
-          
-          hpBar.appendChild(hpFill);
-          hpContainer.appendChild(hpBar);
-          
-          statsRow.appendChild(hpText);
-          statsRow.appendChild(attackText);
-          
-          statsDiv.appendChild(hpContainer);
-          statsDiv.appendChild(statsRow);
-          
-          tile.appendChild(levelDiv);
-          tile.appendChild(icon);
-          tile.appendChild(statsDiv);
-        }
-        // 빈 타일은 기본 스타일 그대로 (적군 타일 코드 제거)
-
-        elements.battleField.appendChild(tile);
-      }
-    }
-
-    // 게임 오버 체크
-    function isGameOver() {
-      // 아군 대장이 죽으면 즉시 게임 오버
-      if (gameState.commander && gameState.commander.hp <= 0) {
-        return true;
-      }
-      
-      // 빈 타일이 있으면 계속 가능
-      if (utils.getEmptyTiles().length > 0) return false;
-      
-      // 합칠 수 있는 타일이 있는지 확인
-      for (let r = 0; r < GAME_CONFIG.SIZE; r++) {
-        for (let c = 0; c < GAME_CONFIG.SIZE; c++) {
-          const current = gameState.board[r][c];
-          if (!current) continue;
-          
-          // 오른쪽 타일과 비교
-          if (c < GAME_CONFIG.SIZE - 1) {
-            const right = gameState.board[r][c + 1];
-            if (right && current.type === right.type && current.level === right.level) {
-              return false;
-            }
-          }
-          
-          // 아래쪽 타일과 비교
-          if (r < GAME_CONFIG.SIZE - 1) {
-            const below = gameState.board[r + 1][c];
-            if (below && current.type === below.type && current.level === below.level) {
-              return false;
-            }
-          }
-        }
-      }
-      
-      return true;
-    }
-
-    // 게임 오버 화면
-    function showGameOver() {
-      let gameOverReason = "보드가 가득 참!";
-      if (gameState.commander && gameState.commander.hp <= 0) {
-        gameOverReason = "아군 대장 전멸!";
-      }
-      
-      elements.finalScore.innerHTML = `
-        <strong>최종 점수: ${gameState.score.toLocaleString()}점</strong><br>
-        <small>소환한 몬스터: ${gameState.monstersSpawned}마리</small><br>
-        <small>처치한 보스: ${gameState.bossKillCount}마리</small><br>
-        <small style="color: #e74c3c;">${gameOverReason}</small>
-      `;
-      elements.gameOverOverlay.classList.add('show');
-    }
-
-    function hideGameOver() {
-      elements.gameOverOverlay.classList.remove('show');
-    }
-
-    // 게임 재시작
-    function restartGame() {
-      gameState.score = 0;
-      gameState.bossLevel = 1; // 보스 레벨 초기화
-      gameState.bossKillCount = 0; // 보스 처치 횟수 초기화
-      gameState.bossTurnCounter = 0; // 보스 턴 카운터 초기화
-      gameState.monstersSpawned = 0;
-      initBoard();
-      hideGameOver();
-    }
-
-    // 되돌리기
-    function undoMove() {
-      if (gameState.previous.board.length > 0) {
-        Object.assign(gameState, utils.deepClone(gameState.previous));
-        updateDisplay();
-      }
-    }
-
-    // 이벤트 리스너들
-    document.addEventListener("keydown", (e) => {
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-        e.preventDefault();
-        const directions = {
-          "ArrowLeft": "left",
-          "ArrowRight": "right",
-          "ArrowUp": "up",
-          "ArrowDown": "down"
-        };
-        move(directions[e.key]);
-      }
-    });
-
-    // 터치 이벤트 (모바일 지원)
-    let touchStart = { x: 0, y: 0 };
-    
-    document.addEventListener("touchstart", (e) => {
-      touchStart.x = e.changedTouches[0].screenX;
-      touchStart.y = e.changedTouches[0].screenY;
-    }, { passive: true });
-    
-    document.addEventListener("touchend", (e) => {
-      const touchEnd = {
-        x: e.changedTouches[0].screenX,
-        y: e.changedTouches[0].screenY
-      };
-      
-      const dx = touchEnd.x - touchStart.x;
-      const dy = touchEnd.y - touchStart.y;
-      const threshold = 30;
-      
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (Math.abs(dx) > threshold) {
-          move(dx > 0 ? "right" : "left");
-        }
-      } else {
-        if (Math.abs(dy) > threshold) {
-          move(dy > 0 ? "down" : "up");
-        }
-      }
-    }, { passive: true });
-
-    // 버튼 이벤트
-    document.getElementById("restart").addEventListener("click", restartGame);
-    document.getElementById("undo").addEventListener("click", undoMove);
-
-    // 게임 시작
-    initBoard();
-  </script>
+        initGame();
+    </script>
 </body>
 </html>
-        
