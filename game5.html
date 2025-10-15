@@ -410,9 +410,13 @@
             border-radius: 15px;
             font-weight: 700;
             font-size: 1.1em;
-            min-height: 20px;
+            min-height: 60px;
+            height: 60px;
             transition: all 0.3s ease;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .message.success {
@@ -635,7 +639,7 @@
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">🏆</span>
-                    <span><strong>랭킹:</strong> 무한 모드까지 클리어하면 랭킹에 등록돼요!</span>
+                    <span><strong>랭킹:</strong> 무한 모드 클리어 시 랭킹에 등록돼요!</span>
                 </div>
             </div>
 
@@ -667,7 +671,7 @@
             <button class="btn btn-next" id="nextStageBtn" style="display: none;">다음 스테이지</button>
             <button class="btn btn-reset" id="resetStageBtn">스테이지 재시작</button>
             <button class="btn btn-new" id="newGameBtn">게임 재시작</button>
-            <button class="btn btn-main" id="mainBtn">메인으로</button>
+            <button class="btn btn-main" id="mainBtn">첫 화면으로</button>
         </div>
 
         <div class="message" id="message"></div>
@@ -1234,7 +1238,7 @@ class AppleNumberGame {
         scoreText += '<br>누적 총점: ' + this.totalScore.toLocaleString() + '점';
         
         if (isLastStage) {
-            scoreText += '<br><br>🌟 다음 스테이지는 무한 모드입니다!';
+            scoreText += '<br><br>🌟 무한 모드 진입!';
         }
         
         const popup = document.createElement('div');
@@ -1287,7 +1291,7 @@ class AppleNumberGame {
         
         const popup = document.createElement('div');
         popup.className = 'modal-backdrop';
-        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🌟 스테이지 3 완료!</div><div class="popup-score">전체 누적 점수: ' + totalScore.toLocaleString() + '점<br>최대 콤보: x' + this.combo + '<br><br>🎉 모든 스테이지를 완주하셨습니다!<br>' + saveMessage + '</div><div class="popup-buttons"><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); location.href=\'index.html\';">메인으로</button><button class="btn btn-new" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGame();">새 게임</button></div></div>';
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🌟 스테이지 3 완료!</div><div class="popup-score">전체 누적 점수: ' + totalScore.toLocaleString() + '점<br>최대 콤보: x' + this.combo + '<br><br>🎉 모든 스테이지를 완주하셨습니다!<br>' + saveMessage + '</div><div class="popup-buttons"><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); location.href=\'index.html\';">첫 화면으로</button><button class="btn btn-new" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGame();">새 게임</button></div></div>';
         document.body.appendChild(popup);
     }
 
