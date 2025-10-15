@@ -4,17 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>사과 게임</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 10px;
-            background: linear-gradient(135deg, #a8d5e2, #d4e7f5);
+            padding: 0;
+            font-family: 'Pretendard', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease-in-out infinite;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
+            justify-content: center;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #93c5fd, transparent);
+            border-radius: 50%;
+            animation: sparkleAnim var(--duration) ease-in-out infinite;
+            opacity: 0;
+            box-shadow: 0 0 10px rgba(147, 197, 253, 0.8);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        @keyframes sparkleAnim {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
         }
 
         .welcome-screen {
@@ -23,7 +57,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #a8d5e2, #d4e7f5);
+            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -31,14 +65,18 @@
         }
 
         .welcome-content {
-            background: white;
-            padding: 50px;
-            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 25px;
             text-align: center;
             max-width: 500px;
-            width: 85%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
             animation: welcomeAppear 0.5s ease-out;
+            border: 3px solid rgba(147, 197, 253, 0.5);
+            z-index: 10;
+            position: relative;
         }
 
         @keyframes welcomeAppear {
@@ -48,20 +86,27 @@
 
         .welcome-title {
             font-size: 3em;
-            color: #6ba3c7;
+            color: #0284c7;
             margin-bottom: 20px;
-            font-weight: bold;
+            font-weight: 800;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .game-rules {
             text-align: left;
-            background: #f0f7fb;
+            background: rgba(240, 249, 255, 0.8);
             padding: 25px;
             border-radius: 15px;
             margin-bottom: 30px;
             font-size: 1.1em;
             line-height: 1.6;
+            border: 2px solid rgba(147, 197, 253, 0.3);
+        }
+
+        .game-rules h3 {
+            margin: 0 0 10px 0;
+            color: #0284c7;
+            font-size: 16px;
         }
 
         .rule-item {
@@ -76,42 +121,46 @@
             margin-top: 2px;
         }
 
-        .start-button {
-            background: linear-gradient(145deg, #6ba3c7, #8ab8d6);
+        .start-button, .ranking-button {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
             color: white;
             border: none;
             padding: 20px 40px;
             font-size: 1.5em;
-            font-weight: bold;
-            border-radius: 50px;
+            font-weight: 700;
+            border-radius: 18px;
             cursor: pointer;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
             transition: all 0.3s ease;
-            animation: pulse 2s infinite;
             margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
         }
 
-        .start-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        .start-button::before, .ranking-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .start-button:hover::before, .ranking-button:hover::before {
+            left: 100%;
+        }
+
+        .start-button {
+            animation: pulse 2s infinite;
         }
 
         .ranking-button {
-            background: linear-gradient(145deg, #92c4df, #7eb3d5);
-            color: white;
-            border: none;
+            background: linear-gradient(135deg, #94a3b8, #64748b);
             padding: 15px 35px;
             font-size: 1.2em;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .ranking-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
 
         @keyframes pulse {
@@ -120,63 +169,73 @@
         }
 
         .game-container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 600px;
-            width: 90%;
             display: none;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
+            width: 95vw;
+            max-width: 600px;
+            max-height: 95vh;
+            overflow-y: auto;
+            border: 3px solid rgba(147, 197, 253, 0.5);
+            z-index: 10;
+            position: relative;
         }
 
         h1 {
-            color: #6ba3c7;
+            color: #0284c7;
             margin-bottom: 10px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            font-weight: 800;
         }
 
         .stage-info {
-            background: linear-gradient(135deg, #8ab8d6, #a8cde3);
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
             color: white;
             padding: 15px;
             border-radius: 15px;
             margin-bottom: 20px;
             font-size: 1.2em;
-            font-weight: bold;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
         }
 
         .stage-info.gravity {
-            background: linear-gradient(135deg, #92c4df, #b0d4e8);
+            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
         }
 
         .stage-info.infinite {
-            background: linear-gradient(135deg, #a8cde3, #c4ddef);
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
         }
 
         .timer-bar-container {
-            background: #ecf0f1;
+            background: rgba(236, 240, 241, 0.8);
             border-radius: 25px;
             height: 20px;
             margin-bottom: 20px;
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid rgba(147, 197, 253, 0.3);
         }
 
         .timer-bar {
-            background: linear-gradient(135deg, #6ba3c7, #8ab8d6);
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
             height: 100%;
             transition: width 0.1s ease;
             border-radius: 25px;
         }
 
         .timer-bar.warning {
-            background: linear-gradient(135deg, #92c4df, #a8cde3);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
         }
 
         .timer-bar.danger {
-            background: linear-gradient(135deg, #7eb3d5, #92c4df);
+            background: linear-gradient(135deg, #f87171, #ef4444);
             animation: pulseTimer 0.5s infinite alternate;
         }
 
@@ -188,18 +247,19 @@
         .timer-text {
             text-align: center;
             font-size: 1.2em;
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 700;
+            color: #0284c7;
             margin-bottom: 10px;
         }
 
         .score-board {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             margin-bottom: 30px;
-            background: #f0f7fb;
+            background: rgba(240, 249, 255, 0.8);
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 15px;
+            border: 2px solid rgba(147, 197, 253, 0.3);
         }
 
         .score-item {
@@ -207,27 +267,28 @@
         }
 
         .score-label {
-            color: #666;
+            color: #64748b;
             font-size: 0.9em;
             margin-bottom: 5px;
         }
 
         .score-value {
             font-size: 1.8em;
-            font-weight: bold;
-            color: #6ba3c7;
+            font-weight: 700;
+            color: #0284c7;
         }
 
         .game-board {
             display: grid;
             gap: 8px;
             margin-bottom: 30px;
-            background: #ecf0f1;
+            background: rgba(240, 249, 255, 0.6);
             padding: 15px;
             border-radius: 15px;
             position: relative;
             touch-action: none;
             justify-items: center;
+            border: 2px solid rgba(147, 197, 253, 0.3);
         }
 
         .tile {
@@ -247,7 +308,7 @@
         .tile::before {
             content: '🍎';
             position: absolute;
-            font-size: 48px;
+            font-size: 42px;
             z-index: 1;
             transition: all 0.3s ease;
         }
@@ -256,10 +317,10 @@
             position: relative;
             z-index: 3;
             font-size: 1.6em;
-            font-weight: bold;
+            font-weight: 700;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            background: rgba(0,0,0,0.4);
+            background: rgba(56, 189, 248, 0.5);
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -271,27 +332,17 @@
 
         .tile:hover {
             transform: translateY(-3px) scale(1.05);
-            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3)) brightness(1.1);
-        }
-
-        .tile:hover::before {
-            transform: scale(1.05);
+            filter: drop-shadow(0 6px 12px rgba(56, 189, 248, 0.4)) brightness(1.1);
         }
 
         .tile.selected {
             transform: scale(1.1);
-            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4)) saturate(1.3);
-        }
-
-        .tile.selected::before {
-            transform: scale(1.1);
-            filter: brightness(1.2) contrast(1.1);
+            filter: drop-shadow(0 6px 12px rgba(56, 189, 248, 0.6)) saturate(1.3);
         }
 
         .tile.selected .number {
-            background: rgba(138, 184, 214, 0.5);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(138, 184, 214, 0.3);
+            background: rgba(56, 189, 248, 0.7);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
         }
 
         .empty-slot {
@@ -303,8 +354,8 @@
 
         .drag-selection {
             position: absolute;
-            background: rgba(107, 163, 199, 0.3);
-            border: 2px solid #6ba3c7;
+            background: rgba(56, 189, 248, 0.2);
+            border: 2px solid #38bdf8;
             border-radius: 5px;
             pointer-events: none;
             z-index: 10;
@@ -320,59 +371,60 @@
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 25px;
+            border-radius: 18px;
             font-size: 1em;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
         .btn-next {
-            background: linear-gradient(145deg, #6ba3c7, #8ab8d6);
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
             color: white;
         }
 
         .btn-next:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
         }
 
         .btn-reset {
-            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+            background: linear-gradient(135deg, #94a3b8, #64748b);
             color: white;
         }
 
         .btn-new {
-            background: linear-gradient(145deg, #8ab8d6, #a8cde3);
+            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
             color: white;
         }
 
         .btn-main {
-            background: linear-gradient(145deg, #7eb3d5, #6ba3c7);
+            background: linear-gradient(135deg, #c4b5fd, #a78bfa);
             color: white;
         }
 
         .message {
             margin-top: 20px;
             padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
+            border-radius: 15px;
+            font-weight: 700;
             font-size: 1.1em;
             min-height: 20px;
             transition: all 0.3s ease;
+            text-align: center;
         }
 
         .message.success {
-            background: #d4e9f2;
-            color: #5a9bc4;
-            border: 2px solid #6ba3c7;
+            background: rgba(220, 252, 231, 0.8);
+            color: #10b981;
+            border: 2px solid #10b981;
         }
 
         .message.error {
-            background: #d9e8f0;
-            color: #7eb3d5;
-            border: 2px solid #92c4df;
+            background: rgba(254, 226, 226, 0.8);
+            color: #f87171;
+            border: 2px solid #f87171;
         }
 
         .combo-effect {
@@ -381,7 +433,7 @@
 
         @keyframes comboFlash {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); background: #b0d4e8; }
+            50% { transform: scale(1.05); background: rgba(186, 230, 253, 0.5); }
         }
 
         .tile-remove {
@@ -418,12 +470,12 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #6ba3c7, #8ab8d6);
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
             color: white;
             padding: 15px 30px;
             border-radius: 25px;
             font-size: 1.5em;
-            font-weight: bold;
+            font-weight: 700;
             z-index: 1001;
             animation: timeBonusShow 1s ease-out forwards;
         }
@@ -434,90 +486,71 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
 
-        .stage-complete-popup {
+        .modal-backdrop {
             position: fixed;
-            top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .popup-content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            animation: popupAppear 0.3s ease-out;
-        }
-
-        @keyframes popupAppear {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .popup-title {
-            font-size: 2em;
-            color: #6ba3c7;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .popup-score {
-            font-size: 1.5em;
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-
-        .coming-soon-popup {
-            position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            width: 100vw;
+            height: 100vh;
+            background: rgba(186, 230, 253, 0.3);
+            backdrop-filter: blur(15px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 3000;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .coming-soon-content {
-            background: white;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(30px);
             padding: 40px;
-            border-radius: 20px;
+            border-radius: 25px;
             text-align: center;
             max-width: 400px;
             width: 90%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            animation: popupAppear 0.3s ease-out;
+            box-shadow: 0 20px 60px rgba(14, 165, 233, 0.3);
+            animation: modalBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 3px solid rgba(147, 197, 253, 0.5);
         }
 
-        .coming-soon-title {
+        @keyframes modalBounce {
+            0% {
+                transform: scale(0.5) translateY(50px);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.05) translateY(-10px);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .popup-title {
             font-size: 2em;
-            color: #7eb3d5;
+            color: #0284c7;
             margin-bottom: 20px;
-            font-weight: bold;
+            font-weight: 800;
         }
 
-        .coming-soon-message {
-            font-size: 1.3em;
-            color: #2c3e50;
+        .popup-score {
+            font-size: 1.5em;
+            color: #64748b;
             margin-bottom: 30px;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .ranking-list {
-           max-height: 400px;
+            max-height: 400px;
             overflow-y: auto;
-              margin-bottom: 20px;
+            margin-bottom: 20px;
         }
 
         .ranking-item {
@@ -525,14 +558,15 @@
             justify-content: space-between;
             padding: 12px;
             margin-bottom: 8px;
-            background: #f0f7fb;
+            background: rgba(240, 249, 255, 0.8);
             border-radius: 10px;
             align-items: center;
+            border: 2px solid rgba(147, 197, 253, 0.3);
         }
 
         .ranking-item .rank {
-            font-weight: bold;
-            color: #6ba3c7;
+            font-weight: 700;
+            color: #0284c7;
             min-width: 50px;
         }
 
@@ -543,26 +577,8 @@
         }
 
         .ranking-item .score {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .coming-soon-button {
-            background: linear-gradient(145deg, #6ba3c7, #8ab8d6);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1.1em;
-            font-weight: bold;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .coming-soon-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            font-weight: 700;
+            color: #64748b;
         }
 
         .popup-buttons {
@@ -572,163 +588,29 @@
         }
 
         @media (max-width: 768px) {
-            body { padding: 25px; }
             .welcome-content { padding: 30px 20px; }
             .welcome-title { font-size: 2.2em; }
             .game-rules { font-size: 1em; padding: 20px; }
-            .game-container { padding: 20px; max-width: 100%; width: 80%; }
+            .game-container { padding: 15px; }
             h1 { font-size: 2em; }
-            .game-board { 
-                grid-template-columns: repeat(6, 1fr);
-                padding: 20px;
-                gap: 7px;
-                justify-items: center;
-            }
             .tile, .empty-slot { width: 48px; height: 48px; }
-            .tile::before { font-size: 44px; }
-            .tile .number { font-size: 1.5em; width: 28px; height: 28px; }
+            .tile::before { font-size: 40px; }
         }
 
         @media (max-width: 480px) {
-            body { padding: 15px; }
-            .welcome-content { 
-                padding: 20px 15px; 
-                width: 85%;
-            }
+            .welcome-content { padding: 20px 15px; }
             .welcome-title { font-size: 1.8em; }
-            .game-rules { 
-                font-size: 0.85em; 
-                padding: 12px;
-                margin-bottom: 15px;
-            }
-            .rule-item { margin-bottom: 8px; }
-            .start-button { 
-                padding: 12px 25px; 
-                font-size: 1.1em; 
-            }
-            .ranking-button { 
-                padding: 10px 20px; 
-                font-size: 0.95em; 
-            }
-            .game-container { 
-                padding: 12px; 
-                border-radius: 15px;
-                width: 85%;
-            }
-            h1 { font-size: 1.6em; margin-bottom: 8px; }
-            .stage-info { 
-                font-size: 0.95em; 
-                padding: 10px;
-                margin-bottom: 12px;
-            }
-            .timer-text { font-size: 0.95em; margin-bottom: 8px; }
-            .timer-bar-container { 
-                height: 16px;
-                margin-bottom: 12px;
-            }
-            .score-board { 
-                padding: 10px; 
-                gap: 8px;
-                margin-bottom: 15px;
-            }
-            .score-label { font-size: 0.75em; }
-            .score-value { font-size: 1.4em; }
-            .game-board { 
-                grid-template-columns: repeat(6, 1fr);
-                padding: 12px;
-                gap: 5px;
-                margin-bottom: 15px;
-                justify-items: center;
-            }
-            .tile, .empty-slot { 
-                width: 42px; 
-                height: 42px; 
-            }
-            .tile::before { font-size: 36px; }
-            .tile .number { 
-                font-size: 1.25em; 
-                width: 24px; 
-                height: 24px; 
-            }
-            .controls { gap: 8px; }
-            .btn { 
-                padding: 8px 15px; 
-                font-size: 0.85em; 
-            }
-            .message { 
-                font-size: 0.9em; 
-                padding: 10px;
-                margin-top: 12px;
-            }
-            .popup-content { 
-                padding: 20px 15px; 
-                width: 90%;
-            }
-            .popup-title { font-size: 1.4em; }
-            .popup-score { font-size: 1.1em; margin-bottom: 20px; }
-        }
-
-        @media (max-width: 360px) {
-            body { padding: 10px; }
-            .game-container { padding: 10px; width: 90%; }
-            h1 { font-size: 1.4em; margin-bottom: 6px; }
-            .stage-info { font-size: 0.9em; padding: 8px; margin-bottom: 10px; }
-            .timer-text { font-size: 0.9em; margin-bottom: 6px; }
-            .timer-bar-container { height: 14px; margin-bottom: 10px; }
-            .score-board { padding: 8px; gap: 6px; margin-bottom: 12px; }
-            .score-label { font-size: 0.7em; }
-            .score-value { font-size: 1.2em; }
-            .game-board { 
-                grid-template-columns: repeat(6, 1fr);
-                gap: 4px;
-                padding: 10px;
-                margin-bottom: 12px;
-                justify-items: center;
-            }
-            .tile, .empty-slot { 
-                width: 38px; 
-                height: 38px; 
-            }
-            .tile::before { font-size: 33px; }
-            .tile .number { 
-                font-size: 1.1em; 
-                width: 22px; 
-                height: 22px; 
-            }
-            .controls { gap: 6px; }
-            .btn { 
-                padding: 7px 12px; 
-                font-size: 0.8em; 
-            }
-            .message { 
-                font-size: 0.85em; 
-                padding: 8px;
-                margin-top: 10px;
-            }
-            .welcome-title { font-size: 1.4em; }
-            .welcome-content { padding: 18px 12px; width: 90%; }
-            .game-rules { font-size: 0.8em; padding: 10px; margin-bottom: 12px; }
-            .rule-item { margin-bottom: 6px; }
-            .start-button { padding: 10px 20px; font-size: 1em; }
-            .ranking-button { padding: 8px 16px; font-size: 0.9em; }
+            .game-rules { font-size: 0.85em; padding: 12px; }
+            .start-button { padding: 12px 25px; font-size: 1.1em; }
+            .ranking-button { padding: 10px 20px; font-size: 0.95em; }
+            .game-container { padding: 12px; }
+            h1 { font-size: 1.6em; }
+            .tile, .empty-slot { width: 42px; height: 42px; }
+            .tile::before { font-size: 32px; }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.min.js"></script>
-    <script>
-        // Firebase 설정
-        const firebaseConfig = {
-          apiKey: "AIzaSyDokZJCfk5vZdWfxDW22eylWKxvVDwgGO0",
-          authDomain: "baekkm-1b0cf.firebaseapp.com",
-          databaseURL: "https://baekkm-1b0cf-default-rtdb.firebaseio.com",
-          projectId: "baekkm-1b0cf",
-          storageBucket: "baekkm-1b0cf.firebasestorage.app",
-          messagingSenderId: "692775126901",
-          appId: "1:692775126901:web:a66a44079fdeb8d329f53c",
-          measurementId: "G-2LB7WPQ62Q"
-        };
-    </script>
-
 </head>
 <body>
     <div class="welcome-screen" id="welcomeScreen">
@@ -736,25 +618,26 @@
             <div class="welcome-title">🍎 사과 게임</div>
             
             <div class="game-rules">
+                <h3>📖 게임 방법</h3>
                 <div class="rule-item">
                     <span class="rule-icon">🍎</span>
-                    <span><strong>게임 목표:</strong> 드래그로 사과를 모아 10을 만드세요!</span>
+                    <span><strong>목표:</strong> 드래그로 사과를 모아 10을 만드세요!</span>
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">🎯</span>
-                    <span><strong>진행 순서:</strong> 일반 모드 -> 중력 모드 -> 무한 모드</span>
+                    <span><strong>순서:</strong> 일반 모드 → 중력 모드 → 무한 모드</span>
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">⏰</span>
-                    <span><strong>제한 시간:</strong> 30초 (무한 모드는 30초 + 연장)</span>
+                    <span><strong>시간:</strong> 30초 (무한 모드는 30초 + 연장)</span>
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">🔥</span>
-                    <span><strong>연속 콤보:</strong> 연속 성공 시 점수 배수 증가</span>
+                    <span><strong>콤보:</strong> 연속 성공 시 점수 배수 증가</span>
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">🏆</span>
-                    <span><strong>랭킹 도전:</strong> 높은 점수를 기록해 1위에 도전하세요!</span>
+                    <span><strong>랭킹:</strong> 무한 모드까지 클리어하면 랭킹에 등록돼요!</span>
                 </div>
             </div>
 
@@ -778,14 +661,6 @@
                 <div class="score-label">누적 점수</div>
                 <div class="score-value" id="totalScore">0</div>
             </div>
-            <div class="score-item">
-                <div class="score-label">스테이지</div>
-                <div class="score-value" id="currentStage">1</div>
-            </div>
-            <div class="score-item">
-                <div class="score-label">남은 타일</div>
-                <div class="score-value" id="remainingTiles">36</div>
-            </div>
         </div>
 
         <div class="game-board" id="gameBoard"></div>
@@ -794,32 +669,53 @@
             <button class="btn btn-next" id="nextStageBtn" style="display: none;">다음 스테이지</button>
             <button class="btn btn-reset" id="resetStageBtn">스테이지 재시작</button>
             <button class="btn btn-new" id="newGameBtn">게임 재시작</button>
-            <button class="btn btn-main" id="mainBtn">메인으로 돌아가기</button>
+            <button class="btn btn-main" id="mainBtn">메인으로</button>
         </div>
 
         <div class="message" id="message"></div>
     </div>
 
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDokZJCfk5vZdWfxDW22eylWKxvVDwgGO0",
+  authDomain: "baekkm-1b0cf.firebaseapp.com",
+  databaseURL: "https://baekkm-1b0cf-default-rtdb.firebaseio.com",
+  projectId: "baekkm-1b0cf",
+  storageBucket: "baekkm-1b0cf.firebasestorage.app",
+  messagingSenderId: "692775126901",
+  appId: "1:692775126901:web:a66a44079fdeb8d329f53c",
+  measurementId: "G-2LB7WPQ62Q"
+};
+
+function createBackgroundEffects() {
+    for (let i = 0; i < 30; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = `${Math.random() * 100}%`;
+        sparkle.style.top = `${Math.random() * 100}%`;
+        sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+        sparkle.style.animationDelay = `${Math.random() * 3}s`;
+        document.body.appendChild(sparkle);
+    }
+}
+
 let db = null;
 let gameInstance = null;
 
-// Firebase 초기화
 (function initFirebase() {
     if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             console.log('✅ Firebase 초기화 성공');
-            console.log('⚠️ Firestore 연결 시도 중... Firebase Console에서 Firestore Database를 활성화했는지 확인하세요.');
         } catch (error) {
             console.error('❌ Firebase 초기화 실패:', error);
         }
     }
 })();
 
-// 버튼 이벤트 리스너 등록
 document.addEventListener('DOMContentLoaded', function() {
+    createBackgroundEffects();
     document.getElementById('startButton').addEventListener('click', startGame);
     document.getElementById('rankingButton').addEventListener('click', showRankings);
 });
@@ -831,53 +727,52 @@ function startGame() {
 }
 
 function showRankings() {
-    if (!db) {
-        alert('Firebase가 초기화되지 않았습니다.');
+    if (typeof firebase === 'undefined' || !db) {
+        const popup = document.createElement('div');
+        popup.className = 'modal-backdrop';
+        popup.innerHTML = `
+            <div class="popup-content">
+                <div class="popup-title">⚠️ 알림</div>
+                <div class="popup-score">
+                    랭킹 시스템을 불러오는 중입니다.<br>
+                    잠시 후 다시 시도해주세요.
+                </div>
+                <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove();">확인</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
         return;
     }
     
-    console.log('🔍 랭킹 조회 시작...');
-    
-    // 먼저 orderBy 없이 조회 시도
     db.collection('rankings')
         .get()
         .then((querySnapshot) => {
-            console.log('📊 조회된 문서 개수 (orderBy 없이):', querySnapshot.size);
-            
             if (querySnapshot.empty) {
-                console.warn('⚠️ 조회된 랭킹 데이터가 없습니다.');
                 const popup = document.createElement('div');
-                popup.className = 'coming-soon-popup';
+                popup.className = 'modal-backdrop';
                 popup.innerHTML = `
-                    <div class="coming-soon-content">
-                        <div class="coming-soon-title">🏆 랭킹</div>
-                        <div class="coming-soon-message">
+                    <div class="popup-content">
+                        <div class="popup-title">🏆 랭킹</div>
+                        <div class="popup-score">
                             아직 등록된 랭킹이 없습니다.<br>
                             무한 모드를 완료하고 첫 랭킹에 도전하세요!
                         </div>
-                        <button class="coming-soon-button" onclick="this.closest('.coming-soon-popup').remove();">닫기</button>
+                        <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove();">닫기</button>
                     </div>
                 `;
                 document.body.appendChild(popup);
                 return;
             }
 
-            // 데이터를 배열로 변환하고 점수순으로 정렬
             const rankings = [];
             querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                console.log('📝 문서 데이터:', data);
-                rankings.push(data);
+                rankings.push(doc.data());
             });
             
-            // JavaScript로 정렬 (내림차순)
             rankings.sort((a, b) => (b.score || 0) - (a.score || 0));
-            
-            // 상위 10개만
             const top10 = rankings.slice(0, 10);
 
             let rankingHTML = '<div class="ranking-list">';
-            
             top10.forEach((data, index) => {
                 rankingHTML += `
                     <div class="ranking-item">
@@ -887,25 +782,21 @@ function showRankings() {
                     </div>
                 `;
             });
-            
             rankingHTML += '</div>';
             
             const popup = document.createElement('div');
-            popup.className = 'coming-soon-popup';
+            popup.className = 'modal-backdrop';
             popup.innerHTML = `
-                <div class="coming-soon-content">
-                    <div class="coming-soon-title">🏆 랭킹</div>
+                <div class="popup-content">
+                    <div class="popup-title">🏆 랭킹</div>
                     ${rankingHTML}
-                    <button class="coming-soon-button" onclick="this.closest('.coming-soon-popup').remove();">닫기</button>
+                    <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove();">닫기</button>
                 </div>
             `;
             document.body.appendChild(popup);
         })
         .catch((error) => {
             console.error("❌ 랭킹 불러오기 실패:", error);
-            console.error("에러 코드:", error.code);
-            console.error("에러 메시지:", error.message);
-            
             alert("랭킹을 불러오는데 실패했습니다.\n\n에러: " + error.message);
         });
 }
@@ -949,8 +840,6 @@ class AppleNumberGame {
         this.timerText = document.getElementById('timerText');
         this.timerBar = document.getElementById('timerBar');
         this.totalScoreEl = document.getElementById('totalScore');
-        this.currentStageEl = document.getElementById('currentStage');
-        this.remainingTilesEl = document.getElementById('remainingTiles');
         this.messageEl = document.getElementById('message');
         this.nextStageBtn = document.getElementById('nextStageBtn');
         this.resetStageBtn = document.getElementById('resetStageBtn');
@@ -1244,7 +1133,6 @@ class AppleNumberGame {
         
         this.stageInfo.textContent = `스테이지 ${stage} - ${config.name}`;
         this.stageInfo.className = this.isInfiniteMode ? 'stage-info infinite' : (config.gravity ? 'stage-info gravity' : 'stage-info');
-        this.currentStageEl.textContent = this.isInfiniteMode ? '3 (∞)' : stage;
         
         this.generateBoard();
         this.updateDisplay();
@@ -1365,7 +1253,7 @@ class AppleNumberGame {
 
     showStagePopup(score) {
         const popup = document.createElement('div');
-        popup.className = 'stage-complete-popup';
+        popup.className = 'modal-backdrop';
         
         const isLastStage = this.currentStage === 2;
         
@@ -1381,8 +1269,8 @@ class AppleNumberGame {
                 <div class="popup-title">스테이지 ${this.currentStage} 완료!</div>
                 <div class="popup-score">${scoreText}</div>
                 <div class="popup-buttons">
-                    <button class="btn btn-next" onclick="this.closest('.stage-complete-popup').remove(); gameInstance.nextStage();">다음 스테이지</button>
-                    <button class="btn btn-reset" onclick="this.closest('.stage-complete-popup').remove(); gameInstance.resetStage();">다시 도전</button>
+                    <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove(); gameInstance.nextStage();">다음 스테이지</button>
+                    <button class="btn btn-reset" onclick="this.closest('.modal-backdrop').remove(); gameInstance.resetStage();">다시 도전</button>
                 </div>
             </div>
         `;
@@ -1393,12 +1281,18 @@ class AppleNumberGame {
     showInfinitePopup(score) {
         this.stageActive = false;
     
+        const previousStagesScore = Object.entries(this.stageScores)
+            .filter(([stage, score]) => parseInt(stage) < this.currentStage)
+            .reduce((sum, [stage, score]) => sum + score, 0);
+        
+        const totalScore = previousStagesScore + score;
+
         const playerName = prompt("🎉 게임 완료! 랭킹에 등록할 닉네임을 입력하세요:", "익명");
         
         if (playerName && db) {
             db.collection('rankings').add({
                 name: playerName,
-                score: score,
+                score: totalScore,
                 combo: this.combo,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
@@ -1406,24 +1300,24 @@ class AppleNumberGame {
                 alert("🏆 랭킹에 등록되었습니다!");
             }).catch((error) => {
                 console.error("❌ 랭킹 저장 실패:", error);
-                alert("랭킹 저장에 실패했습니다.\n\nFirebase Console에서 Firestore Database를 활성화해주세요.");
+                alert("랭킹 저장에 실패했습니다.");
             });
         }
 
         const popup = document.createElement('div');
-        popup.className = 'stage-complete-popup';
+        popup.className = 'modal-backdrop';
         
         popup.innerHTML = `
             <div class="popup-content">
                 <div class="popup-title">🌟 스테이지 3 완료!</div>
                 <div class="popup-score">
-                    무한 모드 점수: ${score.toLocaleString()}점<br>
+                    전체 누적 점수: ${totalScore.toLocaleString()}점<br>
                     최대 콤보: x${this.combo}<br><br>
                     🎉 모든 스테이지를 완주하셨습니다!
                 </div>
                 <div class="popup-buttons">
-                    <button class="btn btn-reset" onclick="this.closest('.stage-complete-popup').remove(); location.reload();">메인으로 돌아가기</button>
-                    <button class="btn btn-new" onclick="this.closest('.stage-complete-popup').remove(); gameInstance.newGame();">새 게임</button>
+                    <button class="btn btn-reset" onclick="this.closest('.modal-backdrop').remove(); location.reload();">메인으로</button>
+                    <button class="btn btn-new" onclick="this.closest('.modal-backdrop').remove(); gameInstance.newGame();">새 게임</button>
                 </div>
             </div>
         `;
@@ -1432,26 +1326,19 @@ class AppleNumberGame {
     }
 
     updateDisplay() {
-        // 누적 점수 = 모든 스테이지 점수 합계
         let displayScore;
         
-        // 이전 스테이지들의 점수 합계
         const previousStagesScore = Object.entries(this.stageScores)
             .filter(([stage, score]) => parseInt(stage) < this.currentStage)
             .reduce((sum, [stage, score]) => sum + score, 0);
         
         if (this.isInfiniteMode) {
-            // 무한 모드: 이전 스테이지 점수 + 무한 모드 점수
             displayScore = previousStagesScore + this.infiniteScore;
         } else {
-            // 일반/중력 모드: 이전 스테이지 점수 + 현재 스테이지 점수
             displayScore = previousStagesScore + this.currentStageScore;
         }
         
         this.totalScoreEl.textContent = displayScore.toLocaleString();
-        
-        const activeTiles = this.board.filter(tile => tile.active).length;
-        this.remainingTilesEl.textContent = activeTiles;
     }
 
     showMessage(text, type) {
