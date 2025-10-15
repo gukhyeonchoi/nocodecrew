@@ -31,7 +31,6 @@
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
-        /* 배경 효과 */
         .sparkle {
             position: absolute;
             width: 8px;
@@ -139,7 +138,7 @@
             max-height: 95vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: center;
             overflow: hidden;
             touch-action: manipulation;
@@ -220,8 +219,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            justify-content: center;
+            gap: 12px;
+            justify-content: space-evenly;
             align-items: center;
             width: 100%;
             overflow: hidden;
@@ -231,7 +230,7 @@
             border: 3px solid rgba(147, 197, 253, 0.5);
             border-radius: 20px;
             padding: 0px;
-            height: 40vh;
+            height: 33vh;
             width: 100%;
             position: relative;
             overflow: hidden;
@@ -251,7 +250,7 @@
             justify-content: center;
             align-items: flex-end;
             height: calc(100% - 32px);
-            max-height: calc(40vh - 32px);
+            max-height: calc(33vh - 32px);
             overflow: hidden;
             position: relative;
         }
@@ -274,7 +273,7 @@
             height: 100%;
             align-items: flex-end;
             padding-bottom: 0px;
-            max-height: calc(40vh - 32px);
+            max-height: calc(33vh - 32px);
             overflow: visible;
         }
         .target-block {
@@ -370,7 +369,7 @@
             border-radius: 20px;
             padding: 12px;
             color: #0369a1;
-            height: 40vh;
+            height: 35vh;
             width: 100%;
             overflow: hidden;
             position: relative;
@@ -391,7 +390,7 @@
             align-items: flex-start;
             padding-top: 10px;
             height: calc(100% - 28px);
-            max-height: 40vh;
+            max-height: calc(35vh - 28px);
             overflow: hidden;
             position: relative;
             margin-top: 20px;
@@ -413,7 +412,7 @@
             gap: 4px;
             align-items: center;
             height: 100%;
-            max-height: 40vh;
+            max-height: calc(35vh - 28px);
             width: 60px;
             overflow: visible;
         }
@@ -456,7 +455,6 @@
             opacity: 0.7;
             cursor: not-allowed;
         }
-        /* 파스텔 색상 */
         .red { 
             --color-start: #fca5a5; 
             --color-end: #f87171; 
@@ -528,12 +526,15 @@
         .btn {
             color: #fff;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 40px;
             margin: 5px;
             border-radius: 8px;
             background: linear-gradient(145deg, #60a5fa, #93c5fd);
             font-weight: 600;
             cursor: pointer;
+        }
+        .btn-home {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
         }
         .message {
             text-align: center;
@@ -632,7 +633,6 @@
             gap: 12px;
             justify-content: center;
         }
-        /* 모바일 최적화 */
         @media (max-width: 768px) {
             #intro {
                 padding: 30px 20px;
@@ -642,30 +642,210 @@
             }
             .game-container {
                 padding: 4px;
+                max-width: 100vw;
+                max-height: 100vh;
+                justify-content: space-evenly;
+            }
+            .game-area {
+                gap: 12px;
             }
             .score-board {
                 font-size: 16px;
+                margin-bottom: 4px;
+                padding: 8px 16px;
             }
-            .target-block, .queue-slot, .queue-block, .stack-block {
+            .stage-progress {
+                gap: 6px;
+                margin-bottom: 4px;
+                font-size: 10px;
+                padding: 4px 0;
+            }
+            .stage-indicator {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            .stage-indicator:not(:last-child)::after {
+                right: -9px;
+                font-size: 10px;
+            }
+            .target-area {
+                height: 38vh;
+                padding: 8px;
+                margin-bottom: 8px;
+            }
+            .target-lanes {
+                max-height: calc(38vh - 28px);
+                gap: 8px;
+            }
+            .target-lane {
+                width: 50px;
+                max-height: calc(38vh - 28px);
+            }
+            .target-block {
                 width: 50px;
                 height: 50px;
+                border-radius: 10px;
             }
-            .target-lane, .stack {
+            .queue-area {
+                height: 12vh;
+                padding: 8px;
+                gap: 8px;
+            }
+            .queue-slot, .queue-block {
                 width: 50px;
+                height: 50px;
+                border-radius: 10px;
+            }
+            .selection-area {
+                height: 38vh;
+                padding: 8px;
+            }
+            .stacks-container {
+                max-height: calc(38vh - 24px);
+                gap: 8px;
+                margin-top: 20px;
+            }
+            .stack {
+                max-height: calc(38vh - 24px);
+                width: 50px;
+            }
+            .stack-block {
+                width: 50px;
+                height: 50px;
+                border-radius: 10px;
             }
             .block-number {
                 font-size: 16px;
             }
         }
         @media (max-height: 600px) {
+            .game-container {
+                padding: 4px;
+                max-height: 100vh;
+                justify-content: space-evenly;
+            }
+            .game-area {
+                gap: 8px;
+            }
             .target-area {
-                height: 40vh;
+                height: 35vh;
+                padding: 6px;
+                margin-bottom: 6px;
             }
             .selection-area {
-                height: 40vh;
+                height: 35vh;
+                padding: 6px;
             }
             .queue-area {
                 height: 10vh;
+                padding: 6px;
+                gap: 6px;
+            }
+            .target-lanes {
+                max-height: calc(35vh - 20px);
+                gap: 6px;
+            }
+            .stacks-container {
+                max-height: calc(35vh - 20px);
+                gap: 6px;
+                margin-top: 20px;
+            }
+            .target-lane {
+                max-height: calc(35vh - 20px);
+                width: 45px;
+            }
+            .stack {
+                max-height: calc(35vh - 20px);
+                width: 45px;
+            }
+            .target-block, .queue-slot, .queue-block, .stack-block {
+                width: 45px;
+                height: 45px;
+                border-radius: 8px;
+            }
+            .block-number {
+                font-size: 14px;
+            }
+            .target-title, .selection-title {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 8px 24px;
+            }
+            .score-board {
+                font-size: 14px;
+                margin-bottom: 4px;
+                padding: 6px 12px;
+            }
+            .message {
+                font-size: 12px;
+                margin-top: 4px;
+            }
+            .modal h2 {
+                font-size: 18px;
+            }
+            .modal p {
+                font-size: 12px;
+            }
+            .damage-text {
+                font-size: 14px;
+            }
+            .stage-progress {
+                gap: 4px;
+                margin-bottom: 4px;
+                font-size: 8px;
+            }
+            .stage-indicator {
+                width: 18px;
+                height: 18px;
+                font-size: 8px;
+            }
+            .stage-indicator:not(:last-child)::after {
+                right: -8px;
+                font-size: 8px;
+            }
+            .shooting-particle {
+                width: 14px;
+                height: 14px;
+            }
+        }
+        @media (orientation: landscape) and (max-height: 500px) {
+            .game-container {
+                padding: 2px;
+                justify-content: space-evenly;
+            }
+            .game-area {
+                gap: 6px;
+            }
+            .target-area {
+                height: 32vh;
+                padding: 4px;
+                margin-bottom: 4px;
+            }
+            .selection-area {
+                height: 32vh;
+                padding: 4px;
+            }
+            .queue-area {
+                height: 8vh;
+                padding: 4px;
+                gap: 4px;
+            }
+            .target-lanes {
+                max-height: calc(32vh - 16px);
+            }
+            .stacks-container {
+                max-height: calc(32vh - 16px);
+                margin-top: 20px;
+            }
+            .target-lane {
+                max-height: calc(32vh - 16px);
+            }
+            .stack {
+                max-height: calc(32vh - 16px);
             }
         }
     </style>
@@ -674,7 +854,6 @@
     <div id="intro">
         <h1>🎯 컬러 슈터</h1>
         <p>색상을 매칭하여 타겟 블록을 모두 제거하세요!</p>
-        
         <div class="game-instructions">
             <h3>📖 게임 방법</h3>
             <p>• 하단 블록에서 상단 블록만 터치 가능</p>
@@ -682,11 +861,9 @@
             <p>• 같은 색상의 타겟이 있으면 자동으로 공격</p>
             <p>• 모든 타겟을 제거하면 다음 스테이지!</p>
         </div>
-        
         <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
         <button class="intro-btn btn-home" id="goHomeBtn">🏠 홈으로</button>
     </div>
-
     <div class="game-container" id="gameContainer">
         <div class="score-board">
             <span>🎯 스테이지: <span id="stage">1</span></span>
@@ -694,35 +871,27 @@
             <span style="margin-left: 20px;">🎨 색상: <span id="colorCount">3</span></span>
         </div>
         <div class="stage-progress" id="stageProgress"></div>
-
         <div class="game-area">
             <div class="target-area">
                 <div class="target-title">🎯 목표 블록</div>
                 <div class="target-lanes" id="targetLanes"></div>
             </div>
-
             <div class="queue-area" id="queueArea"></div>
-
             <div class="selection-area">
                 <div class="selection-title">🎮 블록 선택</div>
                 <div class="stacks-container" id="stacksContainer"></div>
             </div>
         </div>
-
         <div class="game-controls">
             <button class="btn btn-retry" id="resetGameBtn">🔄 다시 시작</button>
             <button class="btn btn-home" id="goHomeBtn2">🏠 홈으로</button>
         </div>
-
         <div class="message" id="message"></div>
     </div>
-
     <div id="modalRoot"></div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
         import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
             authDomain: "gukhyeon-ce3ba.firebaseapp.com",
@@ -733,14 +902,9 @@
             appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
             measurementId: "G-JBBLJNDGY1"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
-        // 메인 화면에서 전달받은 플레이어 이름
         let playerName = localStorage.getItem('playerName') || 'Guest';
-
-        // 배경 효과 생성
         function createBackgroundEffects() {
             for (let i = 0; i < 30; i++) {
                 const sparkle = document.createElement('div');
@@ -752,7 +916,6 @@
                 document.body.appendChild(sparkle);
             }
         }
-
         class ColorShooterGame {
             constructor() {
                 this.fullColorPool = ['red', 'blue', 'green', 'yellow', 'purple'];
@@ -1241,7 +1404,6 @@
                 const modal = document.createElement('div');
                 modal.className = 'modal';
                 modal.innerHTML = `<h2>🎮 게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
-                // 랭킹 표시
                 const rankingDiv = document.createElement('div');
                 rankingDiv.style.margin = '20px 0';
                 rankingDiv.style.textAlign = 'left';
