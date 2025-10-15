@@ -609,8 +609,6 @@
             .tile::before { font-size: 32px; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.min.js"></script>
 </head>
 <body>
     <div class="welcome-screen" id="welcomeScreen">
@@ -675,38 +673,42 @@
         <div class="message" id="message"></div>
     </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyDokZJCfk5vZdWfxDW22eylWKxvVDwgGO0",
-  authDomain: "baekkm-1b0cf.firebaseapp.com",
-  databaseURL: "https://baekkm-1b0cf-default-rtdb.firebaseio.com",
-  projectId: "baekkm-1b0cf",
-  storageBucket: "baekkm-1b0cf.firebasestorage.app",
-  messagingSenderId: "692775126901",
-  appId: "1:692775126901:web:a66a44079fdeb8d329f53c",
-  measurementId: "G-2LB7WPQ62Q"
+  apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+  authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+  databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+  projectId: "gukhyeon-ce3ba",
+  storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+  messagingSenderId: "751956972723",
+  appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+  measurementId: "G-JBBLJNDGY1"
 };
+
+let playerName = localStorage.getItem('playerName') || 'Guest';
 
 function createBackgroundEffects() {
     for (let i = 0; i < 30; i++) {
         const sparkle = document.createElement('div');
         sparkle.className = 'sparkle';
-        sparkle.style.left = `${Math.random() * 100}%`;
-        sparkle.style.top = `${Math.random() * 100}%`;
-        sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
-        sparkle.style.animationDelay = `${Math.random() * 3}s`;
+        sparkle.style.left = Math.random() * 100 + '%';
+        sparkle.style.top = Math.random() * 100 + '%';
+        sparkle.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+        sparkle.style.animationDelay = Math.random() * 3 + 's';
         document.body.appendChild(sparkle);
     }
 }
 
-let db = null;
+let database = null;
 let gameInstance = null;
 
 (function initFirebase() {
     if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
         try {
             firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
+            database = firebase.database();
             console.log('✅ Firebase 초기화 성공');
         } catch (error) {
             console.error('❌ Firebase 초기화 실패:', error);
@@ -727,78 +729,43 @@ function startGame() {
 }
 
 function showRankings() {
-    if (typeof firebase === 'undefined' || !db) {
+    if (typeof firebase === 'undefined' || !database) {
         const popup = document.createElement('div');
         popup.className = 'modal-backdrop';
-        popup.innerHTML = `
-            <div class="popup-content">
-                <div class="popup-title">⚠️ 알림</div>
-                <div class="popup-score">
-                    랭킹 시스템을 불러오는 중입니다.<br>
-                    잠시 후 다시 시도해주세요.
-                </div>
-                <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove();">확인</button>
-            </div>
-        `;
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">⚠️ 알림</div><div class="popup-score">랭킹 시스템을 불러오는 중입니다.<br>잠시 후 다시 시도해주세요.</div><button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove();">확인</button></div>';
         document.body.appendChild(popup);
         return;
     }
     
-    db.collection('rankings')
-        .get()
-        .then((querySnapshot) => {
-            if (querySnapshot.empty) {
-                const popup = document.createElement('div');
-                popup.className = 'modal-backdrop';
-                popup.innerHTML = `
-                    <div class="popup-content">
-                        <div class="popup-title">🏆 랭킹</div>
-                        <div class="popup-score">
-                            아직 등록된 랭킹이 없습니다.<br>
-                            무한 모드를 완료하고 첫 랭킹에 도전하세요!
-                        </div>
-                        <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove();">닫기</button>
-                    </div>
-                `;
-                document.body.appendChild(popup);
-                return;
-            }
-
-            const rankings = [];
-            querySnapshot.forEach((doc) => {
-                rankings.push(doc.data());
-            });
-            
-            rankings.sort((a, b) => (b.score || 0) - (a.score || 0));
-            const top10 = rankings.slice(0, 10);
-
-            let rankingHTML = '<div class="ranking-list">';
-            top10.forEach((data, index) => {
-                rankingHTML += `
-                    <div class="ranking-item">
-                        <span class="rank">${index + 1}위</span>
-                        <span class="name">${data.name || '익명'}</span>
-                        <span class="score">${(data.score || 0).toLocaleString()}점</span>
-                    </div>
-                `;
-            });
-            rankingHTML += '</div>';
-            
+    const scoresRef = database.ref('scores/game5');
+    scoresRef.orderByChild('score').limitToLast(10).once('value').then(function(snapshot) {
+        const rankings = [];
+        snapshot.forEach(function(child) {
+            rankings.unshift(child.val());
+        });
+        
+        if (rankings.length === 0) {
             const popup = document.createElement('div');
             popup.className = 'modal-backdrop';
-            popup.innerHTML = `
-                <div class="popup-content">
-                    <div class="popup-title">🏆 랭킹</div>
-                    ${rankingHTML}
-                    <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove();">닫기</button>
-                </div>
-            `;
+            popup.innerHTML = '<div class="popup-content"><div class="popup-title">🏆 랭킹</div><div class="popup-score">아직 등록된 랭킹이 없습니다.<br>무한 모드를 완료하고 첫 랭킹에 도전하세요!</div><button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove();">닫기</button></div>';
             document.body.appendChild(popup);
-        })
-        .catch((error) => {
-            console.error("❌ 랭킹 불러오기 실패:", error);
-            alert("랭킹을 불러오는데 실패했습니다.\n\n에러: " + error.message);
+            return;
+        }
+
+        let rankingHTML = '<div class="ranking-list">';
+        rankings.forEach(function(data, index) {
+            rankingHTML += '<div class="ranking-item"><span class="rank">' + (index + 1) + '위</span><span class="name">' + (data.name || '익명') + '</span><span class="score">' + (data.score || 0).toLocaleString() + '점</span></div>';
         });
+        rankingHTML += '</div>';
+        
+        const popup = document.createElement('div');
+        popup.className = 'modal-backdrop';
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🏆 랭킹</div>' + rankingHTML + '<button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove();">닫기</button></div>';
+        document.body.appendChild(popup);
+    }).catch(function(error) {
+        console.error("❌ 랭킹 불러오기 실패:", error);
+        alert("랭킹을 불러오는데 실패했습니다.");
+    });
 }
 
 class AppleNumberGame {
@@ -848,28 +815,29 @@ class AppleNumberGame {
     }
 
     bindEvents() {
-        this.nextStageBtn.addEventListener('click', () => this.nextStage());
-        this.resetStageBtn.addEventListener('click', () => this.resetStage());
-        this.newGameBtn.addEventListener('click', () => this.newGame());
-        this.mainBtn.addEventListener('click', () => this.goToMain());
+        const self = this;
+        this.nextStageBtn.addEventListener('click', function() { self.nextStage(); });
+        this.resetStageBtn.addEventListener('click', function() { self.resetStage(); });
+        this.newGameBtn.addEventListener('click', function() { self.newGame(); });
+        this.mainBtn.addEventListener('click', function() { self.goToMain(); });
 
-        this.gameBoard.addEventListener('mousedown', (e) => this.startDrag(e));
-        document.addEventListener('mousemove', (e) => this.moveDrag(e));
-        document.addEventListener('mouseup', (e) => this.endDrag(e));
+        this.gameBoard.addEventListener('mousedown', function(e) { self.startDrag(e); });
+        document.addEventListener('mousemove', function(e) { self.moveDrag(e); });
+        document.addEventListener('mouseup', function(e) { self.endDrag(e); });
         
-        this.gameBoard.addEventListener('touchstart', (e) => {
-            this.startDrag(e.touches[0]);
+        this.gameBoard.addEventListener('touchstart', function(e) {
+            self.startDrag(e.touches[0]);
         }, { passive: false });
         
-        document.addEventListener('touchmove', (e) => {
-            if(this.isDragging) { 
+        document.addEventListener('touchmove', function(e) {
+            if(self.isDragging) { 
                 e.preventDefault(); 
-                this.moveDrag(e.touches[0]); 
+                self.moveDrag(e.touches[0]); 
             }
         }, { passive: false });
         
-        document.addEventListener('touchend', (e) => {
-            this.endDrag(e.changedTouches[0]);
+        document.addEventListener('touchend', function(e) {
+            self.endDrag(e.changedTouches[0]);
         });
     }
 
@@ -913,6 +881,7 @@ class AppleNumberGame {
     }
 
     endDrag(e) {
+        const self = this;
         if (!this.isDragging) return;
         this.isDragging = false;
         
@@ -928,8 +897,8 @@ class AppleNumberGame {
             if (width > 5 || height > 5) {
                 const selected = this.getSelectedTiles(left, top, width, height);
                 if (selected.length > 0) {
-                    const sum = selected.reduce((total, id) => {
-                        const tile = this.board.find(t => t.id === id);
+                    const sum = selected.reduce(function(total, id) {
+                        const tile = self.board.find(function(t) { return t.id === id; });
                         return total + (tile ? tile.value : 0);
                     }, 0);
                     
@@ -946,13 +915,13 @@ class AppleNumberGame {
                             this.currentStageScore += points;
                         }
                         
-                        this.showMessage(`성공! +${points}점 (${selected.length}개 타일, 콤보 x${this.combo})`, 'success');
+                        this.showMessage('성공! +' + points + '점 (' + selected.length + '개 타일, 콤보 x' + this.combo + ')', 'success');
                         this.updateDisplay();
                         this.gameBoard.classList.add('combo-effect');
-                        setTimeout(() => this.gameBoard.classList.remove('combo-effect'), 500);
+                        setTimeout(function() { self.gameBoard.classList.remove('combo-effect'); }, 500);
                     } else {
                         this.combo = 0;
-                        this.showMessage(`합이 ${sum}입니다. 10이 되는 조합을 선택해주세요!`, 'error');
+                        this.showMessage('합이 ' + sum + '입니다. 10이 되는 조합을 선택해주세요!', 'error');
                     }
                 }
             }
@@ -964,11 +933,12 @@ class AppleNumberGame {
     }
 
     highlightTiles(left, top, width, height) {
+        const self = this;
         const tiles = this.gameBoard.querySelectorAll('.tile');
         
-        tiles.forEach(tile => {
+        tiles.forEach(function(tile) {
             const tileRect = tile.getBoundingClientRect();
-            const boardRect = this.gameBoard.getBoundingClientRect();
+            const boardRect = self.gameBoard.getBoundingClientRect();
             const tileLeft = tileRect.left - boardRect.left;
             const tileTop = tileRect.top - boardRect.top;
             const tileRight = tileLeft + tileRect.width;
@@ -980,19 +950,20 @@ class AppleNumberGame {
             
             if (isOverlapping) {
                 tile.classList.add('selected');
-            } else if (!this.selectedTiles.includes(parseInt(tile.dataset.id))) {
+            } else if (!self.selectedTiles.includes(parseInt(tile.dataset.id))) {
                 tile.classList.remove('selected');
             }
         });
     }
 
     getSelectedTiles(left, top, width, height) {
+        const self = this;
         const tiles = this.gameBoard.querySelectorAll('.tile');
         const selected = [];
         
-        tiles.forEach(tile => {
+        tiles.forEach(function(tile) {
             const tileRect = tile.getBoundingClientRect();
-            const boardRect = this.gameBoard.getBoundingClientRect();
+            const boardRect = self.gameBoard.getBoundingClientRect();
             const tileLeft = tileRect.left - boardRect.left;
             const tileTop = tileRect.top - boardRect.top;
             const tileRight = tileLeft + tileRect.width;
@@ -1004,7 +975,7 @@ class AppleNumberGame {
             
             if (isOverlapping) {
                 const tileId = parseInt(tile.dataset.id);
-                if (!this.selectedTiles.includes(tileId)) {
+                if (!self.selectedTiles.includes(tileId)) {
                     selected.push(tileId);
                 }
             }
@@ -1014,22 +985,24 @@ class AppleNumberGame {
     }
 
     removeTiles(tilesToRemove) {
-        tilesToRemove.forEach(id => {
-            const tile = this.board.find(t => t.id === id);
+        const self = this;
+        tilesToRemove.forEach(function(id) {
+            const tile = self.board.find(function(t) { return t.id === id; });
             if (tile) {
                 tile.active = false;
-                const el = document.querySelector(`[data-id="${id}"]`);
+                const el = document.querySelector('[data-id="' + id + '"]');
                 if (el) el.classList.add('tile-remove');
             }
         });
         
-        setTimeout(() => {
-            if (this.hasGravity) this.applyGravity();
-            this.renderBoard();
+        setTimeout(function() {
+            if (self.hasGravity) self.applyGravity();
+            self.renderBoard();
         }, 500);
     }
 
     applyGravity() {
+        const self = this;
         for (let col = 0; col < this.boardSize.cols; col++) {
             const column = [];
             
@@ -1092,9 +1065,7 @@ class AppleNumberGame {
             this.timerInterval = null;
         }
         this.stageActive = false;
-        document.getElementById('gameContainer').style.display = 'none';
-        document.getElementById('welcomeScreen').style.display = 'flex';
-        gameInstance = null;
+        window.location.href = 'index.html';
     }
 
     nextStage() {
@@ -1111,6 +1082,7 @@ class AppleNumberGame {
     }
 
     startStage(stage) {
+        const self = this;
         this.currentStage = stage;
         this.selectedTiles = [];
         this.combo = 0;
@@ -1131,7 +1103,7 @@ class AppleNumberGame {
             this.currentStageScore = 0;
         }
         
-        this.stageInfo.textContent = `스테이지 ${stage} - ${config.name}`;
+        this.stageInfo.textContent = '스테이지 ' + stage + ' - ' + config.name;
         this.stageInfo.className = this.isInfiniteMode ? 'stage-info infinite' : (config.gravity ? 'stage-info gravity' : 'stage-info');
         
         this.generateBoard();
@@ -1154,8 +1126,9 @@ class AppleNumberGame {
     }
 
     renderBoard() {
+        const self = this;
         this.gameBoard.innerHTML = '';
-        this.gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize.cols}, 1fr)`;
+        this.gameBoard.style.gridTemplateColumns = 'repeat(' + this.boardSize.cols + ', 1fr)';
         
         for (let i = 0; i < this.boardSize.rows * this.boardSize.cols; i++) {
             const tile = this.board[i];
@@ -1163,17 +1136,17 @@ class AppleNumberGame {
             if (tile && tile.active) {
                 const el = document.createElement('div');
                 el.className = 'tile';
-                el.innerHTML = `<span class="number">${tile.value}</span>`;
+                el.innerHTML = '<span class="number">' + tile.value + '</span>';
                 el.dataset.id = tile.id;
                 
                 if (tile.justFell && this.hasGravity) {
                     el.classList.add(tile.isNewTile ? 'tile-spawn' : 'gravity-fall');
                     tile.justFell = false;
                     tile.isNewTile = false;
-                    setTimeout(() => el.classList.remove('gravity-fall', 'tile-spawn'), 800);
+                    setTimeout(function() { el.classList.remove('gravity-fall', 'tile-spawn'); }, 800);
                 }
                 
-                el.addEventListener('click', () => this.toggleTile(tile.id));
+                el.addEventListener('click', function() { self.toggleTile(tile.id); });
                 this.gameBoard.appendChild(el);
             } else {
                 const empty = document.createElement('div');
@@ -1194,23 +1167,25 @@ class AppleNumberGame {
     }
 
     updateSelectionDisplay() {
-        document.querySelectorAll('.tile').forEach(tile => {
+        const self = this;
+        document.querySelectorAll('.tile').forEach(function(tile) {
             const id = parseInt(tile.dataset.id);
-            tile.classList.toggle('selected', this.selectedTiles.includes(id));
+            tile.classList.toggle('selected', self.selectedTiles.includes(id));
         });
     }
 
     startTimer() {
+        const self = this;
         this.updateTimer();
-        this.timerInterval = setInterval(() => {
-            this.timeLeft--;
-            this.updateTimer();
-            if (this.timeLeft <= 0) this.endStage();
+        this.timerInterval = setInterval(function() {
+            self.timeLeft--;
+            self.updateTimer();
+            if (self.timeLeft <= 0) self.endStage();
         }, 1000);
     }
 
     updateTimer() {
-        this.timerText.textContent = `남은 시간: ${this.timeLeft}초`;
+        this.timerText.textContent = '남은 시간: ' + this.timeLeft + '초';
         const maxTime = this.isInfiniteMode ? Math.max(60, this.timeLeft + 60) : 30;
         const percentage = Math.min(100, (this.timeLeft / maxTime) * 100);
         this.timerBar.style.width = percentage + '%';
@@ -1225,7 +1200,7 @@ class AppleNumberGame {
         bonus.className = 'time-bonus';
         bonus.textContent = text;
         document.body.appendChild(bonus);
-        setTimeout(() => bonus.remove(), 1000);
+        setTimeout(function() { bonus.remove(); }, 1000);
     }
 
     endStage() {
@@ -1248,89 +1223,83 @@ class AppleNumberGame {
     }
 
     calculateTotalScore() {
-        this.totalScore = Object.values(this.stageScores).reduce((sum, score) => sum + score, 0);
+        const self = this;
+        this.totalScore = Object.values(this.stageScores).reduce(function(sum, score) { return sum + score; }, 0);
     }
 
     showStagePopup(score) {
-        const popup = document.createElement('div');
-        popup.className = 'modal-backdrop';
-        
         const isLastStage = this.currentStage === 2;
         
-        let scoreText = `이번 점수: ${score.toLocaleString()}점`;
-        scoreText += `<br>누적 총점: ${this.totalScore.toLocaleString()}점`;
+        let scoreText = '이번 점수: ' + score.toLocaleString() + '점';
+        scoreText += '<br>누적 총점: ' + this.totalScore.toLocaleString() + '점';
         
         if (isLastStage) {
-            scoreText += `<br><br>🌟 다음 스테이지는 무한 모드입니다!`;
+            scoreText += '<br><br>🌟 다음 스테이지는 무한 모드입니다!';
         }
         
-        popup.innerHTML = `
-            <div class="popup-content">
-                <div class="popup-title">스테이지 ${this.currentStage} 완료!</div>
-                <div class="popup-score">${scoreText}</div>
-                <div class="popup-buttons">
-                    <button class="btn btn-next" onclick="this.closest('.modal-backdrop').remove(); gameInstance.nextStage();">다음 스테이지</button>
-                    <button class="btn btn-reset" onclick="this.closest('.modal-backdrop').remove(); gameInstance.resetStage();">다시 도전</button>
-                </div>
-            </div>
-        `;
-        
+        const popup = document.createElement('div');
+        popup.className = 'modal-backdrop';
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">스테이지 ' + this.currentStage + ' 완료!</div><div class="popup-score">' + scoreText + '</div><div class="popup-buttons"><button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.nextStage();">다음 스테이지</button><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.resetStage();">다시 도전</button></div></div>';
         document.body.appendChild(popup);
     }
 
     showInfinitePopup(score) {
+        const self = this;
         this.stageActive = false;
     
-        const previousStagesScore = Object.entries(this.stageScores)
-            .filter(([stage, score]) => parseInt(stage) < this.currentStage)
-            .reduce((sum, [stage, score]) => sum + score, 0);
+        const previousStagesScore = Object.entries(this.stageScores).filter(function(entry) {
+            return parseInt(entry[0]) < self.currentStage;
+        }).reduce(function(sum, entry) {
+            return sum + entry[1];
+        }, 0);
         
         const totalScore = previousStagesScore + score;
 
-        const playerName = prompt("🎉 게임 완료! 랭킹에 등록할 닉네임을 입력하세요:", "익명");
-        
-        if (playerName && db) {
-            db.collection('rankings').add({
-                name: playerName,
+        if (database) {
+            const scoreData = {
+                name: playerName || '익명',
                 score: totalScore,
-                combo: this.combo,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
+                timestamp: Date.now()
+            };
+            
+            console.log('Saving score to Firebase:', scoreData);
+            console.log('Database reference:', database.ref('scores/game5'));
+            
+            database.ref('scores/game5').push(scoreData).then(function() {
                 console.log("✅ 랭킹 저장 완료!");
-                alert("🏆 랭킹에 등록되었습니다!");
-            }).catch((error) => {
+                self.showFinalPopup(totalScore, true);
+            }).catch(function(error) {
                 console.error("❌ 랭킹 저장 실패:", error);
-                alert("랭킹 저장에 실패했습니다.");
+                console.error("Error code:", error.code);
+                console.error("Error message:", error.message);
+                alert("랭킹 저장 실패!\n\n에러 코드: " + error.code + "\n메시지: " + error.message + "\n\nFirebase Console에서 Database 규칙을 확인해주세요:\n{\n  \"rules\": {\n    \".read\": true,\n    \".write\": true\n  }\n}");
+                self.showFinalPopup(totalScore, false);
             });
+        } else {
+            console.error('Firebase database not initialized!');
+            alert('Firebase가 초기화되지 않았습니다.');
+            this.showFinalPopup(totalScore, false);
         }
+    }
 
+    showFinalPopup(totalScore, savedSuccessfully) {
+        const saveMessage = savedSuccessfully ? '🎉 랭킹에 등록되었습니다!' : '⚠️ 랭킹 등록에 실패했습니다.';
+        
         const popup = document.createElement('div');
         popup.className = 'modal-backdrop';
-        
-        popup.innerHTML = `
-            <div class="popup-content">
-                <div class="popup-title">🌟 스테이지 3 완료!</div>
-                <div class="popup-score">
-                    전체 누적 점수: ${totalScore.toLocaleString()}점<br>
-                    최대 콤보: x${this.combo}<br><br>
-                    🎉 모든 스테이지를 완주하셨습니다!
-                </div>
-                <div class="popup-buttons">
-                    <button class="btn btn-reset" onclick="this.closest('.modal-backdrop').remove(); location.reload();">메인으로</button>
-                    <button class="btn btn-new" onclick="this.closest('.modal-backdrop').remove(); gameInstance.newGame();">새 게임</button>
-                </div>
-            </div>
-        `;
-        
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🌟 스테이지 3 완료!</div><div class="popup-score">전체 누적 점수: ' + totalScore.toLocaleString() + '점<br>최대 콤보: x' + this.combo + '<br><br>🎉 모든 스테이지를 완주하셨습니다!<br>' + saveMessage + '</div><div class="popup-buttons"><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); location.href=\'index.html\';">메인으로</button><button class="btn btn-new" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGame();">새 게임</button></div></div>';
         document.body.appendChild(popup);
     }
 
     updateDisplay() {
         let displayScore;
+        const self = this;
         
-        const previousStagesScore = Object.entries(this.stageScores)
-            .filter(([stage, score]) => parseInt(stage) < this.currentStage)
-            .reduce((sum, [stage, score]) => sum + score, 0);
+        const previousStagesScore = Object.entries(this.stageScores).filter(function(entry) {
+            return parseInt(entry[0]) < self.currentStage;
+        }).reduce(function(sum, entry) {
+            return sum + entry[1];
+        }, 0);
         
         if (this.isInfiniteMode) {
             displayScore = previousStagesScore + this.infiniteScore;
@@ -1342,14 +1311,15 @@ class AppleNumberGame {
     }
 
     showMessage(text, type) {
+        const self = this;
         this.messageEl.textContent = text;
-        this.messageEl.className = `message ${type}`;
+        this.messageEl.className = 'message ' + type;
         
         if (text && type !== 'stage-complete') {
-            setTimeout(() => {
-                if (!this.messageEl.textContent.includes('클리어')) {
-                    this.messageEl.textContent = '';
-                    this.messageEl.className = 'message';
+            setTimeout(function() {
+                if (!self.messageEl.textContent.includes('클리어')) {
+                    self.messageEl.textContent = '';
+                    self.messageEl.className = 'message';
                 }
             }, 3000);
         }
