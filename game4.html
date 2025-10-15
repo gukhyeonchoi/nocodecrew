@@ -753,7 +753,7 @@
         }, { once: true });
         audio.addEventListener('error', (e) => {
           console.warn(`Error loading sound ${key}:`, e);
-          resolve(null); // 오류 시 null 반환
+          resolve(null);
         }, { once: true });
         audio.load();
       });
@@ -812,7 +812,7 @@
     let lockBoard = false;
     let cards = [];
     let comboCount = 0;
-    let playerName = '';
+    let playerName = localStorage.getItem('playerName') || '익명';
 
     function createBackgroundParticles() {
       for (let i = 0; i < 20; i++) {
@@ -826,26 +826,38 @@
     }
 
     function startGame() {
-  console.log("startGame function triggered");
-  showNameModal(() => {
-    if (startScreen) {
-      startScreen.classList.remove("show");
-      startScreen.style.display = "none";
+      console.log("startGame function triggered");
+      if (!playerName || playerName === '익명') {
+        showNameModal(() => {
+          if (startScreen) {
+            startScreen.classList.remove("show");
+            startScreen.style.display = "none";
+          }
+          startGameLogic();
+        });
+      } else {
+        if (startScreen) {
+          startScreen.classList.remove("show");
+          startScreen.style.display = "none";
+        }
+        startGameLogic();
+      }
     }
-    if (board) {
-      board.innerHTML = "";
-      board.style.opacity = "0";
-      console.log("Board initialized for new game");
+
+    function startGameLogic() {
+      if (board) {
+        board.innerHTML = "";
+        board.style.opacity = "0";
+        console.log("Board initialized for new game");
+      }
+      cards = [];
+      createBackgroundParticles();
+      setInterval(createBackgroundParticles, 3000);
+      requestAnimationFrame(() => {
+        startStage();
+        playSound('bgm').catch(err => console.warn("BGM play failed:", err));
+      });
     }
-    cards = [];
-    createBackgroundParticles();
-    setInterval(createBackgroundParticles, 3000);
-    requestAnimationFrame(() => {
-      startStage();
-      playSound('bgm').catch(err => console.warn("BGM play failed:", err));
-    });
-  });
-}
 
     function endGame() {
       if (timerInterval) clearInterval(timerInterval);
@@ -865,74 +877,74 @@
     }
 
     function startStage() {
-  console.log(`Starting stage ${stage}`);
-  hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
-  timeLeft = CONFIG.TIME_LIMITS[stage - 1];
-  comboCount = 0;
-  cards = [];
-  if (scoreDiv) scoreDiv.textContent = `점수: ${score}`;
-  updateHearts();
-  updateStageIndicator();
-  updateTimer();
-  updateProgress();
-  showMessage(`스테이지 ${stage}`);
-  if (document.body) document.body.style.background = STAGE_THEMES[stage - 1].bg;
-  if (board) {
-    board.classList.remove('stage-5');
-    board.innerHTML = "";
-    board.style.opacity = "0";
-    if (stage === 4 || stage === 5) {
-      board.classList.add('stage-5');
-      board.style.gridTemplateColumns = 'repeat(4, 1fr)';
-      board.style.gridTemplateRows = 'repeat(4, 1fr)';
-    } else {
-      board.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      board.style.gridTemplateRows = 'repeat(4, 1fr)';
+      console.log(`Starting stage ${stage}`);
+      hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
+      timeLeft = CONFIG.TIME_LIMITS[stage - 1];
+      comboCount = 0;
+      cards = [];
+      if (scoreDiv) scoreDiv.textContent = `점수: ${score}`;
+      updateHearts();
+      updateStageIndicator();
+      updateTimer();
+      updateProgress();
+      showMessage(`스테이지 ${stage}`);
+      if (document.body) document.body.style.background = STAGE_THEMES[stage - 1].bg;
+      if (board) {
+        board.classList.remove('stage-5');
+        board.innerHTML = "";
+        board.style.opacity = "0";
+        if (stage === 4 || stage === 5) {
+          board.classList.add('stage-5');
+          board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+          board.style.gridTemplateRows = 'repeat(4, 1fr)';
+        } else {
+          board.style.gridTemplateColumns = 'repeat(3, 1fr)';
+          board.style.gridTemplateRows = 'repeat(4, 1fr)';
+        }
+      }
+      cards = generateCards();
+      console.log("Generated cards:", cards);
+      shuffle(cards);
+      cards.forEach((img, index) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        const front = document.createElement("div");
+        front.classList.add("front");
+        const imgElement = document.createElement("img");
+        imgElement.src = img;
+        imgElement.style.width = "80%";
+        imgElement.style.height = "80%";
+        imgElement.style.objectFit = "contain";
+        imgElement.style.borderRadius = "10px";
+        imgElement.style.margin = "auto";
+        front.appendChild(imgElement);
+        const back = document.createElement("div");
+        back.classList.add("back");
+        back.style.background = STAGE_THEMES[stage - 1].cardBack;
+        card.appendChild(front);
+        card.appendChild(back);
+        card.dataset.img = img;
+        card.addEventListener("click", flipCard);
+        card.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          flipCard.call(card);
+        });
+        if (board) {
+          board.appendChild(card);
+          console.log(`Card ${index + 1} appended: ${img}`);
+        }
+      });
+      if (board) {
+        console.log(`Total cards appended: ${board.children.length}`);
+        requestAnimationFrame(() => {
+          board.style.opacity = "1";
+          console.log("Board opacity set to 1");
+        });
+      }
+      startTimer();
+      console.log("startTimer called");
+      if (sounds.bgm) sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
     }
-  }
-  cards = generateCards();
-  console.log("Generated cards:", cards);
-  shuffle(cards);
-  cards.forEach((img, index) => {
-  const card = document.createElement("div");
-  card.classList.add("card");
-  const front = document.createElement("div");
-  front.classList.add("front");
-  const imgElement = document.createElement("img");
-  imgElement.src = img;
-  imgElement.style.width = "80%"; // 이미지 크기를 80%로 줄임
-  imgElement.style.height = "80%"; // 이미지 크기를 80%로 줄임
-  imgElement.style.objectFit = "contain"; // 이미지가 잘리지 않고 전체가 보이도록 설정
-  imgElement.style.borderRadius = "10px";
-  imgElement.style.margin = "auto"; // 이미지를 중앙에 정렬
-  front.appendChild(imgElement);
-  const back = document.createElement("div");
-  back.classList.add("back");
-  back.style.background = STAGE_THEMES[stage - 1].cardBack;
-  card.appendChild(front);
-  card.appendChild(back);
-  card.dataset.img = img;
-  card.addEventListener("click", flipCard);
-  card.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    flipCard.call(card);
-  });
-  if (board) {
-    board.appendChild(card);
-    console.log(`Card ${index + 1} appended: ${img}`);
-  }
-});
-  if (board) {
-    console.log(`Total cards appended: ${board.children.length}`);
-    requestAnimationFrame(() => {
-      board.style.opacity = "1";
-      console.log("Board opacity set to 1");
-    });
-  }
-  startTimer();
-  console.log("startTimer called");
-  if (sounds.bgm) sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
-}
 
     function updateHearts(change = 0) {
       hearts += change;
@@ -966,30 +978,30 @@
       }
     }
 
-function updateProgress() {
-  const matchedPairs = document.querySelectorAll(".matched").length / 2;
-  const totalPairs = CONFIG.CARD_PAIRS[stage - 1];
-  const progress = (matchedPairs / totalPairs) * 100;
-  if (progressFill) {
-    progressFill.style.width = `${progress}%`;
-    console.log(`Progress updated: ${progress}%`);
-  }
-}
+    function updateProgress() {
+      const matchedPairs = document.querySelectorAll(".matched").length / 2;
+      const totalPairs = CONFIG.CARD_PAIRS[stage - 1];
+      const progress = (matchedPairs / totalPairs) * 100;
+      if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+        console.log(`Progress updated: ${progress}%`);
+      }
+    }
 
     function startTimer() {
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    updateTimer();
-    console.log(`Timer tick: ${timeLeft} seconds remaining`);
-    if (timeLeft <= 0) {
-      playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
-      showMessage("시간 초과!");
-      endGame();
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        console.log(`Timer tick: ${timeLeft} seconds remaining`);
+        if (timeLeft <= 0) {
+          playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
+          showMessage("시간 초과!");
+          endGame();
+        }
+      }, 1000);
+      console.log("Timer started with interval ID:", timerInterval);
     }
-  }, 1000);
-  console.log("Timer started with interval ID:", timerInterval);
-}
 
     function showMessage(text) {
       if (messageDiv) {
@@ -1019,31 +1031,31 @@ function updateProgress() {
     }
 
     function generateCards() {
-  const base = [
-    "assets/card_1.png",
-    "assets/card_2.png",
-    "assets/card_3.png",
-    "assets/card_4.png",
-    "assets/card_5.png",
-    "assets/card_6.png",
-    "assets/card_7.png",
-    "assets/card_8.png",
-    "assets/card_9.png",
-    "assets/card_10.png",
-    "assets/card_11.png",
-    "assets/card_12.png"
-  ];
-  const pairCount = CONFIG.CARD_PAIRS[stage - 1];
-  const selected = base.slice(0, pairCount);
-  return [...selected, ...selected];
-}
+      const base = [
+        "assets/card_1.png",
+        "assets/card_2.png",
+        "assets/card_3.png",
+        "assets/card_4.png",
+        "assets/card_5.png",
+        "assets/card_6.png",
+        "assets/card_7.png",
+        "assets/card_8.png",
+        "assets/card_9.png",
+        "assets/card_10.png",
+        "assets/card_11.png",
+        "assets/card_12.png"
+      ];
+      const pairCount = CONFIG.CARD_PAIRS[stage - 1];
+      const selected = base.slice(0, pairCount);
+      return [...selected, ...selected];
+    }
 
     function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
 
     function flipCard() {
       if (lockBoard || this.classList.contains("flipped")) return;
@@ -1203,7 +1215,7 @@ function updateProgress() {
       }
       try {
         console.log(`Saving score: name=${name}, score=${score}`);
-        await push(ref(db, 'memory_card_scores'), {
+        await push(ref(db, 'scores/game4'), {
           name: name || '익명',
           score: Number(score),
           timestamp: Date.now()
@@ -1259,7 +1271,7 @@ function updateProgress() {
       }
       try {
         console.log('Fetching scores from Firebase...');
-        const scoresRef = ref(db, 'memory_card_scores');
+        const scoresRef = ref(db, 'scores/game4');
         const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
         const snapshot = await get(topScoresQuery);
         console.log('Snapshot received:', snapshot.exists());
@@ -1315,53 +1327,55 @@ function updateProgress() {
     }
 
     function showNameModal(callback = null) {
-  console.log('Showing name modal for game start');
-  const modal = document.getElementById('name-modal');
-  const input = document.getElementById('player-name-input');
-  const saveBtn = document.getElementById('save-name-btn');
-  const cancelBtn = document.getElementById('cancel-name-btn');
-  if (!modal || !input || !saveBtn || !cancelBtn) {
-    console.error("Name modal elements not found");
-    if (callback) callback();
-    return;
-  }
-  modal.style.display = 'flex';
-  input.value = playerName || '';
-  input.focus();
-  function onSave() {
-    const name = input.value.trim();
-    if (!name) {
-      alert('이름을 입력하세요.');
+      console.log('Showing name modal for game start');
+      const modal = document.getElementById('name-modal');
+      const input = document.getElementById('player-name-input');
+      const saveBtn = document.getElementById('save-name-btn');
+      const cancelBtn = document.getElementById('cancel-name-btn');
+      if (!modal || !input || !saveBtn || !cancelBtn) {
+        console.error("Name modal elements not found");
+        if (callback) callback();
+        return;
+      }
+      modal.style.display = 'flex';
+      input.value = playerName || '';
       input.focus();
-      return;
+      function onSave() {
+        const name = input.value.trim();
+        if (!name) {
+          alert('이름을 입력하세요.');
+          input.focus();
+          return;
+        }
+        playerName = name;
+        localStorage.setItem('playerName', name);
+        modal.style.display = 'none';
+        cleanup();
+        if (callback) callback();
+      }
+      function onCancel() {
+        modal.style.display = 'none';
+        playerName = '익명';
+        localStorage.setItem('playerName', '익명');
+        cleanup();
+        if (callback) callback();
+      }
+      function onKeydown(e) {
+        if (e.key === 'Enter') onSave();
+      }
+      function cleanup() {
+        saveBtn.removeEventListener('click', onSave);
+        cancelBtn.removeEventListener('click', onCancel);
+        input.removeEventListener('keydown', onKeydown);
+      }
+      saveBtn.removeEventListener('click', onSave);
+      cancelBtn.removeEventListener('click', onCancel);
+      input.removeEventListener('keydown', onKeydown);
+      saveBtn.addEventListener('click', onSave);
+      cancelBtn.addEventListener('click', onCancel);
+      input.addEventListener('keydown', onKeydown);
+      console.log("Name modal event listeners added");
     }
-    playerName = name;
-    modal.style.display = 'none';
-    cleanup();
-    if (callback) callback();
-  }
-  function onCancel() {
-    modal.style.display = 'none';
-    playerName = '익명';
-    cleanup();
-    if (callback) callback();
-  }
-  function onKeydown(e) {
-    if (e.key === 'Enter') onSave();
-  }
-  function cleanup() {
-    saveBtn.removeEventListener('click', onSave);
-    cancelBtn.removeEventListener('click', onCancel);
-    input.removeEventListener('keydown', onKeydown);
-  }
-  saveBtn.removeEventListener('click', onSave);
-  cancelBtn.removeEventListener('click', onCancel);
-  input.removeEventListener('keydown', onKeydown);
-  saveBtn.addEventListener('click', onSave);
-  cancelBtn.addEventListener('click', onCancel);
-  input.addEventListener('keydown', onKeydown);
-  console.log("Name modal event listeners added");
-}
 
     function escapeHtml(unsafe) {
       if (typeof unsafe !== 'string') return '';
@@ -1380,7 +1394,7 @@ function updateProgress() {
           console.log("Start button clicked");
           unlockAudioContext().then(() => {
             playSound('button').then(() => {
-              console.log("Button sound played, prompting for name");
+              console.log("Button sound played, prompting for name if needed");
               startGame();
             }).catch(err => {
               console.warn("Button sound failed, prompting for name anyway:", err);
@@ -1401,7 +1415,7 @@ function updateProgress() {
         hintButton.removeEventListener('click', handleHint);
         hintButton.addEventListener('click', handleHint);
         hintButton.removeEventListener('touchstart', handleHintTouch);
-        hintButton.addEventListener('touchstart', handleHintTouch);
+        startButton.addEventListener('touchstart', handleHintTouch);
       }
       if (showRankingButton) {
         showRankingButton.removeEventListener('click', handleShowRanking);
@@ -1418,7 +1432,7 @@ function updateProgress() {
       console.log("Start button touched");
       unlockAudioContext().then(() => {
         playSound('button').then(() => {
-          console.log("Button sound played, prompting for name");
+          console.log("Button sound played, prompting for name if needed");
           startGame();
         }).catch(err => {
           console.warn("Button sound failed, prompting for name anyway:", err);
@@ -1468,9 +1482,13 @@ function updateProgress() {
           playSound('bgm').then(() => {
             if (sounds.bgm) sounds.bgm.currentTime = 0;
           }).catch(err => console.warn("BGM reset failed:", err));
-          showNameModal(() => {
+          if (!playerName || playerName === '익명') {
+            showNameModal(() => {
+              startStage();
+            });
+          } else {
             startStage();
-          });
+          }
         }).catch(err => {
           console.warn("Button sound failed:", err);
           if (gameOverScreen) {
@@ -1479,34 +1497,37 @@ function updateProgress() {
           }
           score = 0;
           stage = 1;
-          showNameModal(() => {
+          if (!playerName || playerName === '익명') {
+            showNameModal(() => {
+              startStage();
+            });
+          } else {
             startStage();
-          });
+          }
         });
       });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-  console.log("DOM fully loaded");
-  initializeSounds().then(() => {
-    console.log("All sounds initialized");
-  }).catch(err => {
-    console.warn("Sound initialization failed:", err);
-  });
-  initializeEventListeners();
-  if (board) board.style.opacity = "0";
-  try {
-    const styleSheet = document.createElement('style');
-    document.head.appendChild(styleSheet);
-    styleSheet.sheet.insertRule(`.card { transition: transform ${CONFIG.CARD_FLIP_DURATION / 1000}s ease-in-out; }`, 0);
-    styleSheet.sheet.insertRule(`.card.wrong { animation: shake ${CONFIG.SHAKE_ANIMATION_DURATION / 1000}s; }`, 1);
-    styleSheet.sheet.insertRule(`.card.matched .front { animation: glow ${CONFIG.GLOW_ANIMATION_DURATION / 1000}s infinite alternate; }`, 2);
-  } catch (err) {
-    console.error("Failed to insert stylesheet rules:", err);
-  }
-  console.log("Game initialized");
-});
-
+      console.log("DOM fully loaded");
+      initializeSounds().then(() => {
+        console.log("All sounds initialized");
+      }).catch(err => {
+        console.warn("Sound initialization failed:", err);
+      });
+      initializeEventListeners();
+      if (board) board.style.opacity = "0";
+      try {
+        const styleSheet = document.createElement('style');
+        document.head.appendChild(styleSheet);
+        styleSheet.sheet.insertRule(`.card { transition: transform ${CONFIG.CARD_FLIP_DURATION / 1000}s ease-in-out; }`, 0);
+        styleSheet.sheet.insertRule(`.card.wrong { animation: shake ${CONFIG.SHAKE_ANIMATION_DURATION / 1000}s; }`, 1);
+        styleSheet.sheet.insertRule(`.card.matched .front { animation: glow ${CONFIG.GLOW_ANIMATION_DURATION / 1000}s infinite alternate; }`, 2);
+      } catch (err) {
+        console.error("Failed to insert stylesheet rules:", err);
+      }
+      console.log("Game initialized");
+    });
   </script>
 </body>
 </html>

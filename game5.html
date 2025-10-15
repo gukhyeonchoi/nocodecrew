@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사과 숫자 게임 - 7 스테이지</title>
+    <title>사과 게임</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            padding: 10px;
+            background: linear-gradient(135deg, #a8d5e2, #d4e7f5);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
         }
 
         .welcome-screen {
@@ -22,7 +23,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            background: linear-gradient(135deg, #a8d5e2, #d4e7f5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -35,7 +36,7 @@
             border-radius: 30px;
             text-align: center;
             max-width: 500px;
-            width: 90%;
+            width: 85%;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             animation: welcomeAppear 0.5s ease-out;
         }
@@ -47,7 +48,7 @@
 
         .welcome-title {
             font-size: 3em;
-            color: #e74c3c;
+            color: #6ba3c7;
             margin-bottom: 20px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
@@ -62,7 +63,7 @@
 
         .game-rules {
             text-align: left;
-            background: #f8f9fa;
+            background: #f0f7fb;
             padding: 25px;
             border-radius: 15px;
             margin-bottom: 30px;
@@ -100,19 +101,19 @@
         }
 
         .stage-normal {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: linear-gradient(135deg, #7eb3d5, #5a9bc4);
         }
 
         .stage-gravity {
-            background: linear-gradient(135deg, #e67e22, #f39c12);
+            background: linear-gradient(135deg, #92c4df, #6ba3c7);
         }
 
         .stage-infinite {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            background: linear-gradient(135deg, #a8cde3, #8ab8d6);
         }
 
         .start-button {
-            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            background: linear-gradient(145deg, #6ba3c7, #8ab8d6);
             color: white;
             border: none;
             padding: 20px 40px;
@@ -132,7 +133,7 @@
         }
 
         .ranking-button {
-            background: linear-gradient(145deg, #f39c12, #e67e22);
+            background: linear-gradient(145deg, #92c4df, #7eb3d5);
             color: white;
             border: none;
             padding: 15px 35px;
@@ -161,12 +162,12 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             text-align: center;
             max-width: 600px;
-            width: 100%;
+            width: 90%;
             display: none;
         }
 
         h1 {
-            color: #e74c3c;
+            color: #6ba3c7;
             margin-bottom: 10px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
@@ -179,7 +180,7 @@
         }
 
         .stage-info {
-            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            background: linear-gradient(135deg, #8ab8d6, #a8cde3);
             color: white;
             padding: 15px;
             border-radius: 15px;
@@ -189,11 +190,11 @@
         }
 
         .stage-info.gravity {
-            background: linear-gradient(135deg, #e67e22, #f39c12);
+            background: linear-gradient(135deg, #92c4df, #b0d4e8);
         }
 
         .stage-info.infinite {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            background: linear-gradient(135deg, #a8cde3, #c4ddef);
         }
 
         .timer-bar-container {
@@ -206,18 +207,18 @@
         }
 
         .timer-bar {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, #6ba3c7, #8ab8d6);
             height: 100%;
             transition: width 0.1s ease;
             border-radius: 25px;
         }
 
         .timer-bar.warning {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
+            background: linear-gradient(135deg, #92c4df, #a8cde3);
         }
 
         .timer-bar.danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, #7eb3d5, #92c4df);
             animation: pulseTimer 0.5s infinite alternate;
         }
 
@@ -238,7 +239,7 @@
             display: flex;
             justify-content: space-around;
             margin-bottom: 30px;
-            background: #f8f9fa;
+            background: #f0f7fb;
             padding: 15px;
             border-radius: 10px;
         }
@@ -256,23 +257,25 @@
         .score-value {
             font-size: 1.8em;
             font-weight: bold;
-            color: #e74c3c;
+            color: #6ba3c7;
         }
 
         .game-board {
             display: grid;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 30px;
             background: #ecf0f1;
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
             position: relative;
+            touch-action: none;
+            justify-items: center;
         }
 
         /* Apple emoji tile styling */
         .tile {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             position: relative;
             cursor: pointer;
             user-select: none;
@@ -281,36 +284,31 @@
             align-items: center;
             justify-content: center;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            overflow: hidden;
         }
 
         .tile::before {
             content: '🍎';
             position: absolute;
-            font-size: 60px;
+            font-size: 48px;
             z-index: 1;
             transition: all 0.3s ease;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
         }
 
         .tile .number {
-            position: absolute;
+            position: relative;
             z-index: 3;
             font-size: 1.6em;
             font-weight: bold;
             color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-            background: rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.4);
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             backdrop-filter: blur(2px);
         }
 
@@ -320,7 +318,7 @@
         }
 
         .tile:hover::before {
-            transform: translate(-50%, -50%) scale(1.05);
+            transform: scale(1.05);
         }
 
         .tile.selected {
@@ -329,27 +327,27 @@
         }
 
         .tile.selected::before {
-            transform: translate(-50%, -50%) scale(1.1);
+            transform: scale(1.1);
             filter: brightness(1.2) contrast(1.1);
         }
 
         .tile.selected .number {
-            background: rgba(255,165,0,0.5);
+            background: rgba(138, 184, 214, 0.5);
             color: #fff;
-            box-shadow: 0 0 10px rgba(255,165,0,0.3);
+            box-shadow: 0 0 10px rgba(138, 184, 214, 0.3);
         }
 
         .empty-slot {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: transparent;
             border-radius: 10px;
         }
 
         .drag-selection {
             position: absolute;
-            background: rgba(52, 152, 219, 0.3);
-            border: 2px solid #3498db;
+            background: rgba(107, 163, 199, 0.3);
+            border: 2px solid #6ba3c7;
             border-radius: 5px;
             pointer-events: none;
             z-index: 10;
@@ -374,7 +372,7 @@
         }
 
         .btn-next {
-            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            background: linear-gradient(145deg, #6ba3c7, #8ab8d6);
             color: white;
         }
 
@@ -389,7 +387,12 @@
         }
 
         .btn-new {
-            background: linear-gradient(145deg, #8e44ad, #9b59b6);
+            background: linear-gradient(145deg, #8ab8d6, #a8cde3);
+            color: white;
+        }
+
+        .btn-main {
+            background: linear-gradient(145deg, #7eb3d5, #6ba3c7);
             color: white;
         }
 
@@ -404,15 +407,15 @@
         }
 
         .message.success {
-            background: #d5f4e6;
-            color: #27ae60;
-            border: 2px solid #27ae60;
+            background: #d4e9f2;
+            color: #5a9bc4;
+            border: 2px solid #6ba3c7;
         }
 
         .message.error {
-            background: #fadbd8;
-            color: #e74c3c;
-            border: 2px solid #e74c3c;
+            background: #d9e8f0;
+            color: #7eb3d5;
+            border: 2px solid #92c4df;
         }
 
         .combo-effect {
@@ -421,7 +424,7 @@
 
         @keyframes comboFlash {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); background: #f1c40f; }
+            50% { transform: scale(1.05); background: #b0d4e8; }
         }
 
         .tile-remove {
@@ -458,7 +461,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, #6ba3c7, #8ab8d6);
             color: white;
             padding: 15px 30px;
             border-radius: 25px;
@@ -505,7 +508,7 @@
 
         .popup-title {
             font-size: 2em;
-            color: #e74c3c;
+            color: #6ba3c7;
             margin-bottom: 20px;
             font-weight: bold;
         }
@@ -542,7 +545,7 @@
 
         .coming-soon-title {
             font-size: 2em;
-            color: #f39c12;
+            color: #7eb3d5;
             margin-bottom: 20px;
             font-weight: bold;
         }
@@ -555,7 +558,7 @@
         }
 
         .coming-soon-button {
-            background: linear-gradient(145deg, #3498db, #2980b9);
+            background: linear-gradient(145deg, #6ba3c7, #8ab8d6);
             color: white;
             border: none;
             padding: 12px 30px;
@@ -578,45 +581,179 @@
             justify-content: center;
         }
 
+        /* 태블릿 */
         @media (max-width: 768px) {
-            .welcome-content { padding: 30px; }
-            .welcome-title { font-size: 2.5em; }
+            body { padding: 25px; }
+            .welcome-content { padding: 30px 20px; }
+            .welcome-title { font-size: 2.2em; }
+            .game-rules { font-size: 1em; padding: 20px; }
             .stage-preview { flex-direction: column; }
-            .game-board { grid-template-columns: repeat(5, 1fr); }
-            .tile, .empty-slot { width: 50px; height: 50px; }
-            .tile .number { font-size: 1.5em; }
+            .game-container { padding: 20px; max-width: 100%; width: 80%; }
+            h1 { font-size: 2em; }
+            .game-board { 
+                grid-template-columns: repeat(6, 1fr);
+                padding: 20px;
+                gap: 7px;
+                justify-items: center;
+            }
+            .tile, .empty-slot { width: 48px; height: 48px; }
+            .tile::before { font-size: 44px; }
+            .tile .number { font-size: 1.5em; width: 28px; height: 28px; }
+        }
+
+        /* 작은 모바일 (480px 이하) */
+        @media (max-width: 480px) {
+            body { padding: 15px; }
+            .welcome-content { 
+                padding: 20px 15px; 
+                width: 85%;
+            }
+            .welcome-title { font-size: 1.8em; }
+            .game-rules { 
+                font-size: 0.85em; 
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            .rule-item { margin-bottom: 8px; }
+            .start-button { 
+                padding: 12px 25px; 
+                font-size: 1.1em; 
+            }
+            .ranking-button { 
+                padding: 10px 20px; 
+                font-size: 0.95em; 
+            }
+            .game-container { 
+                padding: 12px; 
+                border-radius: 15px;
+                width: 85%;
+            }
+            h1 { font-size: 1.6em; margin-bottom: 8px; }
+            .stage-info { 
+                font-size: 0.95em; 
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+            .timer-text { font-size: 0.95em; margin-bottom: 8px; }
+            .timer-bar-container { 
+                height: 16px;
+                margin-bottom: 12px;
+            }
+            .score-board { 
+                padding: 10px; 
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+            .score-label { font-size: 0.75em; }
+            .score-value { font-size: 1.4em; }
+            .game-board { 
+                grid-template-columns: repeat(6, 1fr);
+                padding: 12px;
+                gap: 5px;
+                margin-bottom: 15px;
+                justify-items: center;
+            }
+            .tile, .empty-slot { 
+                width: 42px; 
+                height: 42px; 
+            }
+            .tile::before { font-size: 36px; }
+            .tile .number { 
+                font-size: 1.25em; 
+                width: 24px; 
+                height: 24px; 
+            }
+            .controls { gap: 8px; }
+            .btn { 
+                padding: 8px 15px; 
+                font-size: 0.85em; 
+            }
+            .message { 
+                font-size: 0.9em; 
+                padding: 10px;
+                margin-top: 12px;
+            }
+            .popup-content { 
+                padding: 20px 15px; 
+                width: 90%;
+            }
+            .popup-title { font-size: 1.4em; }
+            .popup-score { font-size: 1.1em; margin-bottom: 20px; }
+        }
+
+        /* 아주 작은 모바일 (360px 이하) */
+        @media (max-width: 360px) {
+            body { padding: 10px; }
+            .game-container { padding: 10px; width: 90%; }
+            h1 { font-size: 1.4em; margin-bottom: 6px; }
+            .stage-info { font-size: 0.9em; padding: 8px; margin-bottom: 10px; }
+            .timer-text { font-size: 0.9em; margin-bottom: 6px; }
+            .timer-bar-container { height: 14px; margin-bottom: 10px; }
+            .score-board { padding: 8px; gap: 6px; margin-bottom: 12px; }
+            .score-label { font-size: 0.7em; }
+            .score-value { font-size: 1.2em; }
+            .game-board { 
+                grid-template-columns: repeat(6, 1fr);
+                gap: 4px;
+                padding: 10px;
+                margin-bottom: 12px;
+                justify-items: center;
+            }
+            .tile, .empty-slot { 
+                width: 38px; 
+                height: 38px; 
+            }
+            .tile::before { font-size: 33px; }
+            .tile .number { 
+                font-size: 1.1em; 
+                width: 22px; 
+                height: 22px; 
+            }
+            .controls { gap: 6px; }
+            .btn { 
+                padding: 7px 12px; 
+                font-size: 0.8em; 
+            }
+            .message { 
+                font-size: 0.85em; 
+                padding: 8px;
+                margin-top: 10px;
+            }
+            .welcome-title { font-size: 1.4em; }
+            .welcome-content { padding: 18px 12px; width: 90%; }
+            .game-rules { font-size: 0.8em; padding: 10px; margin-bottom: 12px; }
+            .rule-item { margin-bottom: 6px; }
+            .start-button { padding: 10px 20px; font-size: 1em; }
+            .ranking-button { padding: 8px 16px; font-size: 0.9em; }
         }
     </style>
 </head>
 <body>
     <div class="welcome-screen" id="welcomeScreen">
         <div class="welcome-content">
-            <div class="welcome-title">🍎 사과 숫자 게임</div>
-            <div class="welcome-subtitle">드래그로 숫자를 모아 10을 만드세요!</div>
+            <div class="welcome-title">🍎 사과 게임</div>
             
             <div class="game-rules">
                 <div class="rule-item">
+                    <span class="rule-icon">🍎</span>
+                    <span><strong>게임 목표:</strong> 드래그로 사과를 모아 10을 만드세요!</span>
+                </div>
+                <div class="rule-item">
                     <span class="rule-icon">🎯</span>
-                    <span><strong>목표:</strong> 드래그로 타일을 선택하여 숫자 합이 10이 되는 조합을 만드세요</span>
+                    <span><strong>진행 순서:</strong> 일반 모드 -> 중력 모드 -> 무한 모드</span>
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">⏰</span>
-                    <span><strong>시간:</strong> 각 스테이지는 30초 제한시간 (무한 모드는 60초 + 연장)</span>
+                    <span><strong>제한 시간:</strong> 30초 (무한 모드는 30초 + 연장)</span>
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">🔥</span>
-                    <span><strong>콤보:</strong> 연속 성공 시 점수 배수 증가</span>
+                    <span><strong>연속 콤보:</strong> 연속 성공 시 점수 배수 증가</span>
                 </div>
                 <div class="rule-item">
-                    <span class="rule-icon">⚡</span>
-                    <span><strong>즉시 제거:</strong> 합이 10이면 바로 제거, 아니면 자동 취소</span>
+                    <span class="rule-icon">🏆</span>
+                    <span><strong>랭킹 도전:</strong> 높은 점수를 기록해 1위에 도전하세요!</span>
                 </div>
-            </div>
-
-            <div class="stage-preview">
-                <div class="stage-box stage-normal">스테이지 1<br>일반 모드</div>
-                <div class="stage-box stage-gravity">스테이지 2<br>중력 모드</div>
-                <div class="stage-box stage-infinite">스테이지 3<br>무한 모드</div>
             </div>
 
             <button class="start-button" id="startButton">🎮 게임 시작</button>
@@ -625,10 +762,9 @@
     </div>
 
     <div class="game-container" id="gameContainer">
-        <h1>🍎 사과 숫자 게임</h1>
-        <p class="subtitle">3스테이지 도전! 1단계는 일반 모드, 2단계는 중력 모드, 3단계는 무한 모드</p>
+        <h1>🍎 사과 게임</h1>
         
-        <div class="stage-info" id="stageInfo">스테이지 1 - 일반 모드 (6x6)</div>
+        <div class="stage-info" id="stageInfo">스테이지 1 - 일반 모드</div>
         
         <div class="timer-text" id="timerText">남은 시간: 30초</div>
         <div class="timer-bar-container">
@@ -656,6 +792,7 @@
             <button class="btn btn-next" id="nextStageBtn" style="display: none;">다음 스테이지</button>
             <button class="btn btn-reset" id="resetStageBtn">스테이지 재시작</button>
             <button class="btn btn-new" id="newGameBtn">게임 재시작</button>
+            <button class="btn btn-main" id="mainBtn">메인으로 돌아가기</button>
         </div>
 
         <div class="message" id="message"></div>
@@ -712,9 +849,9 @@ class AppleNumberGame {
         this.infiniteScore = 0;
         
         this.stageConfig = {
-            1: { rows: 8, cols: 6, gravity: false, name: "일반 모드 (8x6)" },
-            2: { rows: 8, cols: 6, gravity: true, name: "중력 모드 (8x6)" },
-            3: { rows: 8, cols: 6, gravity: true, name: "무한 모드", isInfinite: true }
+            1: { rows: 6, cols: 6, gravity: false, name: "일반 모드" },
+            2: { rows: 6, cols: 6, gravity: true, name: "중력 모드" },
+            3: { rows: 6, cols: 6, gravity: true, name: "무한 모드", isInfinite: true }
         };
         
         this.init();
@@ -738,12 +875,14 @@ class AppleNumberGame {
         this.nextStageBtn = document.getElementById('nextStageBtn');
         this.resetStageBtn = document.getElementById('resetStageBtn');
         this.newGameBtn = document.getElementById('newGameBtn');
+        this.mainBtn = document.getElementById('mainBtn');
     }
 
     bindEvents() {
         this.nextStageBtn.addEventListener('click', () => this.nextStage());
         this.resetStageBtn.addEventListener('click', () => this.resetStage());
         this.newGameBtn.addEventListener('click', () => this.newGame());
+        this.mainBtn.addEventListener('click', () => this.goToMain());
 
         this.gameBoard.addEventListener('mousedown', (e) => this.startDrag(e));
         document.addEventListener('mousemove', (e) => this.moveDrag(e));
@@ -751,14 +890,14 @@ class AppleNumberGame {
         
         this.gameBoard.addEventListener('touchstart', (e) => {
             this.startDrag(e.touches[0]);
-        });
+        }, { passive: false });
         
         document.addEventListener('touchmove', (e) => {
             if(this.isDragging) { 
                 e.preventDefault(); 
                 this.moveDrag(e.touches[0]); 
             }
-        });
+        }, { passive: false });
         
         document.addEventListener('touchend', (e) => {
             this.endDrag(e.changedTouches[0]);
@@ -857,7 +996,6 @@ class AppleNumberGame {
 
     highlightTiles(left, top, width, height) {
         const tiles = this.gameBoard.querySelectorAll('.tile');
-        const tempSelected = [];
         
         tiles.forEach(tile => {
             const tileRect = tile.getBoundingClientRect();
@@ -872,23 +1010,11 @@ class AppleNumberGame {
             const isOverlapping = !(tileRight < left || tileLeft > selectionRight || tileBottom < top || tileTop > selectionBottom);
             
             if (isOverlapping) {
-                const tileId = parseInt(tile.dataset.id);
-                tempSelected.push(tileId);
                 tile.classList.add('selected');
             } else if (!this.selectedTiles.includes(parseInt(tile.dataset.id))) {
                 tile.classList.remove('selected');
             }
         });
-        
-        const previewSum = tempSelected.reduce((sum, id) => {
-            const tile = this.board.find(t => t.id === id);
-            return sum + (tile ? tile.value : 0);
-        }, 0);
-        
-        const existingSum = this.selectedTiles.reduce((sum, id) => {
-            const tile = this.board.find(t => t.id === id);
-            return sum + (tile ? tile.value : 0);
-        }, 0);
     }
 
     getSelectedTiles(left, top, width, height) {
@@ -938,7 +1064,6 @@ class AppleNumberGame {
         for (let col = 0; col < this.boardSize.cols; col++) {
             const column = [];
             
-            // 해당 열의 모든 활성 타일을 아래서부터 위로 수집
             for (let row = this.boardSize.rows - 1; row >= 0; row--) {
                 const index = row * this.boardSize.cols + col;
                 const tile = this.board[index];
@@ -950,26 +1075,22 @@ class AppleNumberGame {
                 }
             }
             
-            // 해당 열을 모두 비움
             for (let row = 0; row < this.boardSize.rows; row++) {
                 const index = row * this.boardSize.cols + col;
                 this.board[index] = { id: index, value: 0, active: false };
             }
             
-            // 무한 모드에서는 상단에 새 타일 추가
             if (this.isInfiniteMode) {
                 const emptySpaces = this.boardSize.rows - column.length;
-                // 상단에 새 타일들을 추가 (위에서부터 채움)
                 for (let i = 0; i < emptySpaces; i++) {
                     column.push({ 
                         value: Math.floor(Math.random() * 9) + 1, 
-                        originalRow: -1, // 새로 생성된 타일 표시
+                        originalRow: -1,
                         isNew: true 
                     });
                 }
             }
             
-            // 기존 타일들을 아래부터 배치하고, 새 타일들을 위에 배치
             for (let i = 0; i < column.length; i++) {
                 const newRow = this.boardSize.rows - 1 - i;
                 const newIndex = newRow * this.boardSize.cols + col;
@@ -994,6 +1115,17 @@ class AppleNumberGame {
         this.isInfiniteMode = false;
         this.startStage(1);
         this.showMessage('새 게임이 시작되었습니다!', 'success');
+    }
+
+    goToMain() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        this.stageActive = false;
+        document.getElementById('gameContainer').style.display = 'none';
+        document.getElementById('welcomeScreen').style.display = 'flex';
+        gameInstance = null;
     }
 
     nextStage() {
@@ -1023,7 +1155,7 @@ class AppleNumberGame {
         this.isInfiniteMode = config.isInfinite || false;
         
         if (this.isInfiniteMode) {
-            this.timeLeft = 60;
+            this.timeLeft = 30;
             this.infiniteScore = 0;
         } else {
             this.timeLeft = 30;
@@ -1100,13 +1232,6 @@ class AppleNumberGame {
         });
     }
 
-    calculateSum() {
-        return this.selectedTiles.reduce((sum, id) => {
-            const tile = this.board.find(t => t.id === id);
-            return sum + (tile ? tile.value : 0);
-        }, 0);
-    }
-
     startTimer() {
         this.updateTimer();
         this.timerInterval = setInterval(() => {
@@ -1163,19 +1288,12 @@ class AppleNumberGame {
         popup.className = 'stage-complete-popup';
         
         const isLastStage = this.currentStage === 2;
-        const prevBest = this.stageScores[this.currentStage] || 0;
-        const isNewRecord = score > prevBest;
         
         let scoreText = `이번 점수: ${score.toLocaleString()}점`;
-        if (prevBest > 0 && !isNewRecord) {
-            scoreText += `<br>최고 기록: ${prevBest.toLocaleString()}점`;
-        } else if (isNewRecord && prevBest > 0) {
-            scoreText += `<br>🎉 신기록! (이전: ${prevBest.toLocaleString()}점)`;
-        }
         scoreText += `<br>누적 총점: ${this.totalScore.toLocaleString()}점`;
         
         if (isLastStage) {
-            scoreText += `<br><br>🌟 다음은 최종 스테이지 3 - 무한 모드입니다!`;
+            scoreText += `<br><br>🌟 다음 스테이지는 무한 모드입니다!`;
         }
         
         popup.innerHTML = `
@@ -1198,7 +1316,7 @@ class AppleNumberGame {
         
         popup.innerHTML = `
             <div class="popup-content">
-                <div class="popup-title">🌟 스테이지 3 - 무한 모드 완료!</div>
+                <div class="popup-title">🌟 스테이지 3 완료!</div>
                 <div class="popup-score">
                     무한 모드 점수: ${score.toLocaleString()}점<br>
                     최대 콤보: x${this.combo}<br><br>
