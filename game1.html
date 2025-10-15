@@ -231,7 +231,7 @@
             border: 3px solid rgba(147, 197, 253, 0.5);
             border-radius: 20px;
             padding: 0px;
-            height: 33vh;
+            height: 40vh;
             width: 100%;
             position: relative;
             overflow: hidden;
@@ -251,7 +251,7 @@
             justify-content: center;
             align-items: flex-end;
             height: calc(100% - 32px);
-            max-height: calc(33vh - 32px);
+            max-height: calc(40vh - 32px);
             overflow: hidden;
             position: relative;
         }
@@ -262,7 +262,7 @@
             left: 0;
             right: 0;
             height: 40px;
-            background: linear-gradient(to bottom, #f0f9ff 0%, #f0f9ff 50%, transparent 100%);
+            background: transparent;
             pointer-events: none;
             z-index: 5;
         }
@@ -274,7 +274,7 @@
             height: 100%;
             align-items: flex-end;
             padding-bottom: 0px;
-            max-height: calc(33vh - 32px);
+            max-height: calc(40vh - 32px);
             overflow: visible;
         }
         .target-block {
@@ -370,7 +370,7 @@
             border-radius: 20px;
             padding: 12px;
             color: #0369a1;
-            height: 35vh;
+            height: 40vh;
             width: 100%;
             overflow: hidden;
             position: relative;
@@ -391,7 +391,7 @@
             align-items: flex-start;
             padding-top: 10px;
             height: calc(100% - 28px);
-            max-height: 35vh;
+            max-height: 40vh;
             overflow: hidden;
             position: relative;
             margin-top: 20px;
@@ -403,7 +403,7 @@
             left: 0;
             right: 0;
             height: 40px;
-            background: linear-gradient(to bottom, #bae6fd 0%, #bae6fd 70%, transparent 100%);
+            background: transparent;
             pointer-events: none;
             z-index: 10;
         }
@@ -413,7 +413,7 @@
             gap: 4px;
             align-items: center;
             height: 100%;
-            max-height: 35vh;
+            max-height: 40vh;
             width: 60px;
             overflow: visible;
         }
@@ -659,10 +659,10 @@
         }
         @media (max-height: 600px) {
             .target-area {
-                height: 35vh;
+                height: 40vh;
             }
             .selection-area {
-                height: 35vh;
+                height: 40vh;
             }
             .queue-area {
                 height: 10vh;
@@ -1015,6 +1015,9 @@
                             this._particleCount++;
                         }
                         currentBottom.number -= 1;
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(30);
+                        }
                         queued.number -= 1;
                         shotsFired++;
                         this.score += 1;
@@ -1027,9 +1030,6 @@
                             if (lane.length > 0 && lane[0].color === queued.color) {
                                 this.updateTargetLanes();
                             }
-                        }
-                        if ('vibrate' in navigator) {
-                            navigator.vibrate(30);
                         }
                     }
                     if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
