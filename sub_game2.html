@@ -1,620 +1,1189 @@
-<!-- Taehyun | 400 x 736 + Virtual Joystick -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=400, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>탕탕특공대 - 슈팅 게임 (모바일 400x736 + 조이스틱)</title>
-  <style>
-    body{margin:0;padding:0;background:linear-gradient(to bottom,#000428,#004e92);color:#fff;font-family:'Courier New',monospace;overflow:hidden}
-    #gameContainer{position:relative;width:400px;height:736px;margin:8px auto;background:#001122;border:2px solid #00ff88;overflow:hidden;touch-action:none;}
-    canvas{display:block;background:transparent;width:400px;height:736px}
-    #ui{position:absolute;top:6px;left:6px;z-index:10;font-size:14px;font-weight:bold;text-shadow:2px 2px 4px rgba(0,0,0,.8)}
-    #gameOver{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:28px;color:#ff4444;text-shadow:3px 3px 6px rgba(0,0,0,.9);display:none;z-index:20;width:90%}
-    #instructions{text-align:center;margin:6px 0 0;font-size:12px;color:#88ff88}
-
-    /* 리더보드 패널(모바일 폭 축소) */
-    #leaderboard{position:absolute;top:6px;right:6px;z-index:10;width:160px;background:rgba(0,0,0,.35);border:1px solid #00ff88;border-radius:8px;padding:6px 8px;font-size:11px}
-    #leaderboard h3{margin:0 0 4px 0;font-size:12px;color:#a8ffd9}
-    #leaderboard ol{margin:0;padding-left:18px;max-height:140px;overflow:auto}
-    #leaderboard li{line-height:1.3}
-    #leaderboard .empty{color:#84c7c7}
-
-    /* 게임오버 저장 영역 */
-    #saveArea{margin-top:12px;font-size:14px}
-    #playerName{width:140px;padding:6px 8px;border-radius:6px;border:1px solid #00ff88;background:#001a2e;color:#eafff7}
-    #saveScoreBtn{padding:6px 8px;margin-left:6px;border:1px solid #00ff88;background:#00384f;color:#eafff7;border-radius:6px;cursor:pointer}
-    #saveMsg{font-size:12px;color:#a8ffd9;margin-top:6px;height:14px}
-
-    /* ★ 가상 조이스틱 */
-    #joystick{position:absolute;bottom:12px;left:12px;width:140px;height:140px;z-index:12;touch-action:none;}
-    #joyBase{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.05);border:2px solid #00ff88;box-shadow:0 0 12px rgba(0,255,136,.25) inset}
-    #joyStick{position:absolute;width:68px;height:68px;border-radius:50%;left:36px;top:36px;background:rgba(0,255,136,.75);border:2px solid #00ff88;box-shadow:0 0 12px rgba(0,255,136,.6);touch-action:none;}
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
+    <title>탕탕특공대 - 슈팅 게임</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 50%, #fce7f3 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease-in-out infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow: hidden;
+            position: relative;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        /* 배경 효과 */
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #93c5fd, transparent);
+            border-radius: 50%;
+            animation: sparkleAnim var(--duration) ease-in-out infinite;
+            opacity: 0;
+            box-shadow: 0 0 10px rgba(147, 197, 253, 0.8);
+            pointer-events: none;
+        }
+        @keyframes sparkleAnim {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
+        }
+        #intro {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
+            max-width: 90vw;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+            position: relative;
+            border: 3px solid rgba(147, 197, 253, 0.5);
+        }
+        #intro h1 {
+            margin: 0;
+            font-size: 36px;
+            color: #0284c7;
+            font-weight: 800;
+        }
+        #intro p {
+            margin: 0;
+            font-size: 18px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .game-instructions {
+            background: rgba(240, 249, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 14px;
+            color: #0369a1;
+            line-height: 1.5;
+            border: 2px solid rgba(147, 197, 253, 0.3);
+        }
+        .game-instructions h3 {
+            margin: 0 0 10px 0;
+            color: #0284c7;
+            font-size: 16px;
+        }
+        .intro-btn {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: #fff;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .intro-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .intro-btn:hover::before {
+            left: 100%;
+        }
+        .intro-btn:active {
+            transform: scale(0.95);
+        }
+        .intro-btn.btn-home {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            box-shadow: 0 8px 20px rgba(100, 116, 139, 0.3);
+        }
+        .game-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 8px;
+            box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
+            width: 100vw;
+            max-width: 95vw;
+            height: 100vh;
+            max-height: 95vh;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            overflow: hidden;
+            touch-action: manipulation;
+            z-index: 10;
+            position: relative;
+            border: 3px solid rgba(147, 197, 253, 0.5);
+        }
+        #gameCanvas {
+            display: block;
+            background: #000;
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            max-height: 70vh;
+            aspect-ratio: 400 / 736;
+            border-radius: 15px;
+            border: 2px solid rgba(147, 197, 253, 0.3);
+            flex-shrink: 1;
+        }
+        .game-ui {
+            background: rgba(240, 249, 255, 0.8);
+            border-radius: 15px;
+            padding: 10px;
+            margin: 8px 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            font-size: 12px;
+            color: #0284c7;
+            font-weight: 700;
+            border: 2px solid rgba(147, 197, 253, 0.3);
+            width: 100%;
+            max-width: 450px;
+        }
+        .game-ui > div {
+            background: rgba(147, 197, 253, 0.15);
+            padding: 6px 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .game-ui span {
+            color: #7c3aed;
+            font-size: 14px;
+        }
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            width: 100%;
+            max-width: 450px;
+        }
+        .btn {
+            flex: 1;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #38bdf8, #818cf8);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .btn-home {
+            background: linear-gradient(145deg, #94a3b8, #64748b);
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+        }
+        /* 조이스틱 - 터치 시에만 표시 */
+        #joystick {
+            position: fixed;
+            width: 140px;
+            height: 140px;
+            z-index: 1000;
+            touch-action: none;
+            pointer-events: none;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        #joystick.active {
+            display: block;
+            opacity: 1;
+        }
+        #joyBase {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(147, 197, 253, 0.15);
+            border: 3px solid rgba(56, 189, 248, 0.6);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3) inset;
+        }
+        #joyStick {
+            position: absolute;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            left: 36px;
+            top: 36px;
+            background: rgba(56, 189, 248, 0.7);
+            border: 3px solid #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
+            touch-action: none;
+        }
+        /* 리더보드 */
+        #leaderboard {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(147, 197, 253, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 12px;
+            box-shadow: 0 8px 32px rgba(14, 165, 233, 0.15);
+        }
+        #leaderboard h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #0284c7;
+            text-align: center;
+        }
+        #leaderboard ol {
+            margin: 0;
+            padding-left: 20px;
+            max-height: 200px;
+            overflow: auto;
+        }
+        #leaderboard li {
+            line-height: 1.8;
+            color: #0369a1;
+        }
+        #leaderboard .empty {
+            color: #94a3b8;
+            text-align: center;
+            list-style: none;
+        }
+        /* 게임오버 모달 */
+        .modal-backdrop {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(186, 230, 253, 0.3);
+            backdrop-filter: blur(15px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-backdrop.show {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(30px);
+            padding: 40px 30px;
+            border-radius: 25px;
+            width: 90vw;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(14, 165, 233, 0.3);
+            border: 3px solid rgba(147, 197, 253, 0.5);
+            animation: modalBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes modalBounce {
+            0% {
+                transform: scale(0.5) translateY(50px);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.05) translateY(-10px);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal h2 {
+            margin: 0 0 15px 0;
+            font-size: 28px;
+            color: #0284c7;
+            font-weight: 800;
+        }
+        .modal p {
+            margin: 10px 0;
+            font-size: 16px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        .modal input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border: 2px solid rgba(147, 197, 253, 0.5);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Pretendard', sans-serif;
+            background: rgba(240, 249, 255, 0.8);
+            color: #0c4a6e;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .modal input:focus {
+            border-color: #38bdf8;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        }
+        .modal .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .modal button.primary {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+        }
+        .modal button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
+        }
+        .modal button.secondary {
+            background: rgba(226, 232, 240, 0.8);
+            color: #64748b;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+        }
+        .modal button.secondary:hover {
+            background: rgba(203, 213, 225, 0.9);
+        }
+        .ranking-in-modal {
+            margin: 20px 0;
+            text-align: left;
+            font-size: 14px;
+            color: #0284c7;
+        }
+        .ranking-in-modal h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        .ranking-in-modal p {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(147, 197, 253, 0.15);
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+        @media (max-width: 768px) {
+            #intro {
+                padding: 30px 20px;
+            }
+            #intro h1 {
+                font-size: 28px;
+            }
+            #joystick {
+                width: 120px;
+                height: 120px;
+                bottom: 20px;
+                left: 20px;
+            }
+            #joyStick {
+                width: 58px;
+                height: 58px;
+                left: 31px;
+                top: 31px;
+            }
+            #leaderboard {
+                width: 160px;
+                top: 10px;
+                right: 10px;
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="instructions">
-    조이스틱 이동 · 자동 발사 · P: 일시정지 · R: 재시작 · 아이템 수집!
-  </div>
+    <div id="intro">
+        <h1>🎯 탕탕특공대</h1>
+        <p>적을 물리치고 최고 점수에 도전하세요!</p>
+        
+        <div class="game-instructions">
+            <h3>📖 게임 방법</h3>
+            <p>• 조이스틱으로 이동 (PC는 방향키)</p>
+            <p>• 자동으로 가장 가까운 적 공격</p>
+            <p>• 아이템을 수집해 파워업</p>
+            <p>• P키로 일시정지, R키로 재시작</p>
+        </div>
+        
+        <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
+        <button class="intro-btn btn-home" id="goHomeBtn">🏠 홈으로</button>
+    </div>
 
-  <div id="gameContainer">
-    <canvas id="gameCanvas" width="400" height="736"></canvas>
+    <div class="game-container" id="gameContainer">
+        <canvas id="gameCanvas" width="400" height="736"></canvas>
+        
+        <div class="game-ui">
+            <div>🎯 점수: <span id="score">0</span></div>
+            <div>❤️ 생명: <span id="lives">3</span></div>
+            <div>🌊 웨이브: <span id="wave">1</span></div>
+            <div>🛡️ 보호막: <span id="shield">0</span></div>
+            <div>🔥 연사: <span id="fireRate">1.0</span>x</div>
+            <div>💫 멀티: <span id="multiShot">1</span>발</div>
+        </div>
 
-    <div id="ui">
-      <div>점수: <span id="score">0</span></div>
-      <div>생명: <span id="lives">3</span></div>
-      <div>웨이브: <span id="wave">1</span></div>
-      <div>보호막: <span id="shield">0</span></div>
-      <div style="font-size: 11px; margin-top: 4px;">
-        <div>연사: <span id="fireRate">1.0</span>x</div>
-        <div>멀티: <span id="multiShot">1</span>발</div>
-      </div>
+        <div class="game-controls">
+            <button class="btn" id="resetGameBtn">🔄 재시작</button>
+            <button class="btn btn-home" id="goHomeBtn2">🏠 홈으로</button>
+        </div>
+    </div>
+
+    <!-- 조이스틱 (터치 시에만 표시) -->
+    <div id="joystick">
+        <div id="joyBase"></div>
+        <div id="joyStick"></div>
     </div>
 
     <!-- 리더보드 -->
-    <div id="leaderboard">
-      <h3>랭킹 TOP 10</h3>
-      <ol id="lbList"><li class="empty">플레이 후 점수를 저장해보세요.</li></ol>
+    <div id="leaderboard" style="display: none;">
+        <h3>🏆 랭킹 TOP 10</h3>
+        <ol id="lbList">
+            <li class="empty">플레이 후 점수를 저장해보세요.</li>
+        </ol>
     </div>
 
-    <!-- ★ 가상 조이스틱 -->
-    <div id="joystick">
-      <div id="joyBase"></div>
-      <div id="joyStick"></div>
+    <!-- 게임오버 모달 -->
+    <div id="gameOverModal" class="modal-backdrop">
+        <div class="modal">
+            <h2>🎮 게임 오버</h2>
+            <p>최종 점수: <span id="finalScore" style="color: #7c3aed; font-weight: 800; font-size: 24px;">0</span></p>
+            
+            <input type="text" id="playerNameInput" placeholder="이름을 입력하세요 (최대 12자)" maxlength="12">
+            
+            <div class="ranking-in-modal" id="rankingInModal"></div>
+            
+            <div class="button-group">
+                <button class="secondary" onclick="restartGame()">🔄 재도전</button>
+                <button class="primary" id="saveScoreBtn">💾 저장하고 홈으로</button>
+            </div>
+        </div>
     </div>
 
-    <div id="gameOver">
-      <div>게임 오버!</div>
-      <div style="font-size:18px; margin-top:14px;">최종 점수: <span id="finalScore">0</span></div>
-      <div id="saveArea">
-        <input id="playerName" type="text" maxlength="12" placeholder="닉네임(최대 12자)" />
-        <button id="saveScoreBtn">점수 저장</button>
-        <div id="saveMsg"></div>
-      </div>
-      <div style="font-size:14px; margin-top:12px;">R키를 눌러서 재시작</div>
-    </div>
-  </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // ======== 랭킹 시스템 (localStorage) ========
-    const LB_KEY = 'tttg_leaderboard_v1';
-    const NAME_KEY = 'tttg_player_name';
-    let leaderboard = [];
-    let scoreSaved = false;
-
-    function loadHighScores(){
-      try{
-        const raw = localStorage.getItem(LB_KEY);
-        leaderboard = raw ? JSON.parse(raw) : [];
-        if (!Array.isArray(leaderboard)) leaderboard = [];
-      }catch(e){ leaderboard = []; }
-      renderLeaderboard();
-    }
-    function saveHighScore(name, score){
-      const entry = { name: (name||'Player').trim().slice(0,12) || 'Player', score: +score||0, date: new Date().toISOString() };
-      leaderboard.push(entry);
-      leaderboard.sort((a,b)=> b.score - a.score);
-      leaderboard = leaderboard.slice(0,50);
-      localStorage.setItem(LB_KEY, JSON.stringify(leaderboard));
-      localStorage.setItem(NAME_KEY, entry.name);
-      renderLeaderboard();
-    }
-    function renderLeaderboard(){
-      const list = document.getElementById('lbList');
-      if (!list) return;
-      list.innerHTML = '';
-      if (leaderboard.length === 0){
-        const li = document.createElement('li');
-        li.className = 'empty';
-        li.textContent = '플레이 후 점수를 저장해보세요.';
-        list.appendChild(li);
-        return;
-      }
-      leaderboard.slice(0,10).forEach((row, idx)=>{
-        const li = document.createElement('li');
-        li.textContent = `${idx+1}. ${row.name} — ${row.score}`;
-        list.appendChild(li);
-      });
-    }
-
-    // ===== 게임 상태 =====
-    let gameState = {
-      score: 0,
-      lives: 3,
-      wave: 1,
-      gameOver: false,
-      paused: false,
-      keys: {},
-      enemyCount: 0,
-      maxEnemies: 15,
-      time: 0,
-      shotTimer: 0,
-      baseFireRate: 0.22,
-    };
-
-    // ===== 플레이어 =====
-    const player = {
-      x: 200, y: 368, width: 30, height: 30,
-      speed: 220,
-      color: '#00ff88',
-      lastDir: {x: 0, y: -1},
-      invuln: 0,
-      fireRate: 1.0,
-      bulletSpeed: 1.0,
-      multiShot: 1,
-      shield: 0,
-      powerUpTimer: 0
-    };
-
-    // ===== 컨테이너 =====
-    let bullets = [];
-    let enemies = [];
-    let particles = [];
-    let items = [];
-
-    // ===== 유틸 =====
-    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-    function vecNorm(x, y) { const d = Math.hypot(x, y) || 1; return {x: x/d, y: y/d}; }
-
-    // ===== 입력(키보드 유지) =====
-    document.addEventListener('keydown', (e) => {
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
-      gameState.keys[e.code] = true;
-      if (e.code === 'KeyR') restartGame();
-      if (e.code === 'KeyP') gameState.paused = !gameState.paused;
-      // 자동 사격이므로 Space 수동사격은 생략 가능(테스트용 남김)
-      if (e.code === 'Space') manualShoot();
-    });
-    document.addEventListener('keyup', (e) => gameState.keys[e.code] = false);
-
-    /* ===== ★ 가상 조이스틱 로직 ===== */
-    const joyBase = document.getElementById('joyBase');
-    const joyStick = document.getElementById('joyStick');
-    const joyWrap = document.getElementById('joystick');
-
-    const joystick = {
-      active:false,
-      id:null,
-      dx:0, dy:0, // -1..1
-      amp:0      // 0..1 (거리 비율)
-    };
-
-    const DEADZONE = 0.15; // 15%
-
-    function centerStick(){
-      // center to middle (base 140, stick 68 => offset 36)
-      joyStick.style.left = '36px';
-      joyStick.style.top  = '36px';
-    }
-    centerStick();
-
-    function updateFromPoint(clientX, clientY){
-      const rect = joyWrap.getBoundingClientRect();
-      const cx = rect.left + rect.width/2;
-      const cy = rect.top  + rect.height/2;
-      let dx = clientX - cx;
-      let dy = clientY - cy;
-
-      const max = (rect.width/2) - 4; // padding
-      const dist = Math.hypot(dx,dy);
-      const amp = Math.min(dist / max, 1);
-
-      // 방향 단위 벡터
-      const nx = (dist ? dx/dist : 0);
-      const ny = (dist ? dy/dist : 0);
-
-      // 스틱 위치 (클램프)
-      const clampedX = nx * amp * max;
-      const clampedY = ny * amp * max;
-
-      joyStick.style.left = `${rect.width/2 - joyStick.offsetWidth/2 + clampedX}px`;
-      joyStick.style.top  = `${rect.height/2 - joyStick.offsetHeight/2 + clampedY}px`;
-
-      joystick.dx = nx;
-      joystick.dy = ny;
-      joystick.amp = amp;
-      joystick.active = amp > DEADZONE;
-    }
-
-    // Touch events
-    joyWrap.addEventListener('touchstart', (e)=>{
-      e.preventDefault();
-      const t = e.changedTouches[0];
-      joystick.id = t.identifier;
-      updateFromPoint(t.clientX, t.clientY);
-    }, {passive:false});
-
-    joyWrap.addEventListener('touchmove', (e)=>{
-      for (const t of e.changedTouches){
-        if (t.identifier === joystick.id){
-          e.preventDefault();
-          updateFromPoint(t.clientX, t.clientY);
-        }
-      }
-    }, {passive:false});
-
-    function endTouch(e){
-      for (const t of e.changedTouches){
-        if (t.identifier === joystick.id){
-          joystick.id = null;
-          joystick.active = false;
-          joystick.dx = joystick.dy = joystick.amp = 0;
-          centerStick();
-        }
-      }
-    }
-    joyWrap.addEventListener('touchend', endTouch, {passive:false});
-    joyWrap.addEventListener('touchcancel', endTouch, {passive:false});
-
-    // Mouse (PC 테스트용)
-    let mouseDown = false;
-    joyWrap.addEventListener('mousedown', (e)=>{ mouseDown=true; updateFromPoint(e.clientX, e.clientY); });
-    window.addEventListener('mousemove', (e)=>{ if(mouseDown) updateFromPoint(e.clientX, e.clientY); });
-    window.addEventListener('mouseup', ()=>{ if(mouseDown){ mouseDown=false; joystick.active=false; joystick.dx=joystick.dy=joystick.amp=0; centerStick(); }});
-
-    // ===== 플레이어 이동 =====
-    function movePlayer(dt) {
-      // 1) 조이스틱 우선
-      if (joystick.active){
-        // 아날로그 속도 (거리 비율 반영)
-        const speed = player.speed * joystick.amp;
-        player.x += joystick.dx * speed * dt;
-        player.y += joystick.dy * speed * dt;
-
-        // 마지막 방향 업데이트(미세 드래그 방지)
-        if (joystick.amp > DEADZONE + 0.02){
-          player.lastDir = vecNorm(joystick.dx, joystick.dy);
-        }
-      } else {
-        // 2) 키보드 폴백
-        let dx = 0, dy = 0;
-        if (gameState.keys['ArrowLeft'])  dx -= 1;
-        if (gameState.keys['ArrowRight']) dx += 1;
-        if (gameState.keys['ArrowUp'])    dy -= 1;
-        if (gameState.keys['ArrowDown'])  dy += 1;
-
-        if (dx || dy) {
-          const v = vecNorm(dx, dy);
-          player.x += v.x * player.speed * dt;
-          player.y += v.y * player.speed * dt;
-          player.lastDir = v;
-        }
-      }
-
-      player.x = clamp(player.x, 0, canvas.width - player.width);
-      player.y = clamp(player.y, 0, canvas.height - player.height);
-    }
-
-    // ===== 발사 (자동) =====
-    function fire(dir) {
-      if (gameState.gameOver) return;
-      const speed = 520 * player.bulletSpeed;
-      for (let i = 0; i < player.multiShot; i++) {
-        const angle = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i/2) * 0.3;
-        const finalDir = {
-          x: dir.x * Math.cos(angle) - dir.y * Math.sin(angle),
-          y: dir.x * Math.sin(angle) + dir.y * Math.cos(angle)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+            authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+            databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+            projectId: "gukhyeon-ce3ba",
+            storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+            messagingSenderId: "751956972723",
+            appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+            measurementId: "G-JBBLJNDGY1"
         };
-        bullets.push({
-          x: player.x + player.width/2 - 2,
-          y: player.y + player.height/2 - 2,
-          width: 4, height: 4,
-          vx: finalDir.x * speed, vy: finalDir.y * speed,
-          color: '#ffff00'
-        });
-      }
-    }
-    function manualShoot(){ /* 테스트용 남김 */ fire(player.lastDir); }
 
-    function autoFire(dt) {
-      gameState.shotTimer -= dt;
-      const curRate = Math.max(0.10, gameState.baseFireRate - (gameState.wave-1)*0.01) / player.fireRate;
-      if (gameState.shotTimer <= 0) {
-        let target = null, bestD = Infinity;
-        for (const e of enemies) {
-          const cx = e.x + e.width/2, cy = e.y + e.height/2;
-          const dx = cx - (player.x + player.width/2);
-          const dy = cy - (player.y + player.height/2);
-          const d = dx*dx + dy*dy;
-          if (d < bestD) { bestD = d; target = {dx, dy}; }
-        }
-        const dir = target ? vecNorm(target.dx, target.dy) : player.lastDir;
-        fire(dir);
-        gameState.shotTimer = curRate;
-      }
-    }
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    // ===== 적 스폰 =====
-    function spawnEnemy(dt) {
-      if (gameState.enemyCount >= gameState.maxEnemies) return;
-      const spawnPerSecond = 1.2 + gameState.wave * 0.35;
-      const p = 1 - Math.exp(-spawnPerSecond * dt);
-      if (Math.random() < p) {
-        const enemy = { width: 25, height: 25, speed: 60 + gameState.wave * 30, color: '#ff4444', x: 0, y: 0, vx: 0, vy: 0 };
-        const side = Math.floor(Math.random() * 4);
-        if (side === 0) { enemy.x = Math.random()*canvas.width; enemy.y = -enemy.height; }
-        if (side === 1) { enemy.x = Math.random()*canvas.width; enemy.y = canvas.height; }
-        if (side === 2) { enemy.x = -enemy.width; enemy.y = Math.random()*canvas.height; }
-        if (side === 3) { enemy.x = canvas.width; enemy.y = Math.random()*canvas.height; }
-        enemies.push(enemy);
-        gameState.enemyCount++;
-      }
-    }
+        let playerName = localStorage.getItem('playerName') || 'Guest';
+        let scoreSaved = false;
 
-    // ===== 아이템 =====
-    const itemTypes = {
-      FIRE_RATE:   { color: '#ff6666', symbol: 'F', name: '연사력 강화' },
-      MULTI_SHOT:  { color: '#6666ff', symbol: 'M', name: '멀티샷' },
-      SPEED_UP:    { color: '#66ff66', symbol: 'S', name: '이동속도 증가' },
-      SHIELD:      { color: '#ffff66', symbol: 'H', name: '보호막' },
-      BULLET_SPEED:{ color: '#ff66ff', symbol: 'B', name: '총알 속도' }
-    };
-    function spawnItem(x, y) {
-      if (Math.random() < 0.3) {
-        const types = Object.keys(itemTypes);
-        const type = types[Math.floor(Math.random() * types.length)];
-        items.push({ x: x - 10, y: y - 10, width: 20, height: 20, type, life: 10, bob: Math.random() * Math.PI * 2 });
-      }
-    }
-    function collectItem(item) {
-      const type = item.type;
-      createExplosion(item.x + 10, item.y + 10, itemTypes[type].color, 8);
-      switch(type) {
-        case 'FIRE_RATE':   player.fireRate = Math.min(3.0, player.fireRate + 0.3); player.powerUpTimer = 15; break;
-        case 'MULTI_SHOT':  player.multiShot = Math.min(5, player.multiShot + 1);   player.powerUpTimer = 15; break;
-        case 'SPEED_UP':    player.speed = Math.min(350, player.speed + 30);        player.powerUpTimer = 15; break;
-        case 'SHIELD':      player.shield = Math.min(3, player.shield + 1); break;
-        case 'BULLET_SPEED':player.bulletSpeed = Math.min(2.0, player.bulletSpeed + 0.2); player.powerUpTimer = 15; break;
-      }
-    }
-
-    // ===== 파티클 =====
-    function createExplosion(x, y, color = '#ffff00', count = 12) {
-      for (let i = 0; i < count; i++) {
-        const angle = (Math.PI*2*i)/count, sp = 80 + Math.random()*120;
-        particles.push({ x, y, vx: Math.cos(angle)*sp, vy: Math.sin(angle)*sp, life: 0.4 + Math.random()*0.4, maxLife: 0.8, color, size: 2 + Math.random()*2 });
-      }
-    }
-
-    // ===== 충돌 =====
-    function rectHit(a, b) {
-      return a.x < b.x + b.width && a.x + a.width > b.x &&
-             a.y < b.y + b.height && a.y + a.height > b.y;
-    }
-
-    // ===== 업데이트 =====
-    function update(dt) {
-      if (gameState.gameOver || gameState.paused) return;
-
-      gameState.time += dt;
-      if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
-
-      if (player.powerUpTimer > 0) {
-        player.powerUpTimer = Math.max(0, player.powerUpTimer - dt);
-        if (player.powerUpTimer <= 0) {
-          player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.speed = 220;
-        }
-      }
-
-      movePlayer(dt);
-      autoFire(dt);
-      spawnEnemy(dt);
-
-      bullets = bullets.filter(b => {
-        b.x += b.vx * dt; b.y += b.vy * dt;
-        return b.x > -10 && b.x < canvas.width + 10 && b.y > -10 && b.y < canvas.height + 10;
-      });
-
-      for (const e of enemies) {
-        const dx = (player.x + player.width/2) - (e.x + e.width/2);
-        const dy = (player.y + player.height/2) - (e.y + e.height/2);
-        const v = vecNorm(dx, dy);
-        e.vx = v.x * e.speed; e.vy = v.y * e.speed;
-        e.x += e.vx * dt; e.y += e.vy * dt;
-      }
-      enemies = enemies.filter(e => {
-        const inBounds = e.x > -60 && e.x < canvas.width + 60 && e.y > -60 && e.y < canvas.height + 60;
-        if (!inBounds) gameState.enemyCount--;
-        return inBounds;
-      });
-
-      items = items.filter(item => { item.life -= dt; item.bob += dt * 3; return item.life > 0; });
-
-      particles = particles.filter(p => {
-        p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
-        p.vx *= (1 - 1.5*dt); p.vy *= (1 - 1.5*dt);
-        return p.life > 0;
-      });
-
-      outer:
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        for (let j = enemies.length - 1; j >= 0; j--) {
-          if (rectHit(bullets[i], enemies[j])) {
-            const ex = enemies[j].x + enemies[j].width/2;
-            const ey = enemies[j].y + enemies[j].height/2;
-            createExplosion(ex, ey, '#ff8844', 10);
-            spawnItem(ex, ey);
-            bullets.splice(i, 1);
-            enemies.splice(j, 1);
-            gameState.enemyCount--;
-            gameState.score += 50;
-            if (gameState.score > 0 && gameState.score % 500 === 0) { gameState.wave++; gameState.maxEnemies += 3; }
-            continue outer;
-          }
-        }
-      }
-
-      for (let i = items.length - 1; i >= 0; i--) {
-        if (rectHit(player, items[i])) { collectItem(items[i]); items.splice(i, 1); }
-      }
-
-      if (player.invuln <= 0) {
-        for (let i = enemies.length - 1; i >= 0; i--) {
-          if (rectHit(enemies[i], player)) {
-            const ex = enemies[i].x + enemies[i].width/2;
-            const ey = enemies[i].y + enemies[i].height/2;
-            if (player.shield > 0) {
-              player.shield--;
-              createExplosion(ex, ey, '#ffff66', 15);
-              enemies.splice(i, 1);
-              gameState.enemyCount--;
-              player.invuln = 0.5;
-            } else {
-              createExplosion(ex, ey, '#ff4444', 12);
-              createExplosion(player.x + player.width/2, player.y + player.height/2, '#00ff88', 16);
-              enemies.splice(i, 1);
-              gameState.enemyCount--;
-              gameState.lives--;
-              player.invuln = 1.2;
-              const dkx = (player.x + player.width/2) - ex;
-              const dky = (player.y + player.height/2) - ey;
-              const len = Math.hypot(dkx, dky) || 1;
-              player.x = clamp(player.x + (dkx/len)*40, 0, canvas.width - player.width);
-              player.y = clamp(player.y + (dky/len)*40, 0, canvas.height - player.height);
-              if (gameState.lives <= 0) endGame();
+        // 배경 효과 생성
+        function createBackgroundEffects() {
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.top = `${Math.random() * 100}%`;
+                sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                sparkle.style.animationDelay = `${Math.random() * 3}s`;
+                document.body.appendChild(sparkle);
             }
-            break;
-          }
         }
-      }
 
-      updateUI();
-    }
-
-    // ===== 그리기 =====
-    function draw() {
-      ctx.fillStyle = 'rgba(0,17,34,0.35)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const blink = player.invuln > 0 ? Math.floor(gameState.time*10)%2 === 0 : true;
-      if (blink) {
-        ctx.fillStyle = player.color;
-        ctx.fillRect(player.x + 10, player.y, 10, 30);
-        ctx.fillRect(player.x, player.y + 10, 30, 10);
-        ctx.shadowColor = player.color; ctx.shadowBlur = 10;
-        ctx.fillRect(player.x + 12, player.y + 12, 6, 6);
-        ctx.shadowBlur = 0;
-        if (player.shield > 0) {
-          ctx.strokeStyle = '#ffff66';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(player.x + player.width/2, player.y + player.height/2, 25, 0, Math.PI*2);
-          ctx.stroke();
+        // 랭킹 로드
+        async function loadHighScores() {
+            try {
+                const scoresRef = ref(db, 'scores/game2');
+                const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+                const snapshot = await get(topScoresQuery);
+                const rankings = [];
+                snapshot.forEach((child) => {
+                    rankings.unshift(child.val());
+                });
+                renderLeaderboard(rankings);
+                return rankings;
+            } catch (error) {
+                console.error('Error loading rankings:', error);
+                return [];
+            }
         }
-      }
 
-      for (const b of bullets) {
-        ctx.fillStyle = b.color;
-        ctx.shadowColor = b.color; ctx.shadowBlur = 8;
-        ctx.fillRect(b.x, b.y, b.width, b.height);
-        ctx.shadowBlur = 0;
-      }
+        function renderLeaderboard(rankings) {
+            const list = document.getElementById('lbList');
+            if (!list) return;
+            list.innerHTML = '';
+            if (rankings.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'empty';
+                li.textContent = '플레이 후 점수를 저장해보세요.';
+                list.appendChild(li);
+                return;
+            }
+            rankings.forEach((row, idx) => {
+                const li = document.createElement('li');
+                li.textContent = `${row.name} — ${row.score}`;
+                list.appendChild(li);
+            });
+        }
 
-      for (const e of enemies) {
-        const cx = e.x + e.width/2, cy = e.y + e.height/2;
-        ctx.fillStyle = e.color;
-        ctx.beginPath();
-        ctx.moveTo(cx, e.y);
-        ctx.lineTo(e.x + e.width, cy);
-        ctx.lineTo(cx, e.y + e.height);
-        ctx.lineTo(e.x, cy);
-        ctx.closePath();
-        ctx.shadowColor = e.color; ctx.shadowBlur = 5;
-        ctx.fill(); ctx.shadowBlur = 0;
-      }
+        async function saveHighScore(name, score) {
+            try {
+                const scoreData = {
+                    name: (name || 'Player').trim().slice(0, 12) || 'Player',
+                    score: +score || 0,
+                    timestamp: Date.now()
+                };
+                await push(ref(db, 'scores/game2'), scoreData);
+                localStorage.setItem('playerName', scoreData.name);
+                return await loadHighScores();
+            } catch (error) {
+                console.error('Score save error:', error);
+                return [];
+            }
+        }
 
-      for (const item of items) {
-        const bobOffset = Math.sin(item.bob) * 3;
-        const alpha = item.life < 2 ? Math.sin(item.life * 5) * 0.5 + 0.5 : 1;
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = itemTypes[item.type].color;
-        ctx.shadowColor = itemTypes[item.type].color; ctx.shadowBlur = 10;
-        ctx.fillRect(item.x, item.y + bobOffset, item.width, item.height);
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#000000';
-        ctx.font = '12px bold monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(itemTypes[item.type].symbol, item.x + item.width/2, item.y + item.height/2 + 4 + bobOffset);
-        ctx.globalAlpha = 1;
-      }
+        // 게임 로직
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 이미지 스무딩 비활성화 (픽셀 아트용)
+        ctx.imageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
 
-      for (const p of particles) {
-        const a = Math.max(0, p.life / p.maxLife);
-        ctx.globalAlpha = a;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
-        ctx.globalAlpha = 1;
-      }
-    }
+        let gameState = {
+            score: 0,
+            lives: 3,
+            wave: 1,
+            gameOver: false,
+            paused: false,
+            keys: {},
+            enemyCount: 0,
+            maxEnemies: 15,
+            time: 0,
+            shotTimer: 0,
+            baseFireRate: 0.22,
+        };
 
-    // ===== UI =====
-    function updateUI() {
-      document.getElementById('score').textContent = gameState.score;
-      document.getElementById('lives').textContent = gameState.lives;
-      document.getElementById('wave').textContent = gameState.wave;
-      document.getElementById('shield').textContent = player.shield;
-      document.getElementById('fireRate').textContent = player.fireRate.toFixed(1);
-      document.getElementById('multiShot').textContent = player.multiShot;
-    }
+        const player = {
+            x: 200, y: 368, width: 30, height: 30,
+            speed: 220,
+            color: '#00ff88',
+            lastDir: {x: 0, y: -1},
+            invuln: 0,
+            fireRate: 1.0,
+            bulletSpeed: 1.0,
+            multiShot: 1,
+            shield: 0,
+            powerUpTimer: 0,
+            image: null
+        };
 
-    // ===== 종료/재시작 & 랭킹 저장 UI =====
-    const nameInput = document.getElementById('playerName');
-    const saveBtn   = document.getElementById('saveScoreBtn');
-    const saveMsg   = document.getElementById('saveMsg');
+        let bullets = [];
+        let enemies = [];
+        let particles = [];
+        let items = [];
 
-    if (saveBtn){
-      saveBtn.addEventListener('click', () => {
-        if (scoreSaved) return;
-        saveHighScore(nameInput.value, gameState.score);
-        scoreSaved = true;
-        saveBtn.disabled = true;
-        saveBtn.textContent = '저장됨';
-        saveMsg.textContent = '랭킹에 등록되었습니다!';
-      });
-    }
-    if (nameInput){
-      nameInput.addEventListener('keydown', (e)=>{
-        if (e.key === 'Enter') saveBtn.click();
-      });
-    }
+        // 이미지 로드
+        const images = {
+            player: new Image(),
+            enemy: new Image(),
+            bullet: new Image(),
+            background: new Image()
+        };
 
-    function endGame() {
-      gameState.gameOver = true;
-      document.getElementById('finalScore').textContent = gameState.score;
-      document.getElementById('gameOver').style.display = 'block';
-      if (nameInput){ nameInput.value = localStorage.getItem(NAME_KEY) || ''; nameInput.focus(); }
-      if (saveBtn){ saveBtn.disabled = false; saveBtn.textContent = '점수 저장'; }
-      if (saveMsg){ saveMsg.textContent = ''; }
-      scoreSaved = false;
-    }
+        let imagesLoaded = {
+            player: false,
+            enemy: false,
+            bullet: false,
+            background: false
+        };
 
-    function restartGame() {
-      gameState = { score: 0, lives: 3, wave: 1, gameOver: false, paused: false, keys: {}, enemyCount: 0, maxEnemies: 15, time: 0, shotTimer: 0, baseFireRate: 0.22 };
-      player.x = 200; player.y = 368; player.lastDir = {x:0, y:-1}; player.invuln = 0;
-      player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.shield = 0; player.powerUpTimer = 0; player.speed = 220;
-      bullets = []; enemies = []; particles = []; items = [];
-      document.getElementById('gameOver').style.display = 'none';
-      updateUI();
-    }
+        // 이미지 로드 시도
+        images.player.onload = () => { imagesLoaded.player = true; };
+        images.player.onerror = () => { imagesLoaded.player = false; };
+        images.player.src = 'assets/player.png';
 
-    // ===== 루프(Δt) =====
-    let last = performance.now();
-    function loop(now) {
-      const dt = Math.min(0.033, (now - last) / 1000);
-      last = now;
-      update(dt);
-      draw();
-      requestAnimationFrame(loop);
-    }
+        images.enemy.onload = () => { imagesLoaded.enemy = true; };
+        images.enemy.onerror = () => { imagesLoaded.enemy = false; };
+        images.enemy.src = 'assets/enemy.png';
 
-    // 시작
-    loadHighScores();
-    if (nameInput) nameInput.value = localStorage.getItem(NAME_KEY) || '';
-    updateUI();
-    requestAnimationFrame(loop);
-  </script>
+        images.bullet.onload = () => { imagesLoaded.bullet = true; };
+        images.bullet.onerror = () => { imagesLoaded.bullet = false; };
+        images.bullet.src = 'assets/bullet.png';
+
+        images.background.onload = () => { imagesLoaded.background = true; };
+        images.background.onerror = () => { imagesLoaded.background = false; };
+        images.background.src = 'assets/background.png';
+
+        const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+        function vecNorm(x, y) { const d = Math.hypot(x, y) || 1; return {x: x/d, y: y/d}; }
+
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+            gameState.keys[e.code] = true;
+            if (e.code === 'KeyR') restartGame();
+            if (e.code === 'KeyP') gameState.paused = !gameState.paused;
+        });
+        document.addEventListener('keyup', (e) => gameState.keys[e.code] = false);
+
+        // 동적 조이스틱 시스템
+        const joyBase = document.getElementById('joyBase');
+        const joyStick = document.getElementById('joyStick');
+        const joyWrap = document.getElementById('joystick');
+
+        const joystick = {
+            active: false,
+            id: null,
+            startX: 0,
+            startY: 0,
+            dx: 0,
+            dy: 0,
+            amp: 0
+        };
+
+        const DEADZONE = 0.15;
+        const JOYSTICK_RADIUS = 70; // 조이스틱 반경
+
+        function showJoystick(x, y) {
+            joyWrap.style.left = `${x - JOYSTICK_RADIUS}px`;
+            joyWrap.style.top = `${y - JOYSTICK_RADIUS}px`;
+            joyWrap.classList.add('active');
+            joystick.startX = x;
+            joystick.startY = y;
+            centerStick();
+        }
+
+        function hideJoystick() {
+            joyWrap.classList.remove('active');
+            joystick.active = false;
+            joystick.dx = joystick.dy = joystick.amp = 0;
+            centerStick();
+        }
+
+        function centerStick() {
+            joyStick.style.left = '36px';
+            joyStick.style.top = '36px';
+        }
+
+        function updateJoystickFromTouch(touchX, touchY) {
+            const dx = touchX - joystick.startX;
+            const dy = touchY - joystick.startY;
+
+            const dist = Math.hypot(dx, dy);
+            const amp = Math.min(dist / JOYSTICK_RADIUS, 1);
+
+            const nx = dist ? dx / dist : 0;
+            const ny = dist ? dy / dist : 0;
+
+            const clampedX = nx * amp * JOYSTICK_RADIUS;
+            const clampedY = ny * amp * JOYSTICK_RADIUS;
+
+            joyStick.style.left = `${JOYSTICK_RADIUS - joyStick.offsetWidth / 2 + clampedX}px`;
+            joyStick.style.top = `${JOYSTICK_RADIUS - joyStick.offsetHeight / 2 + clampedY}px`;
+
+            joystick.dx = nx;
+            joystick.dy = ny;
+            joystick.amp = amp;
+            joystick.active = amp > DEADZONE;
+        }
+
+        // 게임 컨테이너에서만 터치 이벤트 활성화
+        const gameContainer = document.getElementById('gameContainer');
+
+        gameContainer.addEventListener('touchstart', (e) => {
+            if (gameState.gameOver || gameState.paused) return;
+            e.preventDefault();
+            
+            const touch = e.changedTouches[0];
+            joystick.id = touch.identifier;
+            
+            showJoystick(touch.clientX, touch.clientY);
+            updateJoystickFromTouch(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        gameContainer.addEventListener('touchmove', (e) => {
+            if (gameState.gameOver || gameState.paused) return;
+            
+            for (const touch of e.changedTouches) {
+                if (touch.identifier === joystick.id) {
+                    e.preventDefault();
+                    updateJoystickFromTouch(touch.clientX, touch.clientY);
+                }
+            }
+        }, { passive: false });
+
+        function endTouch(e) {
+            for (const touch of e.changedTouches) {
+                if (touch.identifier === joystick.id) {
+                    joystick.id = null;
+                    hideJoystick();
+                }
+            }
+        }
+
+        gameContainer.addEventListener('touchend', endTouch, { passive: false });
+        gameContainer.addEventListener('touchcancel', endTouch, { passive: false });
+
+        function movePlayer(dt) {
+            if (joystick.active) {
+                const speed = player.speed * joystick.amp;
+                player.x += joystick.dx * speed * dt;
+                player.y += joystick.dy * speed * dt;
+                if (joystick.amp > DEADZONE + 0.02) {
+                    player.lastDir = vecNorm(joystick.dx, joystick.dy);
+                }
+            } else {
+                let dx = 0, dy = 0;
+                if (gameState.keys['ArrowLeft']) dx -= 1;
+                if (gameState.keys['ArrowRight']) dx += 1;
+                if (gameState.keys['ArrowUp']) dy -= 1;
+                if (gameState.keys['ArrowDown']) dy += 1;
+                if (dx || dy) {
+                    const v = vecNorm(dx, dy);
+                    player.x += v.x * player.speed * dt;
+                    player.y += v.y * player.speed * dt;
+                    player.lastDir = v;
+                }
+            }
+            player.x = clamp(player.x, 0, canvas.width - player.width);
+            player.y = clamp(player.y, 0, canvas.height - player.height);
+        }
+
+        function fire(dir) {
+            if (gameState.gameOver) return;
+            const speed = 520 * player.bulletSpeed;
+            for (let i = 0; i < player.multiShot; i++) {
+                const angle = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i / 2) * 0.3;
+                const finalDir = {
+                    x: dir.x * Math.cos(angle) - dir.y * Math.sin(angle),
+                    y: dir.x * Math.sin(angle) + dir.y * Math.cos(angle)
+                };
+                bullets.push({
+                    x: player.x + player.width / 2 - 2,
+                    y: player.y + player.height / 2 - 2,
+                    width: 4, height: 4,
+                    vx: finalDir.x * speed, vy: finalDir.y * speed,
+                    color: '#ffff00'
+                });
+            }
+        }
+
+        function autoFire(dt) {
+            gameState.shotTimer -= dt;
+            const curRate = Math.max(0.10, gameState.baseFireRate - (gameState.wave - 1) * 0.01) / player.fireRate;
+            if (gameState.shotTimer <= 0) {
+                let target = null, bestD = Infinity;
+                for (const e of enemies) {
+                    const cx = e.x + e.width / 2, cy = e.y + e.height / 2;
+                    const dx = cx - (player.x + player.width / 2);
+                    const dy = cy - (player.y + player.height / 2);
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; target = {dx, dy}; }
+                }
+                const dir = target ? vecNorm(target.dx, target.dy) : player.lastDir;
+                fire(dir);
+                gameState.shotTimer = curRate;
+            }
+        }
+
+        function spawnEnemy(dt) {
+            if (gameState.enemyCount >= gameState.maxEnemies) return;
+            const spawnPerSecond = 1.2 + gameState.wave * 0.35;
+            const p = 1 - Math.exp(-spawnPerSecond * dt);
+            if (Math.random() < p) {
+                const enemy = { width: 25, height: 25, speed: 60 + gameState.wave * 30, color: '#ff4444', x: 0, y: 0, vx: 0, vy: 0 };
+                const side = Math.floor(Math.random() * 4);
+                if (side === 0) { enemy.x = Math.random() * canvas.width; enemy.y = -enemy.height; }
+                if (side === 1) { enemy.x = Math.random() * canvas.width; enemy.y = canvas.height; }
+                if (side === 2) { enemy.x = -enemy.width; enemy.y = Math.random() * canvas.height; }
+                if (side === 3) { enemy.x = canvas.width; enemy.y = Math.random() * canvas.height; }
+                enemies.push(enemy);
+                gameState.enemyCount++;
+            }
+        }
+
+        const itemTypes = {
+            FIRE_RATE: { color: '#ff6666', symbol: 'F', name: '연사력 강화' },
+            MULTI_SHOT: { color: '#6666ff', symbol: 'M', name: '멀티샷' },
+            SPEED_UP: { color: '#66ff66', symbol: 'S', name: '이동속도 증가' },
+            SHIELD: { color: '#ffff66', symbol: 'H', name: '보호막' },
+            BULLET_SPEED: { color: '#ff66ff', symbol: 'B', name: '이알 속도' }
+        };
+
+        function spawnItem(x, y) {
+            if (Math.random() < 0.3) {
+                const types = Object.keys(itemTypes);
+                const type = types[Math.floor(Math.random() * types.length)];
+                items.push({ x: x - 10, y: y - 10, width: 20, height: 20, type, life: 10, bob: Math.random() * Math.PI * 2 });
+            }
+        }
+
+        function collectItem(item) {
+            const type = item.type;
+            createExplosion(item.x + 10, item.y + 10, itemTypes[type].color, 8);
+            switch (type) {
+                case 'FIRE_RATE': player.fireRate = Math.min(3.0, player.fireRate + 0.3); player.powerUpTimer = 15; break;
+                case 'MULTI_SHOT': player.multiShot = Math.min(5, player.multiShot + 1); player.powerUpTimer = 15; break;
+                case 'SPEED_UP': player.speed = Math.min(350, player.speed + 30); player.powerUpTimer = 15; break;
+                case 'SHIELD': player.shield = Math.min(3, player.shield + 1); break;
+                case 'BULLET_SPEED': player.bulletSpeed = Math.min(2.0, player.bulletSpeed + 0.2); player.powerUpTimer = 15; break;
+            }
+        }
+
+        function createExplosion(x, y, color = '#ffff00', count = 12) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count, sp = 80 + Math.random() * 120;
+                particles.push({ x, y, vx: Math.cos(angle) * sp, vy: Math.sin(angle) * sp, life: 0.4 + Math.random() * 0.4, maxLife: 0.8, color, size: 2 + Math.random() * 2 });
+            }
+        }
+
+        function rectHit(a, b) {
+            return a.x < b.x + b.width && a.x + a.width > b.x &&
+                a.y < b.y + b.height && a.y + a.height > b.y;
+        }
+
+        function update(dt) {
+            if (gameState.gameOver || gameState.paused) return;
+
+            gameState.time += dt;
+            if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
+
+            if (player.powerUpTimer > 0) {
+                player.powerUpTimer = Math.max(0, player.powerUpTimer - dt);
+                if (player.powerUpTimer <= 0) {
+                    player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.speed = 220;
+                }
+            }
+
+            movePlayer(dt);
+            autoFire(dt);
+            spawnEnemy(dt);
+
+            bullets = bullets.filter(b => {
+                b.x += b.vx * dt; b.y += b.vy * dt;
+                return b.x > -10 && b.x < canvas.width + 10 && b.y > -10 && b.y < canvas.height + 10;
+            });
+
+            for (const e of enemies) {
+                const dx = (player.x + player.width / 2) - (e.x + e.width / 2);
+                const dy = (player.y + player.height / 2) - (e.y + e.height / 2);
+                const v = vecNorm(dx, dy);
+                e.vx = v.x * e.speed; e.vy = v.y * e.speed;
+                e.x += e.vx * dt; e.y += e.vy * dt;
+            }
+            enemies = enemies.filter(e => {
+                const inBounds = e.x > -60 && e.x < canvas.width + 60 && e.y > -60 && e.y < canvas.height + 60;
+                if (!inBounds) gameState.enemyCount--;
+                return inBounds;
+            });
+
+            items = items.filter(item => { item.life -= dt; item.bob += dt * 3; return item.life > 0; });
+
+            particles = particles.filter(p => {
+                p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+                p.vx *= (1 - 1.5 * dt); p.vy *= (1 - 1.5 * dt);
+                return p.life > 0;
+            });
+
+            outer:
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    if (rectHit(bullets[i], enemies[j])) {
+                        const ex = enemies[j].x + enemies[j].width / 2;
+                        const ey = enemies[j].y + enemies[j].height / 2;
+                        createExplosion(ex, ey, '#ff8844', 10);
+                        spawnItem(ex, ey);
+                        bullets.splice(i, 1);
+                        enemies.splice(j, 1);
+                        gameState.enemyCount--;
+                        gameState.score += 50;
+                        if (gameState.score > 0 && gameState.score % 500 === 0) { gameState.wave++; gameState.maxEnemies += 3; }
+                        continue outer;
+                    }
+                }
+            }
+
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (rectHit(player, items[i])) { collectItem(items[i]); items.splice(i, 1); }
+            }
+
+            if (player.invuln <= 0) {
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    if (rectHit(enemies[i], player)) {
+                        const ex = enemies[i].x + enemies[i].width / 2;
+                        const ey = enemies[i].y + enemies[i].height / 2;
+                        if (player.shield > 0) {
+                            player.shield--;
+                            createExplosion(ex, ey, '#ffff66', 15);
+                            enemies.splice(i, 1);
+                            gameState.enemyCount--;
+                            player.invuln = 0.5;
+                        } else {
+                            createExplosion(ex, ey, '#ff4444', 12);
+                            createExplosion(player.x + player.width / 2, player.y + player.height / 2, '#00ff88', 16);
+                            enemies.splice(i, 1);
+                            gameState.enemyCount--;
+                            gameState.lives--;
+                            player.invuln = 1.2;
+                            const dkx = (player.x + player.width / 2) - ex;
+                            const dky = (player.y + player.height / 2) - ey;
+                            const len = Math.hypot(dkx, dky) || 1;
+                            player.x = clamp(player.x + (dkx / len) * 40, 0, canvas.width - player.width);
+                            player.y = clamp(player.y + (dky / len) * 40, 0, canvas.height - player.height);
+                            if (gameState.lives <= 0) endGame();
+                        }
+                        break;
+                    }
+                }
+            }
+
+            updateUI();
+        }
+
+        function draw() {
+            // 배경 그리기
+            if (imagesLoaded.background) {
+                ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = 'rgba(0,17,34,0.35)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            const blink = player.invuln > 0 ? Math.floor(gameState.time * 10) % 2 === 0 : true;
+            if (blink) {
+                // 플레이어 그리기
+                if (imagesLoaded.player) {
+                    ctx.save();
+                    ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
+                    ctx.drawImage(images.player, -player.width / 2, -player.height / 2, player.width, player.height);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = player.color;
+                    ctx.fillRect(player.x + 10, player.y, 10, 30);
+                    ctx.fillRect(player.x, player.y + 10, 30, 10);
+                    ctx.shadowColor = player.color; ctx.shadowBlur = 10;
+                    ctx.fillRect(player.x + 12, player.y + 12, 6, 6);
+                    ctx.shadowBlur = 0;
+                }
+                
+                if (player.shield > 0) {
+                    ctx.strokeStyle = '#ffff66';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(player.x + player.width / 2, player.y + player.height / 2, 25, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+
+            // 총알 그리기
+            for (const b of bullets) {
+                if (imagesLoaded.bullet) {
+                    ctx.save();
+                    ctx.translate(b.x + b.width / 2, b.y + b.height / 2);
+                    const angle = Math.atan2(b.vy, b.vx);
+                    ctx.rotate(angle);
+                    ctx.drawImage(images.bullet, -b.width / 2, -b.height / 2, b.width * 2, b.height * 2);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = b.color;
+                    ctx.shadowColor = b.color; ctx.shadowBlur = 8;
+                    ctx.fillRect(b.x, b.y, b.width, b.height);
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            // 적 그리기
+            for (const e of enemies) {
+                if (imagesLoaded.enemy) {
+                    ctx.save();
+                    ctx.translate(e.x + e.width / 2, e.y + e.height / 2);
+                    ctx.drawImage(images.enemy, -e.width / 2, -e.height / 2, e.width, e.height);
+                    ctx.restore();
+                } else {
+                    const cx = e.x + e.width / 2, cy = e.y + e.height / 2;
+                    ctx.fillStyle = e.color;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, e.y);
+                    ctx.lineTo(e.x + e.width, cy);
+                    ctx.lineTo(cx, e.y + e.height);
+                    ctx.lineTo(e.x, cy);
+                    ctx.closePath();
+                    ctx.shadowColor = e.color; ctx.shadowBlur = 5;
+                    ctx.fill(); ctx.shadowBlur = 0;
+                }
+            }
+
+            for (const item of items) {
+                const bobOffset = Math.sin(item.bob) * 3;
+                const alpha = item.life < 2 ? Math.sin(item.life * 5) * 0.5 + 0.5 : 1;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = itemTypes[item.type].color;
+                ctx.shadowColor = itemTypes[item.type].color; ctx.shadowBlur = 10;
+                ctx.fillRect(item.x, item.y + bobOffset, item.width, item.height);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#000000';
+                ctx.font = '12px bold monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(itemTypes[item.type].symbol, item.x + item.width / 2, item.y + item.height / 2 + 4 + bobOffset);
+                ctx.globalAlpha = 1;
+            }
+
+            for (const p of particles) {
+                const a = Math.max(0, p.life / p.maxLife);
+                ctx.globalAlpha = a;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('wave').textContent = gameState.wave;
+            document.getElementById('shield').textContent = player.shield;
+            document.getElementById('fireRate').textContent = player.fireRate.toFixed(1);
+            document.getElementById('multiShot').textContent = player.multiShot;
+        }
+
+        async function endGame() {
+            gameState.gameOver = true;
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('playerNameInput').value = localStorage.getItem('playerName') || '';
+            
+            const rankings = await loadHighScores();
+            const rankingDiv = document.getElementById('rankingInModal');
+            const medals = ['🥇', '🥈', '🥉'];
+            rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+            if (rankings.length === 0) {
+                rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
+            } else {
+                rankings.slice(0, 5).forEach((entry, index) => {
+                    const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                    rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+                });
+            }
+            
+            document.getElementById('gameOverModal').classList.add('show');
+            scoreSaved = false;
+        }
+
+        window.restartGame = function() {
+            gameState = { score: 0, lives: 3, wave: 1, gameOver: false, paused: false, keys: {}, enemyCount: 0, maxEnemies: 15, time: 0, shotTimer: 0, baseFireRate: 0.22 };
+            player.x = 200; player.y = 368; player.lastDir = {x: 0, y: -1}; player.invuln = 0;
+            player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.shield = 0; player.powerUpTimer = 0; player.speed = 220;
+            bullets = []; enemies = []; particles = []; items = [];
+            document.getElementById('gameOverModal').classList.remove('show');
+            updateUI();
+        }
+
+        let last = performance.now();
+        function loop(now) {
+            const dt = Math.min(0.033, (now - last) / 1000);
+            last = now;
+            update(dt);
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        function startGame() {
+            document.getElementById('intro').style.display = 'none';
+            const gameContainer = document.getElementById('gameContainer');
+            gameContainer.style.display = 'flex';
+            document.getElementById('leaderboard').style.display = 'block';
+            loadHighScores();
+            updateUI();
+            requestAnimationFrame(loop);
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        document.getElementById('goHomeBtn').addEventListener('click', goHome);
+        document.getElementById('resetGameBtn').addEventListener('click', restartGame);
+        document.getElementById('goHomeBtn2').addEventListener('click', goHome);
+
+        document.getElementById('saveScoreBtn').addEventListener('click', async () => {
+            if (scoreSaved) {
+                goHome();
+                return;
+            }
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) {
+                alert('이름을 입력해주세요 😊');
+                return;
+            }
+            await saveHighScore(name, gameState.score);
+            scoreSaved = true;
+            document.getElementById('saveScoreBtn').textContent = '✅ 저장 완료';
+            setTimeout(goHome, 1000);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createBackgroundEffects();
+            playerName = localStorage.getItem('playerName') || 'Guest';
+            const nameDisplay = document.createElement('p');
+            nameDisplay.style.color = '#0284c7';
+            nameDisplay.style.fontWeight = '700';
+            nameDisplay.textContent = `👤 플레이어: ${playerName}`;
+            document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
+        });
+    </script>
 </body>
 </html>

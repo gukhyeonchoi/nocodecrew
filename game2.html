@@ -153,10 +153,13 @@
             max-width: 450px;
             height: auto;
             max-height: 70vh;
-            aspect-ratio: 400 / 736;
             border-radius: 15px;
             border: 2px solid rgba(147, 197, 253, 0.3);
             flex-shrink: 1;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
         .game-ui {
             background: rgba(240, 249, 255, 0.8);
@@ -1005,11 +1008,24 @@
 
             const blink = player.invuln > 0 ? Math.floor(gameState.time * 10) % 2 === 0 : true;
             if (blink) {
-                // 플레이어 그리기
+                // 플레이어 그리기 (비율 유지)
                 if (imagesLoaded.player) {
+                    const img = images.player;
+                    const aspectRatio = img.width / img.height;
+                    let drawWidth = player.width;
+                    let drawHeight = player.height;
+                    
+                    if (aspectRatio > 1) {
+                        // 가로가 더 긴 경우
+                        drawHeight = drawWidth / aspectRatio;
+                    } else {
+                        // 세로가 더 긴 경우
+                        drawWidth = drawHeight * aspectRatio;
+                    }
+                    
                     ctx.save();
                     ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
-                    ctx.drawImage(images.player, -player.width / 2, -player.height / 2, player.width, player.height);
+                    ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                     ctx.restore();
                 } else {
                     ctx.fillStyle = player.color;
@@ -1029,14 +1045,25 @@
                 }
             }
 
-            // 총알 그리기
+            // 총알 그리기 (비율 유지)
             for (const b of bullets) {
                 if (imagesLoaded.bullet) {
+                    const img = images.bullet;
+                    const aspectRatio = img.width / img.height;
+                    let drawWidth = b.width * 3;
+                    let drawHeight = b.height * 3;
+                    
+                    if (aspectRatio > 1) {
+                        drawHeight = drawWidth / aspectRatio;
+                    } else {
+                        drawWidth = drawHeight * aspectRatio;
+                    }
+                    
                     ctx.save();
                     ctx.translate(b.x + b.width / 2, b.y + b.height / 2);
                     const angle = Math.atan2(b.vy, b.vx);
                     ctx.rotate(angle);
-                    ctx.drawImage(images.bullet, -b.width / 2, -b.height / 2, b.width * 2, b.height * 2);
+                    ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                     ctx.restore();
                 } else {
                     ctx.fillStyle = b.color;
@@ -1046,12 +1073,23 @@
                 }
             }
 
-            // 적 그리기
+            // 적 그리기 (비율 유지)
             for (const e of enemies) {
                 if (imagesLoaded.enemy) {
+                    const img = images.enemy;
+                    const aspectRatio = img.width / img.height;
+                    let drawWidth = e.width;
+                    let drawHeight = e.height;
+                    
+                    if (aspectRatio > 1) {
+                        drawHeight = drawWidth / aspectRatio;
+                    } else {
+                        drawWidth = drawHeight * aspectRatio;
+                    }
+                    
                     ctx.save();
                     ctx.translate(e.x + e.width / 2, e.y + e.height / 2);
-                    ctx.drawImage(images.enemy, -e.width / 2, -e.height / 2, e.width, e.height);
+                    ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                     ctx.restore();
                 } else {
                     const cx = e.x + e.width / 2, cy = e.y + e.height / 2;
@@ -1145,6 +1183,22 @@
             const gameContainer = document.getElementById('gameContainer');
             gameContainer.style.display = 'flex';
             document.getElementById('leaderboard').style.display = 'block';
+            
+            // 캔버스 크기 조정
+            const canvas = document.getElementById('gameCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            // 실제 캔버스 크기를 표시 크기에 맞춤
+            canvas.width = 400;
+            canvas.height = 736;
+            
+            // 이미지 스무딩 재설정
+            ctx.imageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+            
             loadHighScores();
             updateUI();
             requestAnimationFrame(loop);
