@@ -639,12 +639,14 @@
                 </div>
                 <div class="rule-item">
                     <span class="rule-icon">🏆</span>
-                    <span><strong>랭킹:</strong> 무한 모드 클리어 시 랭킹에 등록돼요!</span>
+                    <span><strong>랭킹:</strong> 무한 모드까지 클리어하면 랭킹에 등록돼요!</span>
                 </div>
             </div>
 
+            <p id="playerNameDisplay" style="margin-top: 0; margin-bottom: 20px; color: #0284c7; font-weight: 700; font-size: 1.1em;">👤 플레이어: Guest</p>
+
             <button class="start-button" id="startButton">🎮 게임 시작</button>
-            <button class="ranking-button" id="rankingButton">🏆 랭킹 보기</button>
+            <button class="ranking-button" id="homeButton">🏠 홈으로</button>
         </div>
     </div>
 
@@ -671,7 +673,7 @@
             <button class="btn btn-next" id="nextStageBtn" style="display: none;">다음 스테이지</button>
             <button class="btn btn-reset" id="resetStageBtn">스테이지 재시작</button>
             <button class="btn btn-new" id="newGameBtn">게임 재시작</button>
-            <button class="btn btn-main" id="mainBtn">첫 화면으로</button>
+            <button class="btn btn-main" id="mainBtn">나가기</button>
         </div>
 
         <div class="message" id="message"></div>
@@ -722,8 +724,17 @@ let gameInstance = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     createBackgroundEffects();
+    
+    // 플레이어 이름 표시
+    const playerNameDisplay = document.getElementById('playerNameDisplay');
+    if (playerNameDisplay) {
+        playerNameDisplay.textContent = '👤 플레이어: ' + playerName;
+    }
+    
     document.getElementById('startButton').addEventListener('click', startGame);
-    document.getElementById('rankingButton').addEventListener('click', showRankings);
+    document.getElementById('homeButton').addEventListener('click', function() {
+    window.location.href = 'index.html';
+});
 });
 
 function startGame() {
@@ -732,45 +743,7 @@ function startGame() {
     gameInstance = new AppleNumberGame();
 }
 
-function showRankings() {
-    if (typeof firebase === 'undefined' || !database) {
-        const popup = document.createElement('div');
-        popup.className = 'modal-backdrop';
-        popup.innerHTML = '<div class="popup-content"><div class="popup-title">⚠️ 알림</div><div class="popup-score">랭킹 시스템을 불러오는 중입니다.<br>잠시 후 다시 시도해주세요.</div><button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove();">확인</button></div>';
-        document.body.appendChild(popup);
-        return;
-    }
-    
-    const scoresRef = database.ref('scores/game5');
-    scoresRef.orderByChild('score').limitToLast(10).once('value').then(function(snapshot) {
-        const rankings = [];
-        snapshot.forEach(function(child) {
-            rankings.unshift(child.val());
-        });
-        
-        if (rankings.length === 0) {
-            const popup = document.createElement('div');
-            popup.className = 'modal-backdrop';
-            popup.innerHTML = '<div class="popup-content"><div class="popup-title">🏆 랭킹</div><div class="popup-score">아직 등록된 랭킹이 없습니다.<br>무한 모드를 완료하고 첫 랭킹에 도전하세요!</div><button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove();">닫기</button></div>';
-            document.body.appendChild(popup);
-            return;
-        }
 
-        let rankingHTML = '<div class="ranking-list">';
-        rankings.forEach(function(data, index) {
-            rankingHTML += '<div class="ranking-item"><span class="rank">' + (index + 1) + '위</span><span class="name">' + (data.name || '익명') + '</span><span class="score">' + (data.score || 0).toLocaleString() + '점</span></div>';
-        });
-        rankingHTML += '</div>';
-        
-        const popup = document.createElement('div');
-        popup.className = 'modal-backdrop';
-        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🏆 랭킹</div>' + rankingHTML + '<button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove();">닫기</button></div>';
-        document.body.appendChild(popup);
-    }).catch(function(error) {
-        console.error("❌ 랭킹 불러오기 실패:", error);
-        alert("랭킹을 불러오는데 실패했습니다.");
-    });
-}
 
 class AppleNumberGame {
     constructor() {
@@ -1069,7 +1042,9 @@ class AppleNumberGame {
             this.timerInterval = null;
         }
         this.stageActive = false;
-        window.location.href = 'index.html';
+        document.getElementById('gameContainer').style.display = 'none';
+        document.getElementById('welcomeScreen').style.display = 'flex';
+        gameInstance = null;
     }
 
     nextStage() {
@@ -1291,7 +1266,7 @@ class AppleNumberGame {
         
         const popup = document.createElement('div');
         popup.className = 'modal-backdrop';
-        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🌟 스테이지 3 완료!</div><div class="popup-score">전체 누적 점수: ' + totalScore.toLocaleString() + '점<br>최대 콤보: x' + this.combo + '<br><br>🎉 모든 스테이지를 완주하셨습니다!<br>' + saveMessage + '</div><div class="popup-buttons"><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); location.href=\'index.html\';">첫 화면으로</button><button class="btn btn-new" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGame();">새 게임</button></div></div>';
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🌟 스테이지 3 완료!</div><div class="popup-score">전체 누적 점수: ' + totalScore.toLocaleString() + '점<br>최대 콤보: x' + this.combo + '<br><br>🎉 모든 스테이지를 완주하셨습니다!<br>' + saveMessage + '</div><div class="popup-buttons"><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.goToMain();">나가기</button><button class="btn btn-new" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGame();">새 게임</button></div></div>';
         document.body.appendChild(popup);
     }
 
