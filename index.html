@@ -808,14 +808,17 @@
     });
   });
 
-  // 페이지 로드 시 초기화
+// 페이지 로드 시 초기화
   window.addEventListener('load', () => {
     createBackgroundEffects();
     
-    if (!window.playerName) {
-      setTimeout(() => showNameModal(false), 500);
-    } else {
+    // localStorage에서 저장된 이름 불러오기
+    const savedName = localStorage.getItem('playerName');
+    if (savedName) {
+      window.playerName = savedName;
       updateUserDisplay();
+    } else {
+      setTimeout(() => showNameModal(false), 500);
     }
   });
 </script>
