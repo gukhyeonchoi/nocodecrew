@@ -54,13 +54,6 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
-        .welcome-subtitle {
-            font-size: 1.3em;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
-
         .game-rules {
             text-align: left;
             background: #f0f7fb;
@@ -81,35 +74,6 @@
             font-size: 1.2em;
             margin-right: 10px;
             margin-top: 2px;
-        }
-
-        .stage-preview {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            gap: 10px;
-        }
-
-        .stage-box {
-            flex: 1;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 0.9em;
-            font-weight: bold;
-            color: white;
-            text-align: center;
-        }
-
-        .stage-normal {
-            background: linear-gradient(135deg, #7eb3d5, #5a9bc4);
-        }
-
-        .stage-gravity {
-            background: linear-gradient(135deg, #92c4df, #6ba3c7);
-        }
-
-        .stage-infinite {
-            background: linear-gradient(135deg, #a8cde3, #8ab8d6);
         }
 
         .start-button {
@@ -171,12 +135,6 @@
             margin-bottom: 10px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 1.1em;
         }
 
         .stage-info {
@@ -272,7 +230,6 @@
             justify-items: center;
         }
 
-        /* Apple emoji tile styling */
         .tile {
             width: 50px;
             height: 50px;
@@ -557,6 +514,39 @@
             line-height: 1.6;
         }
 
+        .ranking-list {
+           max-height: 400px;
+            overflow-y: auto;
+              margin-bottom: 20px;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f0f7fb;
+            border-radius: 10px;
+            align-items: center;
+        }
+
+        .ranking-item .rank {
+            font-weight: bold;
+            color: #6ba3c7;
+            min-width: 50px;
+        }
+
+        .ranking-item .name {
+            flex: 1;
+            text-align: left;
+            padding: 0 10px;
+        }
+
+        .ranking-item .score {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
         .coming-soon-button {
             background: linear-gradient(145deg, #6ba3c7, #8ab8d6);
             color: white;
@@ -581,13 +571,11 @@
             justify-content: center;
         }
 
-        /* 태블릿 */
         @media (max-width: 768px) {
             body { padding: 25px; }
             .welcome-content { padding: 30px 20px; }
             .welcome-title { font-size: 2.2em; }
             .game-rules { font-size: 1em; padding: 20px; }
-            .stage-preview { flex-direction: column; }
             .game-container { padding: 20px; max-width: 100%; width: 80%; }
             h1 { font-size: 2em; }
             .game-board { 
@@ -601,7 +589,6 @@
             .tile .number { font-size: 1.5em; width: 28px; height: 28px; }
         }
 
-        /* 작은 모바일 (480px 이하) */
         @media (max-width: 480px) {
             body { padding: 15px; }
             .welcome-content { 
@@ -681,7 +668,6 @@
             .popup-score { font-size: 1.1em; margin-bottom: 20px; }
         }
 
-        /* 아주 작은 모바일 (360px 이하) */
         @media (max-width: 360px) {
             body { padding: 10px; }
             .game-container { padding: 10px; width: 90%; }
@@ -727,6 +713,22 @@
             .ranking-button { padding: 8px 16px; font-size: 0.9em; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.min.js"></script>
+    <script>
+        // Firebase 설정
+        const firebaseConfig = {
+          apiKey: "AIzaSyDokZJCfk5vZdWfxDW22eylWKxvVDwgGO0",
+          authDomain: "baekkm-1b0cf.firebaseapp.com",
+          databaseURL: "https://baekkm-1b0cf-default-rtdb.firebaseio.com",
+          projectId: "baekkm-1b0cf",
+          storageBucket: "baekkm-1b0cf.firebasestorage.app",
+          messagingSenderId: "692775126901",
+          appId: "1:692775126901:web:a66a44079fdeb8d329f53c",
+          measurementId: "G-2LB7WPQ62Q"
+        };
+    </script>
+
 </head>
 <body>
     <div class="welcome-screen" id="welcomeScreen">
@@ -773,7 +775,7 @@
         
         <div class="score-board">
             <div class="score-item">
-                <div class="score-label">총 점수</div>
+                <div class="score-label">누적 점수</div>
                 <div class="score-value" id="totalScore">0</div>
             </div>
             <div class="score-item">
@@ -799,7 +801,28 @@
     </div>
 
 <script>
+let db = null;
 let gameInstance = null;
+
+// Firebase 초기화
+(function initFirebase() {
+    if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log('✅ Firebase 초기화 성공');
+            console.log('⚠️ Firestore 연결 시도 중... Firebase Console에서 Firestore Database를 활성화했는지 확인하세요.');
+        } catch (error) {
+            console.error('❌ Firebase 초기화 실패:', error);
+        }
+    }
+})();
+
+// 버튼 이벤트 리스너 등록
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('startButton').addEventListener('click', startGame);
+    document.getElementById('rankingButton').addEventListener('click', showRankings);
+});
 
 function startGame() {
     document.getElementById('welcomeScreen').style.display = 'none';
@@ -807,28 +830,85 @@ function startGame() {
     gameInstance = new AppleNumberGame();
 }
 
-function showComingSoon() {
-    const popup = document.createElement('div');
-    popup.className = 'coming-soon-popup';
+function showRankings() {
+    if (!db) {
+        alert('Firebase가 초기화되지 않았습니다.');
+        return;
+    }
     
-    popup.innerHTML = `
-        <div class="coming-soon-content">
-            <div class="coming-soon-title">🏆 랭킹 시스템</div>
-            <div class="coming-soon-message">
-                랭킹 기능은 현재 개발 중입니다!<br>
-                곧 멋진 랭킹 시스템으로 돌아올 예정이에요 🚀
-            </div>
-            <button class="coming-soon-button" onclick="this.closest('.coming-soon-popup').remove();">확인</button>
-        </div>
-    `;
+    console.log('🔍 랭킹 조회 시작...');
     
-    document.body.appendChild(popup);
-}
+    // 먼저 orderBy 없이 조회 시도
+    db.collection('rankings')
+        .get()
+        .then((querySnapshot) => {
+            console.log('📊 조회된 문서 개수 (orderBy 없이):', querySnapshot.size);
+            
+            if (querySnapshot.empty) {
+                console.warn('⚠️ 조회된 랭킹 데이터가 없습니다.');
+                const popup = document.createElement('div');
+                popup.className = 'coming-soon-popup';
+                popup.innerHTML = `
+                    <div class="coming-soon-content">
+                        <div class="coming-soon-title">🏆 랭킹</div>
+                        <div class="coming-soon-message">
+                            아직 등록된 랭킹이 없습니다.<br>
+                            무한 모드를 완료하고 첫 랭킹에 도전하세요!
+                        </div>
+                        <button class="coming-soon-button" onclick="this.closest('.coming-soon-popup').remove();">닫기</button>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+                return;
+            }
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('startButton').addEventListener('click', startGame);
-    document.getElementById('rankingButton').addEventListener('click', showComingSoon);
-});
+            // 데이터를 배열로 변환하고 점수순으로 정렬
+            const rankings = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                console.log('📝 문서 데이터:', data);
+                rankings.push(data);
+            });
+            
+            // JavaScript로 정렬 (내림차순)
+            rankings.sort((a, b) => (b.score || 0) - (a.score || 0));
+            
+            // 상위 10개만
+            const top10 = rankings.slice(0, 10);
+
+            let rankingHTML = '<div class="ranking-list">';
+            
+            top10.forEach((data, index) => {
+                rankingHTML += `
+                    <div class="ranking-item">
+                        <span class="rank">${index + 1}위</span>
+                        <span class="name">${data.name || '익명'}</span>
+                        <span class="score">${(data.score || 0).toLocaleString()}점</span>
+                    </div>
+                `;
+            });
+            
+            rankingHTML += '</div>';
+            
+            const popup = document.createElement('div');
+            popup.className = 'coming-soon-popup';
+            popup.innerHTML = `
+                <div class="coming-soon-content">
+                    <div class="coming-soon-title">🏆 랭킹</div>
+                    ${rankingHTML}
+                    <button class="coming-soon-button" onclick="this.closest('.coming-soon-popup').remove();">닫기</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        })
+        .catch((error) => {
+            console.error("❌ 랭킹 불러오기 실패:", error);
+            console.error("에러 코드:", error.code);
+            console.error("에러 메시지:", error.message);
+            
+            alert("랭킹을 불러오는데 실패했습니다.\n\n에러: " + error.message);
+        });
+}
 
 class AppleNumberGame {
     constructor() {
@@ -1311,6 +1391,25 @@ class AppleNumberGame {
     }
 
     showInfinitePopup(score) {
+        this.stageActive = false;
+    
+        const playerName = prompt("🎉 게임 완료! 랭킹에 등록할 닉네임을 입력하세요:", "익명");
+        
+        if (playerName && db) {
+            db.collection('rankings').add({
+                name: playerName,
+                score: score,
+                combo: this.combo,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                console.log("✅ 랭킹 저장 완료!");
+                alert("🏆 랭킹에 등록되었습니다!");
+            }).catch((error) => {
+                console.error("❌ 랭킹 저장 실패:", error);
+                alert("랭킹 저장에 실패했습니다.\n\nFirebase Console에서 Firestore Database를 활성화해주세요.");
+            });
+        }
+
         const popup = document.createElement('div');
         popup.className = 'stage-complete-popup';
         
@@ -1333,8 +1432,23 @@ class AppleNumberGame {
     }
 
     updateDisplay() {
-        const score = this.isInfiniteMode ? this.infiniteScore : this.totalScore;
-        this.totalScoreEl.textContent = score.toLocaleString();
+        // 누적 점수 = 모든 스테이지 점수 합계
+        let displayScore;
+        
+        // 이전 스테이지들의 점수 합계
+        const previousStagesScore = Object.entries(this.stageScores)
+            .filter(([stage, score]) => parseInt(stage) < this.currentStage)
+            .reduce((sum, [stage, score]) => sum + score, 0);
+        
+        if (this.isInfiniteMode) {
+            // 무한 모드: 이전 스테이지 점수 + 무한 모드 점수
+            displayScore = previousStagesScore + this.infiniteScore;
+        } else {
+            // 일반/중력 모드: 이전 스테이지 점수 + 현재 스테이지 점수
+            displayScore = previousStagesScore + this.currentStageScore;
+        }
+        
+        this.totalScoreEl.textContent = displayScore.toLocaleString();
         
         const activeTiles = this.board.filter(tile => tile.active).length;
         this.remainingTilesEl.textContent = activeTiles;
