@@ -266,34 +266,6 @@
   backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
 }
 
-    /* 게임 번호 배지 */
-.game-number {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: clamp(20px, 3vw, 30px);
-      height: clamp(20px, 3vw, 30px);
-      border-radius: 50%;
-      background: linear-gradient(135deg, #7dd3fc, #a5b4fc);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: clamp(0.7rem, 1.5vw, 0.9rem);
-      color: #fff;
-      text-shadow: 0 1px 3px rgba(14, 165, 233, 0.5);
-      box-shadow: 
-        0 3px 8px rgba(125, 211, 252, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-      animation: badgePulse 2s ease-in-out infinite;
-      transform: rotateX(45deg) scaleY(1.414);
-    }
-
-    @keyframes badgePulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
 
     /* 게임 버튼 */
 .game-btn {
@@ -569,8 +541,8 @@
   }
       .game-number {
         width: 30px;
-        height: 30px;
-        font-size: 0.9rem;
+        height: 0px;
+        font-size: 0rem;
       }
       .game-btn {
         padding: 8px 0;
@@ -671,7 +643,7 @@
   <div class="btn-container" id="carousel">
     <div class="game-card" data-game="game1" data-angle="0">
       <div class="game-title">컬러 슈터</div>
-      <div class="game-number">1</div>
+      <div class="game-number"></div>
       <button class="game-btn" data-game="game1">게임 시작</button>
       <button class="view-full-ranking" data-game="game1">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
 <div class="ranking-list" id="ranking-game1">
@@ -842,7 +814,7 @@ function loadRankings(gameId) {
       }
     });
     
-    const top10 = allRankings.slice(0, 8);  // ✅ 8위까지
+    const top10 = allRankings.slice(0, 9);  // ✅ 8위까지
 if (top10.length === 0) {
   const emptyMsg = document.createElement('p');
   emptyMsg.style.textAlign = 'center';
@@ -901,7 +873,7 @@ const closeFullRankingBtn = document.getElementById('close-full-ranking');
 function showFullRanking(gameId) {
   fullRankingTitle.textContent = `전체 랭킹 - ${document.querySelector(`[data-game="${gameId}"] .game-title`).textContent}`;
   const scoresRef = ref(db, 'scores/' + gameId);
-  const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(8)); // 최대 8위
+  const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(9)); // 최대 8위
   onValue(topScoresQuery, (snapshot) => {
   const playerBestScores = {};
   
