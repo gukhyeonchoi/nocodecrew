@@ -319,10 +319,17 @@
         .cell[data-value="1024"] { background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-size: clamp(16px, 3vw, 24px); }
         .cell[data-value="2048"] { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-size: clamp(16px, 3vw, 24px); }
         .game-controls {
-            display: flex;
-            gap: 6px;
-            margin-top: 10px;
-        }
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    position: sticky;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);  /* 배경 추가로 가독성 향상 */
+    backdrop-filter: blur(10px);  /* 배경 흐리기 */
+    z-index: 100;  /* 버튼이 다른 요소 위에 표시 */
+    width: 100%;
+    justify-content: center;
+}
         .btn {
             flex: 1;
             color: #fff;
