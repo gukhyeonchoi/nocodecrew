@@ -368,9 +368,10 @@
 }
 
 .ranking-list p.my-rank { /* 내 랭킹 강조 클래스 */
-  background: rgba(167, 243, 208, 0.4);
-  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(167, 243, 208, 0.6);
+  border-color: rgba(34, 197, 94, 0.7);
   font-weight: 700;
+  color: #065f46;
 }
 
     .ranking-list p:hover {
@@ -797,45 +798,84 @@
     }
 
     // 랭킹 로드
-    function loadRankings(gameId) {
+function loadRankings(gameId) {
   const scoresRef = ref(db, 'scores/' + gameId);
-  // 전체 랭킹 쿼리 (내 등수 계산용)
   const allScoresQuery = query(scoresRef, orderByChild('score'));
+  
   onValue(allScoresQuery, (snapshot) => {
-    const allRankings = [];
+    const playerBestScores = {}; // 플레이어별 최고 점수 추적
+    
     snapshot.forEach((child) => {
-      allRankings.unshift(child.val()); // 내림차순으로
-    });
+  const data = child.val();
+  const playerName = data.name || '익명';  // ✅ undefined 방지
+  
+  // 같은 이름의 기록 중 최고 점수만 유지
+  if (!playerBestScores[playerName] || data.score > playerBestScores[playerName].score) {
+    playerBestScores[playerName] = data;
+  }
+});
+    
+    // 객체를 배열로 변환하고 점수 순으로 정렬 (내림차순)
+    const allRankings = Object.values(playerBestScores).sort((a, b) => b.score - a.score);
 
-    // 상위 10위 표시
-    const top10 = allRankings.slice(0, 10);
+    // 상위 3위 표시
     const rankingDiv = document.getElementById('ranking-' + gameId);
     const medals = ['🥇', '🥈', '🥉'];
-    rankingDiv.innerHTML = '';
-    top10.forEach((entry, index) => {
-      const medal = index < 3 ? medals[index] : '';
-      const name = (entry.name || '익명').slice(0, 8);
-      rankingDiv.innerHTML += `<p><span class="rank">${medal} ${index + 1}위</span> <span>${name}</span> <span class="score">${entry.score}점</span></p>`;
+    
+    // 내 등수 요소를 제외한 기존 랭킹만 제거
+    const myRankElem = document.getElementById('my-rank-' + gameId);
+    Array.from(rankingDiv.children).forEach(child => {
+      if (child.id !== 'my-rank-' + gameId) {
+        child.remove();
+      }
     });
-    if (top10.length === 0) {
-      rankingDiv.innerHTML = '<p style="text-align: center; color: #94a3b8;">아직 기록이 없어요</p>';
+    
+    const top3 = allRankings.slice(0, 3);
+    if (top3.length === 0) {
+      const emptyMsg = document.createElement('p');
+      emptyMsg.style.textAlign = 'center';
+      emptyMsg.style.color = '#94a3b8';
+      emptyMsg.textContent = '아직 기록이 없어요';
+      rankingDiv.insertBefore(emptyMsg, myRankElem);
+    } else {
+      top3.forEach((entry, index) => {
+        const p = document.createElement('p');
+        const medal = medals[index];
+        const name = (entry.name || '익명').slice(0, 8);
+        p.innerHTML = `<span class="rank">${medal} ${index + 1}위</span> <span>${name}</span> <span class="score">${entry.score}점</span>`;
+        
+        // 내 등수 요소 앞에 삽입
+        rankingDiv.insertBefore(p, myRankElem);
+      });
     }
 
-    // 내 등수 계산
-    const myRankElem = document.getElementById('my-rank-' + gameId);
-    if (window.playerName && myRankElem) {
-      const myEntry = allRankings.find(entry => entry.name === window.playerName);
-      if (myEntry) {
-        const myRank = allRankings.indexOf(myEntry) + 1;
-        myRankElem.innerHTML = `<span class="rank">내 등수 ${myRank}위</span> <span>${window.playerName}</span> <span class="score">${myEntry.score}점</span>`;
-        myRankElem.classList.add('my-rank'); // 항상 내 등수 강조
-        // 1~10위 안에 있으면 해당 랭킹 강조
-        if (myRank <= 10) {
+    // 내 등수 계산 및 표시
+    if (!myRankElem) return;
+    
+    if (window.playerName) {
+      const myEntries = allRankings.filter(entry => entry.name === window.playerName);
+      
+      if (myEntries.length > 0) {
+        const myBestScore = Math.max(...myEntries.map(e => e.score));
+        const myRank = allRankings.findIndex(entry => entry.score === myBestScore && entry.name === window.playerName) + 1;
+        
+        myRankElem.innerHTML = `<span class="rank">내 등수: ${myRank}위</span> <span>${window.playerName}</span> <span class="score">${myBestScore}점</span>`;
+        myRankElem.classList.add('my-rank');
+        myRankElem.style.display = 'flex';
+        
+        // 1~3위 안에 있으면 해당 랭킹도 강조
+        if (myRank <= 3 && myRank <= rankingDiv.children.length) {
           rankingDiv.children[myRank - 1].classList.add('my-rank');
         }
       } else {
         myRankElem.innerHTML = `<span class="rank">내 등수</span> <span>기록 없음</span> <span class="score">-</span>`;
+        myRankElem.classList.add('my-rank');
+        myRankElem.style.display = 'flex';
       }
+    } else {
+      myRankElem.innerHTML = `<span class="rank">내 등수</span> <span>이름을 입력해주세요</span> <span class="score">-</span>`;
+      myRankElem.classList.remove('my-rank');
+      myRankElem.style.display = 'flex';
     }
   });
 }
@@ -850,10 +890,18 @@ function showFullRanking(gameId) {
   const scoresRef = ref(db, 'scores/' + gameId);
   const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10)); // 최대 10위
   onValue(topScoresQuery, (snapshot) => {
-    const rankings = [];
-    snapshot.forEach((child) => {
-      rankings.unshift(child.val());
-    });
+  const playerBestScores = {};
+  
+  snapshot.forEach((child) => {
+    const data = child.val();
+    const playerName = data.name || '익명';
+    
+    if (!playerBestScores[playerName] || data.score > playerBestScores[playerName].score) {
+      playerBestScores[playerName] = data;
+    }
+  });
+  
+  const rankings = Object.values(playerBestScores).sort((a, b) => b.score - a.score);
     fullRankingList.innerHTML = '';
     const medals = ['🥇', '🥈', '🥉'];
     rankings.forEach((entry, index) => {
@@ -906,24 +954,27 @@ document.querySelectorAll('.view-full-ranking').forEach(btn => {
       modal.classList.remove('show');
     }
 
-    function saveName() {
-      const name = input.value.trim();
-      if (!name) {
-        alert('이름을 입력해주세요 😊');
-        input.focus();
-        return;
-      }
-      if (name.length > 4) {
-        alert('이름은 최대 4글자까지 입력 가능해요');
-        input.focus();
-        return;
-      }
-      window.playerName = name;
-      localStorage.setItem('playerName', name);
-      userNameDisplay.textContent = name;
-      userInfo.style.display = 'flex';
-      hideNameModal();
-    }
+function saveName() {
+  const name = input.value.trim();
+  if (!name) {
+    alert('이름을 입력해주세요 😊');
+    input.focus();
+    return;
+  }
+  if (name.length > 4) {
+    alert('이름은 최대 4글자까지 입력 가능해요');
+    input.focus();
+    return;
+  }
+  window.playerName = name;
+  localStorage.setItem('playerName', name);
+  userNameDisplay.textContent = name;
+  userInfo.style.display = 'flex';
+  hideNameModal();
+  
+  // 이름 저장 후 모든 게임의 랭킹 새로고침
+  ['game1', 'game2', 'game3', 'game4', 'game5'].forEach(loadRankings);
+}
 
     function updateUserDisplay() {
       const savedName = window.playerName;
