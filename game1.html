@@ -512,17 +512,18 @@
             }
         }
         .game-controls {
-            text-align: center;
-            padding: 8px;
-            background: rgba(240, 249, 255, 0.9);
-            position: sticky;
-            bottom: 0;
-            z-index: 100;
-            width: 100%;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(147, 197, 253, 0.3);
-        }
+    text-align: center;
+    padding: 8px;
+    background: rgba(240, 249, 255, 0.9);
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    width: 100%;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(147, 197, 253, 0.3);
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
         .btn {
             color: #fff;
             border: none;
@@ -1671,19 +1672,18 @@
             if (game) game.resetGame();
         }
         function goHome() {
-    parent.document.getElementById('game-frame').style.display = 'none';
-    parent.document.querySelector('h1').style.display = 'block';
-    parent.document.getElementById('carousel').style.display = 'block';
-    parent.document.getElementById('user-info').style.display = 'flex';
-    
-    // BGM 재생 보장 (부모 창의 playBGM 호출)
-    if (parent.playBGM) {
-        parent.playBGM();  // index의 playBGM 함수 호출
-    }
-    
-    if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-    }
+  if (parent.resetIframe) {
+    parent.resetIframe();  // 부모의 iframe 초기화 호출
+  }
+  parent.document.querySelector('h1').style.display = 'block';
+  parent.document.getElementById('carousel').style.display = 'block';
+  parent.document.getElementById('user-info').style.display = 'flex';
+  if (parent.playBGM) {
+    parent.playBGM(false);  // BGM 유지
+  }
+  if ('vibrate' in navigator) {
+    navigator.vibrate(50);
+  }
 }
         document.addEventListener('DOMContentLoaded', function() {
             createBackgroundEffects();
