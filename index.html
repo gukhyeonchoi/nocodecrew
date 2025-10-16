@@ -1126,7 +1126,7 @@ document.querySelectorAll('.game-btn').forEach(btn => {
     document.querySelector('h1').style.display = 'none';
     document.getElementById('carousel').style.display = 'none';
     document.getElementById('user-info').style.display = 'none';
-    playBGM(false); // 사용자 클릭 후 BGM 재생
+    // playBGM(false); // 사용자 클릭 후 BGM 재생
   });
 });
 
@@ -1149,28 +1149,74 @@ document.querySelectorAll('.game-btn').forEach(btn => {
       if (radius !== newRadius) {
         radius = newRadius;
         updateCarousel();
+        playBGM(false); // ⬅️ 이 줄 추가
       }
     });
     
-    // BGM 관리 함수 (resize 밖으로 이동, duplicate 제거)
+    // BGM 관리 함수 수정
     const bgm = document.getElementById('bgm');
     bgm.volume = 0.3;
+    let bgmStarted = false; // BGM 시작 여부 추적
 
     function playBGM(reset = false) {
       if (reset) {
-        bgm.currentTime = 0;  // 초기만 reset (사용 안 함)
+        bgm.currentTime = 0;
       }
-      if (bgm.paused && localStorage.getItem('bgmEnabled') !== 'false') {
+      
+      // 이미 재생 중이면 아무것도 하지 않음
+      if (!bgm.paused) {
+        return;
+      }
+      
+      if (localStorage.getItem('bgmEnabled') !== 'false') {
         bgm.play().catch(err => console.warn('BGM play failed:', err));
+        bgmStarted = true;
       }
     }
+
+    // 사용자 인터랙션 시 BGM 재생 (자동재생 실패 대비)
+    document.body.addEventListener('click', function startBGMOnInteraction() {
+      if (!bgmStarted || bgm.paused) {
+        playBGM(false);
+      }
+    }, { once: true }); // 한 번만 실행
 
     // visibilitychange: pause/resume (reset 없이)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        playBGM(false);  // resume only, no reset
+        if (bgmStarted) {  // ⬅️ 조건 추가
+          playBGM(false);
+        }
       } else {
-        bgm.pause();  // 배터리 절약
+        bgm.pause();
+      }
+    });
+    // postMessage 리스너 추가 (goHome 메시지 처리)
+    window.addEventListener('message', (e) => {
+      if (e.data === 'goHome') {
+        resetIframe();
+        document.querySelector('h1').style.display = 'block';
+        document.getElementById('carousel').style.display = 'block';
+        document.getElementById('user-info').style.display = 'flex';
+        
+        // BGM이 일시정지 상태일 때만 재생 (중복 방지)
+        if (bgm.paused && bgmStarted) {
+          playBGM(false);
+        }
+      }
+    });
+
+
+    window.addEventListener('message', (e) => {
+      if (e.data === 'goHome') {
+        resetIframe();
+        document.querySelector('h1').style.display = 'block';
+        document.getElementById('carousel').style.display = 'block';
+        document.getElementById('user-info').style.display = 'flex';
+        
+        if (bgm.paused) {
+          playBGM(false);
+        }
       }
     });
   </script>

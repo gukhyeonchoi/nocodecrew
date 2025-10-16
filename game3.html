@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>싸워라! 2048 - Battle 2048</title>
+    <title>배틀 2048 v16 - Battle 2048</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
     <style>
         * {
@@ -402,7 +402,7 @@
             font-weight: 800;
             font-size: 28px;
         }
-        .modal-actions {
+        .modal .button-group {
             display: flex;
             gap: 10px;
             margin-top: 25px;
@@ -433,6 +433,24 @@
         }
         .modal button.secondary:hover {
             background: rgba(203, 213, 225, 0.9);
+        }
+        .modal input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border: 2px solid rgba(147, 197, 253, 0.5);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Pretendard', sans-serif;
+            background: rgba(240, 249, 255, 0.8);
+            color: #0c4a6e;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .modal input:focus {
+            border-color: #38bdf8;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
         }
         .ranking-in-modal {
             margin: 20px 0;
@@ -508,11 +526,10 @@
             }
         }
     </style>
-    <link rel="icon" href="data:,">
 </head>
 <body>
     <div id="intro">
-        <h1>🎯 싸워라! 2048</h1>
+        <h1>🎯 배틀 2048 v16</h1>
         <p>타일을 합쳐서 보스를 물리치세요!</p>
         
         <div class="game-instructions">
@@ -521,6 +538,7 @@
             <p>• 같은 숫자를 합쳐서 점수 획득</p>
             <p>• 점수가 높을수록 강한 공격!</p>
             <p>• 보스를 물리치고 다음 스테이지로!</p>
+            <p style="margin-top: 10px; color: #7c3aed; font-weight: 700;">✨ v16: Firebase 연동 최적화</p>
         </div>
         
         <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
@@ -573,701 +591,675 @@
 
         <div class="game-controls">
             <button class="btn" onclick="newGame()">🔄 재시작</button>
-            <button class="btn btn-home" id="goHomeBtn2" onclick="goHome()">🏠 홈으로</button>
+            <button class="btn btn-home" id="goHomeBtn2">🏠 홈으로</button>
         </div>
     </div>
 
-    <div id="modalRoot"></div>
+    <div id="gameOverModal" class="modal-backdrop">
+        <div class="modal">
+            <h2>🎮 게임 오버</h2>
+            <p>최종 점수: <span class="score-highlight" id="final-score">0</span></p>
+            <p>처치한 보스: <span class="score-highlight" id="final-boss-kills">0</span></p>
+            
+            <input type="text" id="playerNameInput" placeholder="이름을 입력하세요 (최대 12자)" maxlength="12">
+            
+            <div class="ranking-in-modal" id="rankingInModal"></div>
+            
+            <div class="button-group">
+                <button class="secondary" onclick="restartGame()">🔄 재도전</button>
+                <button class="primary" id="saveScoreBtn">💾 저장하고 홈으로</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-// 페이지 로드 시 초기화
-window.addEventListener('load', () => {
-  createBackgroundEffects();
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-  // ✅ 사용자 표시 함수
-  function updateUserDisplay() {
-    const userElement = document.getElementById("user-info");
-    if (userElement) {
-      const name = window.playerName || 'Guest';
-      userElement.textContent = `현재 플레이어: ${name}`;
-    }
-    console.log("updateUserDisplay 실행됨");
-  }
-
-  // ✅ 캐러셀이 없다면 더미 함수라도 정의
-  function updateCarousel() {
-    console.log("updateCarousel 실행됨 (임시)");
-    // 실제로 이미지나 카드 전환이 필요하다면 여기에 구현
-  }
-
-  // ✅ BGM 관련 더미 변수/함수 정의
-  let bgm; // 오디오 객체
-  function playBGM() {
-    if (!bgm) {
-      bgm = new Audio('bgm.mp3'); // 🎵 실제 경로로 교체 필요
-      bgm.loop = true;
-    }
-    bgm.play().catch(err => console.warn('BGM 재생 실패:', err));
-  }
-
-  const savedName = localStorage.getItem('playerName');
-  if (savedName) {
-    window.playerName = savedName;
-    updateUserDisplay();
-  } else {
-    setTimeout(() => showNameModal(false), 500);
-  }
-
-  updateCarousel();
-  playBGM(); // ✅ 필요하다면 자동 재생
-});
-
-
-// postMessage 리스너 추가
-window.addEventListener('message', (e) => {
-  if (e.data === 'goHome') {
-    resetIframe();
-    playBGM(false);
-  }
-});
-
-// visibilitychange: pause/resume (reset 없이)
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    playBGM(false);  // resume only, no reset
-  } else {
-    bgm.pause();  // 배터리 절약
-  }
-});
-    const firebaseConfig = {
-        apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
-        authDomain: "gukhyeon-ce3ba.firebaseapp.com",
-        databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
-        projectId: "gukhyeon-ce3ba",
-        storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
-        messagingSenderId: "751956972723",
-        appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
-        measurementId: "G-JBBLJNDGY1"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let playerName = localStorage.getItem('playerName') || 'Guest';
-    let scoreSaved = false;
-
-    function createBackgroundEffects() {
-        for (let i = 0; i < 30; i++) {
-            const sparkle = document.createElement('div');
-            sparkle.className = 'sparkle';
-            sparkle.style.left = `${Math.random() * 100}%`;
-            sparkle.style.top = `${Math.random() * 100}%`;
-            sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
-            sparkle.style.animationDelay = `${Math.random() * 3}s`;
-            document.body.appendChild(sparkle);
-        }
-    }
-
-    let board = [];
-    let score = 0;
-    let bossKills = 0;
-    let gameOver = false;
-    let gameStarted = false;
-    let playerHP = 500;
-    let playerMaxHP = 500;
-    let playerAtk = 0;
-    let playerLevel = 1;
-    let previousPlayerLevel = 1;
-    let bossLevel = 1;
-    let bossHP = 500;
-    let bossMaxHP = 500;
-    let bossAtk = 10;
-    let bossName = "슬라임 킹";
-    let bossEmoji = "👹";
-    let combatInterval = null;
-
-    const bossData = [
-        { name: "슬라임 킹", emoji: "👹", hp: 300, atk: 10 },
-        { name: "고블린 전사", emoji: "👺", hp: 600, atk: 20 },
-        { name: "오크 대장", emoji: "🧟", hp: 1000, atk: 35 },
-        { name: "다크 나이트", emoji: "⚔️", hp: 1500, atk: 50 },
-        { name: "드래곤 로드", emoji: "🐉", hp: 2500, atk: 75 },
-        { name: "리치 킹", emoji: "💀", hp: 4000, atk: 100 },
-        { name: "악마 군주", emoji: "😈", hp: 6000, atk: 150 },
-        { name: "고대 드래곤", emoji: "🔥", hp: 9000, atk: 200 },
-        { name: "파괴의 신", emoji: "👿", hp: 13000, atk: 300 },
-        { name: "절대자", emoji: "💫", hp: 20000, atk: 500 }
-    ];
-
-    function initGame() {
-        board = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
-        score = 0;
-        bossKills = 0;
-        gameOver = false;
-        gameStarted = false;
-        playerHP = 500;
-        playerMaxHP = 500;
-        playerLevel = 1;
-        previousPlayerLevel = 1;
-        bossLevel = 1;
-        spawnBoss(1);
-        addNewTile();
-        addNewTile();
-        updateBoard();
-        updateScore();
-        updateBattle();
-        if (combatInterval) clearInterval(combatInterval);
-    }
-
-    function startGame() {
-        document.getElementById('intro').style.display = 'none';
-        document.getElementById('gameContainer').style.display = 'block';
-        gameStarted = true;
-        combatInterval = setInterval(combat, 2000);
-    }
-
-    function spawnBoss(level) {
-        const bossIndex = Math.min(level - 1, bossData.length - 1);
-        const boss = bossData[bossIndex];
-        bossLevel = level;
-        bossName = boss.name;
-        bossEmoji = boss.emoji;
-        bossMaxHP = boss.hp;
-        bossHP = boss.hp;
-        bossAtk = boss.atk;
-        document.getElementById('boss-level').textContent = `BOSS LV.${level}`;
-        document.getElementById('boss-name').textContent = bossName;
-        document.getElementById('boss-sprite').textContent = bossEmoji;
-        updateBattle();
-    }
-
-    function combat() {
-        if (gameOver || !gameStarted) return;
-        playerAtk = Math.floor(score / 2) + 20;
-        playerLevel = Math.floor(playerAtk / 50) + 1;
-        if (score === 0) {
-            setTimeout(() => {
-                const bossSprite = document.getElementById('boss-sprite');
-                bossSprite.classList.add('attacking');
-                setTimeout(() => bossSprite.classList.remove('attacking'), 300);
-                const playerSprite = document.getElementById('player-sprite');
-                playerHP -= bossAtk;
-                showDamage(playerSprite, bossAtk);
-                
-                if ('vibrate' in navigator) {
-                    navigator.vibrate(100);
-                }
-                
-                if (playerHP <= 0) {
-                    playerHP = 0;
-                    endGame();
-                }
-                updateBattle();
-            }, 1000);
-            return;
-        }
-        const playerSprite = document.getElementById('player-sprite');
-        const bossSprite = document.getElementById('boss-sprite');
-        playerSprite.classList.add('attacking');
-        setTimeout(() => playerSprite.classList.remove('attacking'), 300);
-        bossHP -= playerAtk;
-        showDamage(bossSprite, playerAtk);
-        
-        if ('vibrate' in navigator) {
-            navigator.vibrate(30);
-        }
-        
-        if (bossHP <= 0) {
-            bossHP = 0;
-            bossKills++;
-            
-            if ('vibrate' in navigator) {
-                navigator.vibrate([100, 50, 100]);
-            }
-            
-            setTimeout(() => {
-                spawnBoss(bossLevel + 1);
-            }, 500);
-        } else {
-            setTimeout(() => {
-                bossSprite.classList.add('attacking');
-                setTimeout(() => bossSprite.classList.remove('attacking'), 300);
-                playerHP -= bossAtk;
-                showDamage(playerSprite, bossAtk);
-                
-                if ('vibrate' in navigator) {
-                    navigator.vibrate(100);
-                }
-                
-                if (playerHP <= 0) {
-                    playerHP = 0;
-                    endGame();
-                }
-                updateBattle();
-            }, 1000);
-            return;
-        }
-        updateBattle();
-    }
-
-    function showDamage(element, damage) {
-        const rect = element.getBoundingClientRect();
-        const damageText = document.createElement('div');
-        damageText.className = 'damage-text';
-        damageText.textContent = `-${damage}`;
-        damageText.style.left = rect.left + rect.width / 2 + 'px';
-        damageText.style.top = rect.top + 'px';
-        document.body.appendChild(damageText);
-        setTimeout(() => damageText.remove(), 1000);
-    }
-
-    function updateBattle() {
-        const playerHPPercent = (playerHP / playerMaxHP) * 100;
-        const bossHPPercent = (bossHP / bossMaxHP) * 100;
-        playerAtk = score === 0 ? 0 : Math.floor(score / 2) + 20;
-        playerLevel = Math.floor(playerAtk / 50) + 1;
-        if (playerLevel > previousPlayerLevel) {
-            const levelDiff = playerLevel - previousPlayerLevel;
-            playerHP = Math.min(playerHP + (levelDiff * 5), playerMaxHP);
-            previousPlayerLevel = playerLevel;
-        }
-        document.getElementById('player-level').textContent = `LV.${playerLevel}`;
-        document.getElementById('player-hp-bar').style.width = playerHPPercent + '%';
-        document.getElementById('player-hp-text').textContent = `${playerHP}/${playerMaxHP}`;
-        document.getElementById('player-atk').textContent = playerAtk;
-        document.getElementById('boss-hp-bar').style.width = bossHPPercent + '%';
-        document.getElementById('boss-hp-text').textContent = `${bossHP}/${bossMaxHP}`;
-        document.getElementById('boss-atk').textContent = bossAtk;
-        document.getElementById('boss-kills').textContent = bossKills;
-    }
-
-    async function endGame() {
-        gameOver = true;
-        if (combatInterval) clearInterval(combatInterval);
-        
-        if ('vibrate' in navigator) {
-            navigator.vibrate([200, 50, 200, 100, 200]);
-        }
-        
-        await saveHighScore(playerName, score);
-        const rankings = await loadHighScores();
-        showGameOverModal(`게임 오버!\n최종 점수: ${score}점\n처치한 보스: ${bossKills}마리`, rankings);
-        scoreSaved = true;
-    }
-
-    async function loadHighScores() {
-        try {
-            const scoresRef = ref(db, 'scores/game3');
-            const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
-            const snapshot = await get(topScoresQuery);
-            const rankings = [];
-            snapshot.forEach((child) => {
-                rankings.unshift(child.val());
-            });
-            return rankings;
-        } catch (error) {
-            console.error('Error loading rankings:', error);
-            return [];
-        }
-    }
-
-    async function saveHighScore(name, scoreValue) {
-        try {
-            const scoreData = {
-                name: (name || 'Player').trim().slice(0, 12) || 'Player',
-                score: Number(scoreValue) || 0,
-                timestamp: Date.now()
-            };
-            await push(ref(db, 'scores/game3'), scoreData);
-            localStorage.setItem('playerName', scoreData.name);
-            playerName = scoreData.name;
-            return await loadHighScores();
-        } catch (error) {
-            console.error('Score save error:', error);
-            return [];
-        }
-    }
-
-    function showGameOverModal(message, rankings) {
-        const root = document.getElementById('modalRoot');
-        root.innerHTML = '';
-        const backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop';
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `<h2>🎮 게임 오버</h2><p style="white-space: pre-line;">${message}</p>`;
-        
-        const rankingDiv = document.createElement('div');
-        rankingDiv.className = 'ranking-in-modal';
-        rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
-        
-        if (rankings.length === 0) {
-            rankingDiv.innerHTML += '<p style="text-align: center; color: #94a3b8;">랭킹 데이터 없음</p>';
-        } else {
-            const medals = ['🥇', '🥈', '🥉'];
-            rankings.forEach((entry, index) => {
-                const medal = index < 3 ? medals[index] : '';
-                const rankText = medal ? `${medal} ${index + 1}위` : `${index + 1}위`;
-                rankingDiv.innerHTML += `<p><span class="rank">${rankText}</span> <span class="score">${entry.name || '익명'} - ${entry.score}점</span></p>`;
-            });
-        }
-        modal.appendChild(rankingDiv);
-        
-        const actions = document.createElement('div');
-        actions.className = 'modal-actions';
-        
-        const retry = document.createElement('button');
-        retry.className = 'secondary';
-        retry.textContent = '🔄 재도전';
-        retry.onclick = () => {
-            root.innerHTML = '';
-            restartGame();
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+            authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+            databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+            projectId: "gukhyeon-ce3ba",
+            storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+            messagingSenderId: "751956972723",
+            appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+            measurementId: "G-JBBLJNDGY1"
         };
-        
-        const continueBtn = document.createElement('button');
-        continueBtn.className = 'secondary';
-        continueBtn.textContent = '📺 광고 보고 이어하기';
-        continueBtn.onclick = () => {
-            root.innerHTML = '';
-            showAdModal();
-        };
-        
-        const home = document.createElement('button');
-        home.className = 'primary';
-        home.textContent = '🏠 홈으로';
-        home.onclick = () => {
-            goHome();
-        };
-        
-        actions.appendChild(retry);
-        actions.appendChild(continueBtn);
-        actions.appendChild(home);
-        modal.appendChild(actions);
-        backdrop.appendChild(modal);
-        root.appendChild(backdrop);
-        
-        setTimeout(() => backdrop.classList.add('show'), 10);
-    }
 
-    function showAdModal() {
-        const root = document.getElementById('modalRoot');
-        root.innerHTML = '';
-        const backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop';
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `<h2>📺 광고 문의</h2><p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>`;
-        
-        const actions = document.createElement('div');
-        actions.className = 'modal-actions';
-        
-        const close = document.createElement('button');
-        close.className = 'primary';
-        close.textContent = '❌ 닫기';
-        close.onclick = () => {
-            root.innerHTML = '';
-            restartGame();
-        };
-        
-        actions.appendChild(close);
-        modal.appendChild(actions);
-        backdrop.appendChild(modal);
-        root.appendChild(backdrop);
-        
-        setTimeout(() => backdrop.classList.add('show'), 10);
-        
-        if ('vibrate' in navigator) {
-            navigator.vibrate(50);
-        }
-    }
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    window.restartGame = function() {
-        const root = document.getElementById('modalRoot');
-        root.innerHTML = '';
-        initGame();
-        startGame();
-    }
+        let playerName = localStorage.getItem('playerName') || 'Guest';
+        let scoreSaved = false;
 
-    function addNewTile() {
-        const emptyCells = [];
-        for (let i = 0; i < 4; i++) {
-            for (let j = 0; j < 4; j++) {
-                if (board[i][j] === 0) {
-                    emptyCells.push({row: i, col: j});
-                }
+        function createBackgroundEffects() {
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.top = `${Math.random() * 100}%`;
+                sparkle.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                sparkle.style.animationDelay = `${Math.random() * 3}s`;
+                document.body.appendChild(sparkle);
             }
         }
-        if (emptyCells.length > 0) {
-            const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            board[randomCell.row][randomCell.col] = Math.random() < 0.9 ? 2 : 4;
-        }
-    }
 
-    function updateBoard() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        for (let i = 0; i < 4; i++) {
-            for (let j = 0; j < 4; j++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                const value = board[i][j];
-                if (value !== 0) {
-                    cell.textContent = value;
-                    cell.setAttribute('data-value', value);
-                }
-                grid.appendChild(cell);
-            }
-        }
-    }
+        let board = [];
+        let score = 0;
+        let bossKills = 0;
+        let gameOver = false;
+        let gameStarted = false;
+        let playerHP = 500;
+        let playerMaxHP = 500;
+        let playerAtk = 0;
+        let playerLevel = 1;
+        let previousPlayerLevel = 1;
+        let bossLevel = 1;
+        let bossHP = 500;
+        let bossMaxHP = 500;
+        let bossAtk = 10;
+        let bossName = "슬라임 킹";
+        let bossEmoji = "👹";
+        let combatInterval = null;
 
-    function updateScore() {
-        document.getElementById('score').textContent = score;
-    }
+        const bossData = [
+            { name: "슬라임 킹", emoji: "👹", hp: 300, atk: 10 },
+            { name: "고블린 전사", emoji: "👺", hp: 600, atk: 20 },
+            { name: "오크 대장", emoji: "🧟", hp: 1000, atk: 35 },
+            { name: "다크 나이트", emoji: "⚔️", hp: 1500, atk: 50 },
+            { name: "드래곤 로드", emoji: "🐉", hp: 2500, atk: 75 },
+            { name: "리치 킹", emoji: "💀", hp: 4000, atk: 100 },
+            { name: "악마 군주", emoji: "😈", hp: 6000, atk: 150 },
+            { name: "고대 드래곤", emoji: "🔥", hp: 9000, atk: 200 },
+            { name: "파괴의 신", emoji: "👿", hp: 13000, atk: 300 },
+            { name: "절대자", emoji: "💫", hp: 20000, atk: 500 }
+        ];
 
-    function move(direction) {
-        if (gameOver) return;
-        if (!gameStarted) startGame();
-        let moved = false;
-        if (direction === 'left') moved = moveLeft();
-        else if (direction === 'right') moved = moveRight();
-        else if (direction === 'up') moved = moveUp();
-        else if (direction === 'down') moved = moveDown();
-        if (moved) {
+        function initGame() {
+            board = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+            score = 0;
+            bossKills = 0;
+            gameOver = false;
+            gameStarted = false;
+            playerHP = 500;
+            playerMaxHP = 500;
+            playerLevel = 1;
+            previousPlayerLevel = 1;
+            bossLevel = 1;
+            spawnBoss(1);
+            addNewTile();
             addNewTile();
             updateBoard();
             updateScore();
+            updateBattle();
+            if (combatInterval) clearInterval(combatInterval);
+        }
+
+        function startGame() {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            gameStarted = true;
+            combatInterval = setInterval(combat, 2000);
+        }
+
+        function spawnBoss(level) {
+            const bossIndex = Math.min(level - 1, bossData.length - 1);
+            const boss = bossData[bossIndex];
+            bossLevel = level;
+            bossName = boss.name;
+            bossEmoji = boss.emoji;
+            bossMaxHP = boss.hp;
+            bossHP = boss.hp;
+            bossAtk = boss.atk;
+            document.getElementById('boss-level').textContent = `BOSS LV.${level}`;
+            document.getElementById('boss-name').textContent = bossName;
+            document.getElementById('boss-sprite').textContent = bossEmoji;
+            updateBattle();
+        }
+
+        function combat() {
+            if (gameOver || !gameStarted) return;
+            playerAtk = Math.floor(score / 2) + 20;
+            playerLevel = Math.floor(playerAtk / 50) + 1;
+            if (score === 0) {
+                setTimeout(() => {
+                    const bossSprite = document.getElementById('boss-sprite');
+                    bossSprite.classList.add('attacking');
+                    setTimeout(() => bossSprite.classList.remove('attacking'), 300);
+                    const playerSprite = document.getElementById('player-sprite');
+                    playerHP -= bossAtk;
+                    showDamage(playerSprite, bossAtk);
+                    
+                    // 플레이어가 공격받을 때 진동
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(100);
+                    }
+                    
+                    if (playerHP <= 0) {
+                        playerHP = 0;
+                        endGame();
+                    }
+                    updateBattle();
+                }, 1000);
+                return;
+            }
+            const playerSprite = document.getElementById('player-sprite');
+            const bossSprite = document.getElementById('boss-sprite');
+            playerSprite.classList.add('attacking');
+            setTimeout(() => playerSprite.classList.remove('attacking'), 300);
+            bossHP -= playerAtk;
+            showDamage(bossSprite, playerAtk);
+            
+            // 플레이어 공격 시 약한 진동
+            if ('vibrate' in navigator) {
+                navigator.vibrate(30);
+            }
+            
+            if (bossHP <= 0) {
+                bossHP = 0;
+                bossKills++;
+                
+                // 보스 처치 시 강한 진동
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                
+                setTimeout(() => {
+                    spawnBoss(bossLevel + 1);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    bossSprite.classList.add('attacking');
+                    setTimeout(() => bossSprite.classList.remove('attacking'), 300);
+                    playerHP -= bossAtk;
+                    showDamage(playerSprite, bossAtk);
+                    
+                    // 플레이어가 공격받을 때 진동
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(100);
+                    }
+                    
+                    if (playerHP <= 0) {
+                        playerHP = 0;
+                        endGame();
+                    }
+                    updateBattle();
+                }, 1000);
+                return;
+            }
+            updateBattle();
+        }
+
+        function showDamage(element, damage) {
+            const rect = element.getBoundingClientRect();
+            const damageText = document.createElement('div');
+            damageText.className = 'damage-text';
+            damageText.textContent = `-${damage}`;
+            damageText.style.left = rect.left + rect.width / 2 + 'px';
+            damageText.style.top = rect.top + 'px';
+            document.body.appendChild(damageText);
+            setTimeout(() => damageText.remove(), 1000);
+        }
+
+        function updateBattle() {
+            const playerHPPercent = (playerHP / playerMaxHP) * 100;
+            const bossHPPercent = (bossHP / bossMaxHP) * 100;
             playerAtk = score === 0 ? 0 : Math.floor(score / 2) + 20;
             playerLevel = Math.floor(playerAtk / 50) + 1;
-            updateBattle();
-            if (checkGameOver()) endGame();
+            if (playerLevel > previousPlayerLevel) {
+                const levelDiff = playerLevel - previousPlayerLevel;
+                playerHP = Math.min(playerHP + (levelDiff * 5), playerMaxHP);
+                previousPlayerLevel = playerLevel;
+            }
+            document.getElementById('player-level').textContent = `LV.${playerLevel}`;
+            document.getElementById('player-hp-bar').style.width = playerHPPercent + '%';
+            document.getElementById('player-hp-text').textContent = `${playerHP}/${playerMaxHP}`;
+            document.getElementById('player-atk').textContent = playerAtk;
+            document.getElementById('boss-hp-bar').style.width = bossHPPercent + '%';
+            document.getElementById('boss-hp-text').textContent = `${bossHP}/${bossMaxHP}`;
+            document.getElementById('boss-atk').textContent = bossAtk;
+            document.getElementById('boss-kills').textContent = bossKills;
         }
-    }
 
-    function moveLeft() {
-        let moved = false;
-        let merged = false;
-        for (let i = 0; i < 4; i++) {
-            let row = board[i].filter(val => val !== 0);
-            for (let j = 0; j < row.length - 1; j++) {
-                if (row[j] === row[j + 1]) {
-                    row[j] *= 2;
-                    score += row[j];
-                    row.splice(j + 1, 1);
-                    merged = true;
+        async function endGame() {
+            gameOver = true;
+            if (combatInterval) clearInterval(combatInterval);
+            
+            // 게임오버 시 진동
+            if ('vibrate' in navigator) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+            }
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-boss-kills').textContent = bossKills;
+            document.getElementById('playerNameInput').value = localStorage.getItem('playerName') || '';
+            
+            const rankings = await loadHighScores();
+            const rankingDiv = document.getElementById('rankingInModal');
+            const medals = ['🥇', '🥈', '🥉'];
+            rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+            if (rankings.length === 0) {
+                rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
+            } else {
+                rankings.slice(0, 5).forEach((entry, index) => {
+                    const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                    rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+                });
+            }
+            
+            document.getElementById('gameOverModal').classList.add('show');
+            scoreSaved = false;
+        }
+
+        async function loadHighScores() {
+            try {
+                console.log('[v16] Loading high scores from Firebase...');
+                const scoresRef = ref(db, 'scores/game3');
+                const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+                const snapshot = await get(topScoresQuery);
+                const rankings = [];
+                snapshot.forEach((child) => {
+                    rankings.unshift(child.val());
+                });
+                console.log('[v16] Loaded rankings:', rankings);
+                return rankings;
+            } catch (error) {
+                console.error('[v16] Error loading rankings:', error);
+                return [];
+            }
+        }
+
+        async function saveHighScore(name, scoreValue) {
+            try {
+                console.log('[v16] saveHighScore called with:', { name, scoreValue });
+                const scoreData = {
+                    name: (name || 'Player').trim().slice(0, 12) || 'Player',
+                    score: Number(scoreValue) || 0,
+                    timestamp: Date.now()
+                };
+                console.log('[v16] Saving to Firebase (scores/game3):', scoreData);
+                const result = await push(ref(db, 'scores/game3'), scoreData);
+                console.log('[v16] Successfully saved to Firebase, key:', result.key);
+                localStorage.setItem('playerName', scoreData.name);
+                playerName = scoreData.name;
+                return await loadHighScores();
+            } catch (error) {
+                console.error('[v16] Score save error:', error);
+                console.error('[v16] Error details:', error.message, error.code);
+                alert(`저장 실패: ${error.message}`);
+                return [];
+            }
+        }
+
+        function fetchRankings() {
+            return loadHighScores();
+        }
+
+        function showRankingsInModal(rankings) {
+            const rankingDiv = document.getElementById('rankingInModal');
+            const medals = ['🥇', '🥈', '🥉'];
+            rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+            
+            if (rankings.length === 0) {
+                rankingDiv.innerHTML += '<p style="text-align: center; color: #94a3b8;">랭킹 데이터 없음</p>';
+            } else {
+                rankings.forEach((entry, index) => {
+                    const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                    rankingDiv.innerHTML += `<p><span class="rank">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+                });
+            }
+        }
+
+        window.restartGame = function() {
+            document.getElementById('gameOverModal').classList.remove('show');
+            initGame();
+            startGame();
+        }
+
+        function addNewTile() {
+            const emptyCells = [];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (board[i][j] === 0) {
+                        emptyCells.push({row: i, col: j});
+                    }
                 }
             }
-            while (row.length < 4) row.push(0);
-            if (JSON.stringify(board[i]) !== JSON.stringify(row)) moved = true;
-            board[i] = row;
-        }
-        
-        if ('vibrate' in navigator) {
-            if (merged) {
-                navigator.vibrate(50);
-            } else if (moved) {
-                navigator.vibrate(20);
+            if (emptyCells.length > 0) {
+                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                board[randomCell.row][randomCell.col] = Math.random() < 0.9 ? 2 : 4;
             }
         }
-        
-        return moved;
-    }
 
-    function moveRight() {
-        let moved = false;
-        let merged = false;
-        for (let i = 0; i < 4; i++) {
-            let row = board[i].filter(val => val !== 0);
-            for (let j = row.length - 1; j > 0; j--) {
-                if (row[j] === row[j - 1]) {
-                    row[j] *= 2;
-                    score += row[j];
-                    row.splice(j - 1, 1);
-                    j--;
-                    merged = true;
+        function updateBoard() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    const value = board[i][j];
+                    if (value !== 0) {
+                        cell.textContent = value;
+                        cell.setAttribute('data-value', value);
+                    }
+                    grid.appendChild(cell);
                 }
             }
-            while (row.length < 4) row.unshift(0);
-            if (JSON.stringify(board[i]) !== JSON.stringify(row)) moved = true;
-            board[i] = row;
         }
-        
-        if ('vibrate' in navigator) {
-            if (merged) {
-                navigator.vibrate(50);
-            } else if (moved) {
-                navigator.vibrate(20);
-            }
-        }
-        
-        return moved;
-    }
 
-    function moveUp() {
-        let moved = false;
-        let merged = false;
-        for (let j = 0; j < 4; j++) {
-            let col = [];
-            for (let i = 0; i < 4; i++) {
-                if (board[i][j] !== 0) col.push(board[i][j]);
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function move(direction) {
+            if (gameOver) return;
+            if (!gameStarted) startGame();
+            let moved = false;
+            if (direction === 'left') moved = moveLeft();
+            else if (direction === 'right') moved = moveRight();
+            else if (direction === 'up') moved = moveUp();
+            else if (direction === 'down') moved = moveDown();
+            if (moved) {
+                addNewTile();
+                updateBoard();
+                updateScore();
+                playerAtk = score === 0 ? 0 : Math.floor(score / 2) + 20;
+                playerLevel = Math.floor(playerAtk / 50) + 1;
+                updateBattle();
+                if (checkGameOver()) endGame();
             }
-            for (let i = 0; i < col.length - 1; i++) {
-                if (col[i] === col[i + 1]) {
-                    col[i] *= 2;
-                    score += col[i];
-                    col.splice(i + 1, 1);
-                    merged = true;
+        }
+
+        function moveLeft() {
+            let moved = false;
+            let merged = false;
+            for (let i = 0; i < 4; i++) {
+                let row = board[i].filter(val => val !== 0);
+                for (let j = 0; j < row.length - 1; j++) {
+                    if (row[j] === row[j + 1]) {
+                        row[j] *= 2;
+                        score += row[j];
+                        row.splice(j + 1, 1);
+                        merged = true;
+                    }
+                }
+                while (row.length < 4) row.push(0);
+                if (JSON.stringify(board[i]) !== JSON.stringify(row)) moved = true;
+                board[i] = row;
+            }
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
                 }
             }
-            while (col.length < 4) col.push(0);
-            for (let i = 0; i < 4; i++) {
-                if (board[i][j] !== col[i]) moved = true;
-                board[i][j] = col[i];
-            }
+            
+            return moved;
         }
-        
-        if ('vibrate' in navigator) {
-            if (merged) {
-                navigator.vibrate(50);
-            } else if (moved) {
-                navigator.vibrate(20);
-            }
-        }
-        
-        return moved;
-    }
 
-    function moveDown() {
-        let moved = false;
-        let merged = false;
-        for (let j = 0; j < 4; j++) {
-            let col = [];
+        function moveRight() {
+            let moved = false;
+            let merged = false;
             for (let i = 0; i < 4; i++) {
-                if (board[i][j] !== 0) col.push(board[i][j]);
+                let row = board[i].filter(val => val !== 0);
+                for (let j = row.length - 1; j > 0; j--) {
+                    if (row[j] === row[j - 1]) {
+                        row[j] *= 2;
+                        score += row[j];
+                        row.splice(j - 1, 1);
+                        j--;
+                        merged = true;
+                    }
+                }
+                while (row.length < 4) row.unshift(0);
+                if (JSON.stringify(board[i]) !== JSON.stringify(row)) moved = true;
+                board[i] = row;
             }
-            for (let i = col.length - 1; i > 0; i--) {
-                if (col[i] === col[i - 1]) {
-                    col[i] *= 2;
-                    score += col[i];
-                    col.splice(i - 1, 1);
-                    i--;
-                    merged = true;
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
                 }
             }
-            while (col.length < 4) col.unshift(0);
-            for (let i = 0; i < 4; i++) {
-                if (board[i][j] !== col[i]) moved = true;
-                board[i][j] = col[i];
-            }
+            
+            return moved;
         }
-        
-        if ('vibrate' in navigator) {
-            if (merged) {
-                navigator.vibrate(50);
-            } else if (moved) {
-                navigator.vibrate(20);
-            }
-        }
-        
-        return moved;
-    }
 
-    function checkGameOver() {
-        for (let i = 0; i < 4; i++) {
+        function moveUp() {
+            let moved = false;
+            let merged = false;
             for (let j = 0; j < 4; j++) {
-                if (board[i][j] === 0) return false;
-                if (j < 3 && board[i][j] === board[i][j + 1]) return false;
-                if (i < 3 && board[i][j] === board[i + 1][j]) return false;
+                let col = [];
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== 0) col.push(board[i][j]);
+                }
+                for (let i = 0; i < col.length - 1; i++) {
+                    if (col[i] === col[i + 1]) {
+                        col[i] *= 2;
+                        score += col[i];
+                        col.splice(i + 1, 1);
+                        merged = true;
+                    }
+                }
+                while (col.length < 4) col.push(0);
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== col[i]) moved = true;
+                    board[i][j] = col[i];
+                }
             }
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
+                }
+            }
+            
+            return moved;
         }
-        return true;
-    }
 
-    window.newGame = function() {
-        const root = document.getElementById('modalRoot');
-        root.innerHTML = '';
-        initGame();
-        startGame();
-    }
+        function moveDown() {
+            let moved = false;
+            let merged = false;
+            for (let j = 0; j < 4; j++) {
+                let col = [];
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== 0) col.push(board[i][j]);
+                }
+                for (let i = col.length - 1; i > 0; i--) {
+                    if (col[i] === col[i - 1]) {
+                        col[i] *= 2;
+                        score += col[i];
+                        col.splice(i - 1, 1);
+                        i--;
+                        merged = true;
+                    }
+                }
+                while (col.length < 4) col.unshift(0);
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== col[i]) moved = true;
+                    board[i][j] = col[i];
+                }
+            }
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
+                }
+            }
+            
+            return moved;
+        }
 
-    window.goHome = function() {
-    if (parent && parent !== window) {
-        parent.postMessage('goHome', '*');
-    } else {
-        window.location.href = 'index.html';
-    }
-    if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-    }
+        function checkGameOver() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (board[i][j] === 0) return false;
+                    if (j < 3 && board[i][j] === board[i][j + 1]) return false;
+                    if (i < 3 && board[i][j] === board[i + 1][j]) return false;
+                }
+            }
+            return true;
+        }
+
+        window.newGame = function() {
+            document.getElementById('gameOverModal').classList.remove('show');
+            initGame();
+            startGame();
+        }
+
+        window.goHome = function() {
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+        
+        // iframe 내부에서 실행 중인지 확인
+        if (window.parent && window.parent !== window) {
+            // iframe 안에서 실행 중이면 부모에게 메시지 전송
+            window.parent.postMessage('goHome', '*');
+        } else {
+            // 직접 실행 중이면 바로 이동
+            window.location.href = 'index.html';
+        }
 }
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            move('left');
-        } else if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            move('right');
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            move('up');
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            move('down');
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                move('left');
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                move('right');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                move('up');
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                move('down');
+            }
+        });
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (gameStarted && !gameOver) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const minSwipeDistance = 30;
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) return;
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX > 0) move('right');
+                else move('left');
+            } else {
+                if (deltaY > 0) move('down');
+                else move('up');
+            }
         }
-    });
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
+        document.addEventListener('DOMContentLoaded', () => {
+            createBackgroundEffects();
+            playerName = localStorage.getItem('playerName') || 'Guest';
+            const nameDisplay = document.createElement('p');
+            nameDisplay.style.color = '#0284c7';
+            nameDisplay.style.fontWeight = '700';
+            nameDisplay.textContent = `👤 플레이어: ${playerName}`;
+            const intro = document.getElementById('intro');
+            const startBtn = document.getElementById('startGameBtn');
+            if (intro && startBtn && !intro.querySelector('p')) {
+                intro.insertBefore(nameDisplay, startBtn);
+            }
+            initGame();
+        });
 
-    document.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-
-    document.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        handleSwipe();
-    }, { passive: true });
-
-    document.addEventListener('touchmove', (e) => {
-        if (gameStarted && !gameOver) {
-            e.preventDefault();
-        }
-    }, { passive: false });
-
-    function handleSwipe() {
-        const deltaX = touchEndX - touchStartX;
-        const deltaY = touchEndY - touchStartY;
-        const minSwipeDistance = 30;
-        if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) return;
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            if (deltaX > 0) move('right');
-            else move('left');
-        } else {
-            if (deltaY > 0) move('down');
-            else move('up');
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        createBackgroundEffects();
-        playerName = localStorage.getItem('playerName') || 'Guest';
-        const nameDisplay = document.createElement('p');
-        nameDisplay.style.color = '#0284c7';
-        nameDisplay.style.fontWeight = '700';
-        nameDisplay.textContent = `👤 플레이어: ${playerName}`;
-        document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
-        initGame();
-    });
-
-    document.getElementById('startGameBtn').addEventListener('click', startGame);
-    document.getElementById('goHomeBtn').addEventListener('click', goHome);
-    document.getElementById('goHomeBtn2').addEventListener('click', goHome);
-</script>
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        document.getElementById('goHomeBtn').addEventListener('click', goHome);
+        document.getElementById('goHomeBtn2').addEventListener('click', goHome);
+        
+        document.getElementById('saveScoreBtn').addEventListener('click', async () => {
+            if (scoreSaved) {
+                goHome();
+                return;
+            }
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) {
+                alert('이름을 입력해주세요 😊');
+                return;
+            }
+            console.log('[v16] Button clicked - Saving score:', { name, score });
+            
+            try {
+                const result = await saveHighScore(name, score);
+                console.log('[v16] Save completed, rankings:', result);
+                scoreSaved = true;
+                document.getElementById('saveScoreBtn').textContent = '✅ 저장 완료';
+                setTimeout(() => {
+                    console.log('[v16] Redirecting to home...');
+                    goHome();
+                }, 1000);
+            } catch (error) {
+                console.error('[v16] Save failed:', error);
+                alert(`저장 중 오류 발생: ${error.message}`);
+            }
+        });
+        
+        document.getElementById('saveScoreBtn').addEventListener('click', async () => {
+            if (scoreSaved) {
+                goHome();
+                return;
+            }
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) {
+                alert('이름을 입력해주세요 😊');
+                return;
+            }
+            console.log('[v16] Button clicked - Saving score:', { name, score });
+            
+            try {
+                const result = await saveHighScore(name, score);
+                console.log('[v16] Save completed, rankings:', result);
+                scoreSaved = true;
+                document.getElementById('saveScoreBtn').textContent = '✅ 저장 완료';
+                setTimeout(() => {
+                    console.log('[v16] Redirecting to home...');
+                    goHome();
+                }, 1000);
+            } catch (error) {
+                console.error('[v16] Save failed:', error);
+                alert(`저장 중 오류 발생: ${error.message}`);
+            }
+        });
+    </script>
 </body>
 </html>
