@@ -300,6 +300,17 @@
             z-index: 3000;
             animation: fadeIn 0.3s ease-out;
         }
+        #gameOverModal {
+            z-index: 3000; /* 명시적 z-index */
+        }
+        #statusModal {
+            cursor: pointer;
+            z-index: 3100; /* gameOverModal보다 높음 */
+        }
+        #statusModal.show {
+            display: flex;
+        }
+
         .modal-backdrop.show {
             display: flex;
         }
@@ -431,13 +442,7 @@
             flex-direction: column;
             gap: 5px;
         }
-        /* 추가: 최종 상태 모달 스타일 */
-        #statusModal {
-            cursor: pointer;
-        }
-        #statusModal.show {
-            display: flex;
-        }
+
         /* 추가: 탭 스타일 */
         .tab-group {
             display: flex;
@@ -656,6 +661,7 @@
                 <p>💫 멀티샷: <span id="finalMultiShot">0</span>발</p>
                 <p>🛡️ 보호막: <span id="finalShield">0</span></p>
                 <p>🚀 이알 속도: <span id="finalBulletSpeed">0</span>x</p>
+                <p>🌊 최종 웨이브: <span id="finalWave">0</span></p>
             </div>
             <div id="highScoreTab" class="tab-content" style="display: none;">
                 <h3>🏆 내 하이스코어 (최대 10개)</h3>
@@ -785,7 +791,7 @@
             }
             scores.forEach((score, index) => {
                 const p = document.createElement('p');
-                p.innerHTML = `<span>${index + 1}위</span> <span>${score.score}점 (전체 ${score.globalRank}위)</span>`;
+                p.innerHTML = `<span>${index + 1}위</span> <span>${score.score}점 (전체 ${score.globalRank}위, ${new Date(score.timestamp).toLocaleString('ko-KR')})</span>`;
                 highScoreDiv.appendChild(p);
             });
         }
@@ -1434,6 +1440,7 @@
                 document.getElementById('finalMultiShot').textContent = player.multiShot;
                 document.getElementById('finalShield').textContent = player.shield;
                 document.getElementById('finalBulletSpeed').textContent = player.bulletSpeed.toFixed(1);
+                document.getElementById('finalWave').textContent = gameState.wave;
             }
         }
 
@@ -1568,21 +1575,36 @@
             requestAnimationFrame(loop);
         }
 
-        function goHome() {
-            const parentDoc = window.parent.document;
-            const frame = parentDoc.getElementById('game-frame');
-            if (frame) {
-                frame.src = 'about:blank';
-                frame.style.display = 'none';
-            }
-            parentDoc.querySelector('h1').style.display = 'block';
-            parentDoc.getElementById('carousel').style.display = 'block';
-            parentDoc.getElementById('user-info').style.display = 'flex';
-            if (window.parent.playBGM) {
-                window.parent.playBGM(false);
-            }
-            if ('vibrate' in navigator) {
-                navigator.vibrate(50);
+        function goHome(event) {
+            if (event) event.stopPropagation(); // 이벤트 전파 차단
+            try {
+                const parentDoc = window.parent && window.parent.document;
+                if (parentDoc) {
+                    const frame = parentDoc.getElementById('game-frame');
+                    if (frame) {
+                        frame.src = 'about:blank';
+                        frame.style.display = 'none';
+                    }
+                    const h1 = parentDoc.querySelector('h1');
+                    if (h1) h1.style.display = 'block';
+                    const carousel = parentDoc.getElementById('carousel');
+                    if (carousel) carousel.style.display = 'block';
+                    const userInfo = parentDoc.getElementById('user-info');
+                    if (userInfo) userInfo.style.display = 'flex';
+                    if (window.parent.playBGM) {
+                        window.parent.playBGM(false);
+                    }
+                } else {
+                    // iframe 외 환경: 단순히 intro 화면으로 전환
+                    document.getElementById('gameOverModal').classList.remove('show');
+                    document.getElementById('gameContainer').style.display = 'none';
+                    document.getElementById('intro').style.display = 'flex';
+                }
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+            } catch (error) {
+                console.error('Error in goHome:', error);
             }
         }
 
@@ -1603,13 +1625,21 @@
             nameDisplay.style.fontWeight = '700';
             nameDisplay.textContent = `👤 플레이어: ${playerName}`;
             document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+            document.getElementById('goHomeBtn').addEventListener('click', goHome); // 추가
+            document.getElementById('resetGameBtn').addEventListener('click', restartGame);
+            document.getElementById('goHomeBtn2').addEventListener('click', goHome); // 추가
+            document.getElementById('continueAdBtn').addEventListener('click', showAdModal);
             document.getElementById('showStatusBtn').addEventListener('click', showStatusModal);
-            document.getElementById('statusModal').addEventListener('click', hideStatusModal);
+            document.getElementById('statusModal').addEventListener('click', (e) => {
+                if (e.target.closest('.tab-group, .tab-content')) return;
+                hideStatusModal();
+            });
             document.getElementById('statusModal').addEventListener('touchstart', (e) => {
+                if (e.target.closest('.tab-group, .tab-content')) return;
                 e.preventDefault();
                 hideStatusModal();
             }, { passive: false });
-            // 추가: 탭 버튼 이벤트 리스너
             document.getElementById('statusTabBtn').addEventListener('click', (e) => switchTab(e, 'status'));
             document.getElementById('highScoreTabBtn').addEventListener('click', (e) => switchTab(e, 'highScore'));
             document.getElementById('statusTabBtn').addEventListener('touchstart', (e) => {
@@ -1620,6 +1650,9 @@
                 e.stopPropagation();
                 switchTab(e, 'highScore');
             }, { passive: false });
+            document.getElementById('gameOverModal').addEventListener('click', (e) => {
+                if (e.target.closest('.modal, .button-group, button')) return; // 버튼/모달 콘텐츠 클릭 시 무시
+            });
         });
 
     </script>
