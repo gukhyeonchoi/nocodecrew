@@ -205,44 +205,46 @@
 
     /* 3D 도넛 컨테이너 */
     .btn-container {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%) rotateX(25deg);
-      width: clamp(320px, 45vw, 450px);
-      height: clamp(320px, 45vw, 450px);
-      perspective: 1000px;
-      z-index: 10;
-      transform-style: preserve-3d;
-    }
+  position: absolute;
+  left: 50%;
+  top: 35%;
+  transform: translate(-50%, -50%) rotateX(-45deg); /* 회전 방향 반대로 */
+  width: clamp(320px, 45vw, 450px);
+  height: clamp(320px, 45vw, 450px);
+  perspective: 1000px;
+  z-index: 10;
+  transform-style: preserve-3d;
+}
 
     /* 게임 카드 - 높이 증가 */
-    .game-card {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      margin-left: calc(-1 * clamp(60px, 9vw, 90px));
-      margin-top: calc(-1 * clamp(100px, 15vw, 150px));
-      width: clamp(120px, 18vw, 180px);
-      height: clamp(200px, 30vw, 300px);
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      border: 2px solid rgba(147, 197, 253, 0.4);
-      box-shadow: 
-        0 8px 16px rgba(14, 165, 233, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-      padding: 8px;
-      transition: all 0.3s ease;
-      transform-style: preserve-3d;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      will-change: transform, opacity, scale;
-      transform: rotateY(0deg);
-    }
+.game-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: calc(-1 * clamp(60px, 9vw, 90px));
+  margin-top: calc(-1 * clamp(100px, 15vw, 150px));
+  width: clamp(120px, 18vw, 180px);
+  height: clamp(300px, 40vw, 400px);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 2px solid rgba(147, 197, 253, 0.4);
+  box-shadow: 
+    0 8px 16px rgba(14, 165, 233, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  padding: 8px;
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  will-change: transform, opacity, scale;
+  transform: rotateY(0deg);
+  -webkit-font-smoothing: antialiased; /* 전체 카드 폰트 스무딩 */
+  backface-visibility: hidden; /* 카드 뒷면 숨김으로 왜곡 최소화 */
+}
 
     .game-card:hover {
       transform: scale(1.2) translateZ(10px) rotateY(0deg);
@@ -254,12 +256,15 @@
 
     /* 게임 제목 */
     .game-title {
-      font-size: clamp(0.9rem, 2vw, 1.1rem);
-      font-weight: 700;
-      color: #0284c7;
-      margin-bottom: 8px;
-      text-align: center;
-    }
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 700;
+  color: #0284c7;
+  margin-bottom: 8px;
+  text-align: center;
+  -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
+  transform: translateZ(0.01px); /* 3D 왜곡 보정 */
+  backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
+}
 
     /* 게임 번호 배지 */
     .game-number {
@@ -290,23 +295,26 @@
     }
 
     /* 게임 버튼 */
-    .game-btn {
-      padding: 6px 0;
-      font-size: clamp(0.9rem, 2vw, 1.1rem);
-      border-radius: 10px;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      color: #fff;
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 
-        0 4px 8px rgba(56, 189, 248, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    }
+.game-btn {
+  padding: 6px 0;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 8px rgba(56, 189, 248, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
+  transform: translateZ(0.01px); /* 3D 왜곡 보정 */
+  backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
+}
 
     .game-btn:hover {
       transform: translateY(-2px);
@@ -320,34 +328,49 @@
     }
 
     /* 랭킹 리스트 - 가시성 개선 */
-    .ranking-list {
+.ranking-list {
   margin-top: 10px;
-  font-size: clamp(0.5rem, 1.2vw, 0.7rem);
+  font-size: clamp(0.45rem, 1vw, 0.65rem);
   color: #0369a1;
   text-align: left;
   width: 100%;
   padding: 0 8px;
-  line-height: 1.3;
+  line-height: 1.2;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
+  -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
+  transform: translateZ(0.01px); /* 3D 왜곡 보정 */
+  backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
 }
 
-    .ranking-list p {
-      margin: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 8px;
-      background: rgba(147, 197, 253, 0.15);
-      border-radius: 8px;
-      border: 1px solid rgba(147, 197, 253, 0.25);
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+.ranking-list p {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px;
+  background: rgba(147, 197, 253, 0.15);
+  border-radius: 8px;
+  border: 1px solid rgba(147, 197, 253, 0.25);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-list span:nth-child(2) { /* 이름 부분에만 최대 너비 적용 */
+  max-width: 40%; /* 이름이 너무 길면 ...으로 잘림 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-list p.my-rank { /* 내 랭킹 강조 클래스 */
+  background: rgba(167, 243, 208, 0.4);
+  border-color: rgba(34, 197, 94, 0.5);
+  font-weight: 700;
+}
 
     .ranking-list p:hover {
       background: rgba(147, 197, 253, 0.25);
@@ -492,14 +515,14 @@
     /* 반응형 */
     @media (max-width: 600px) {
       .btn-container {
-        max-width: 320px;
-        height: 320px;
-      }
-      .game-card {
-        width: 120px;
-        height: 200px;
-        padding: 6px;
-      }
+    max-width: 320px;
+    height: 320px;
+  }
+  .game-card {
+    width: 120px;
+    height: 350px; /* 모바일에서도 높이 증가 */
+    padding: 6px;
+  }
       .game-number {
         width: 20px;
         height: 20px;
@@ -510,7 +533,7 @@
         font-size: 0.9rem;
       }
       .ranking-list {
-        font-size: 0.75rem;
+        font-size: 0.55rem; /* 모바일에서 폰트 더 줄임 */
         gap: 4px;
       }
       .ranking-list p {
@@ -533,14 +556,14 @@
 
     @media (min-width: 768px) {
       .btn-container {
-        max-width: 450px;
-        height: 450px;
-      }
-      .game-card {
-        width: 180px;
-        height: 300px;
-        padding: 10px;
-      }
+    max-width: 450px;
+    height: 450px;
+  }
+  .game-card {
+    width: 180px;
+    height: 500px; /* 데스크탑 높이 증가 */
+    padding: 10px;
+  }
       .game-number {
         width: 30px;
         height: 30px;
@@ -551,7 +574,7 @@
         font-size: 1.1rem;
       }
       .ranking-list {
-        font-size: 0.95rem;
+        font-size: 0.75rem; /* 데스크탑에서 폰트 약간 줄임 */
         gap: 6px;
       }
       .ranking-list p {
@@ -571,6 +594,49 @@
         font-size: clamp(2rem, 4vw, 2.5rem);
       }
     }
+    .view-full-ranking {
+  margin-top: 8px;
+  padding: 4px 0;
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #a5b4fc, #c4b5fd);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 6px rgba(165, 180, 252, 0.3);
+}
+
+.view-full-ranking:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(165, 180, 252, 0.4);
+}
+
+.full-ranking-modal .modal-content {
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.full-ranking-list {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.full-ranking-list p {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(147, 197, 253, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(147, 197, 253, 0.2);
+  font-size: 0.9rem;
+}
   </style>
 </head>
 <body>
@@ -592,50 +658,60 @@
       <div class="game-title">컬러 슈터</div>
       <div class="game-number">1</div>
       <button class="game-btn" data-game="game1">게임 시작</button>
-      <div class="ranking-list" id="ranking-game1">
-        <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-        <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
-      </div>
+<button class="view-full-ranking" data-game="game1">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
+<div class="ranking-list" id="ranking-game1">
+  <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+  <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+  <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+  <p id="my-rank-game1"><span class="rank">내 등수</span> <span>-</span> <span class="score">-</span></p> <!-- 내 등수 추가 -->
+</div>
     </div>
     <div class="game-card" data-game="game2" data-angle="72">
       <div class="game-title">탕탕 특공대</div>
       <div class="game-number">2</div>
       <button class="game-btn" data-game="game2">게임 시작</button>
+      <button class="view-full-ranking" data-game="game2">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
       <div class="ranking-list" id="ranking-game2">
         <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p id="my-rank-game2"><span class="rank">내 등수</span> <span>-</span> <span class="score">-</span></p> <!-- 내 등수 추가 -->
       </div>
     </div>
     <div class="game-card" data-game="game3" data-angle="144">
       <div class="game-title">전투형 2048</div>
       <div class="game-number">3</div>
       <button class="game-btn" data-game="game3">게임 시작</button>
+      <button class="view-full-ranking" data-game="game3">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
       <div class="ranking-list" id="ranking-game3">
         <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p id="my-rank-game3"><span class="rank">내 등수</span> <span>-</span> <span class="score">-</span></p> <!-- 내 등수 추가 -->
       </div>
     </div>
     <div class="game-card" data-game="game4" data-angle="216">
       <div class="game-title">기억력 카드게임</div>
       <div class="game-number">4</div>
       <button class="game-btn" data-game="game4">게임 시작</button>
+      <button class="view-full-ranking" data-game="game4">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
       <div class="ranking-list" id="ranking-game4">
         <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p id="my-rank-game4"><span class="rank">내 등수</span> <span>-</span> <span class="score">-</span></p> <!-- 내 등수 추가 -->
       </div>
     </div>
     <div class="game-card" data-game="game5" data-angle="288">
       <div class="game-title">사과 게임</div>
       <div class="game-number">5</div>
       <button class="game-btn" data-game="game5">게임 시작</button>
+      <button class="view-full-ranking" data-game="game5">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
       <div class="ranking-list" id="ranking-game5">
         <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
         <p><span class="rank">🥉 3위</span> <span>로딩 중...</span> <span class="score">-</span></p>
+        <p id="my-rank-game5"><span class="rank">내 등수</span> <span>-</span> <span class="score">-</span></p> <!-- 내 등수 추가 -->
       </div>
     </div>
   </div>
@@ -658,14 +734,14 @@
     import { getDatabase, ref, query, orderByChild, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
     const firebaseConfig = {
-            apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
-            authDomain: "gukhyeon-ce3ba.firebaseapp.com",
-            databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
-            projectId: "gukhyeon-ce3ba",
-            storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
-            messagingSenderId: "751956972723",
-            appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
-            measurementId: "G-JBBLJNDGY1"
+      apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+      authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+      databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+      projectId: "gukhyeon-ce3ba",
+      storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+      messagingSenderId: "751956972723",
+      appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+      measurementId: "G-JBBLJNDGY1"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -720,25 +796,87 @@
 
     // 랭킹 로드
     function loadRankings(gameId) {
-      const scoresRef = ref(db, 'scores/' + gameId);
-      const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(3));
-      onValue(topScoresQuery, (snapshot) => {
-        const rankings = [];
-        snapshot.forEach((child) => {
-          rankings.unshift(child.val());
-        });
-        const rankingDiv = document.getElementById('ranking-' + gameId);
-        const medals = ['🥇', '🥈', '🥉'];
-        rankingDiv.innerHTML = '';
-        rankings.forEach((entry, index) => {
-          const name = (entry.name || '익명').slice(0, 8);
-          rankingDiv.innerHTML += `<p><span class="rank">${medals[index]} ${index + 1}위</span> <span>${name}</span> <span class="score">${entry.score}점</span></p>`;
-        });
-        if (rankings.length === 0) {
-          rankingDiv.innerHTML = '<p style="text-align: center; color: #94a3b8;">아직 기록이 없어요</p>';
-        }
-      });
+  const scoresRef = ref(db, 'scores/' + gameId);
+  // 전체 랭킹 쿼리 (내 등수 계산용)
+  const allScoresQuery = query(scoresRef, orderByChild('score'));
+  onValue(allScoresQuery, (snapshot) => {
+    const allRankings = [];
+    snapshot.forEach((child) => {
+      allRankings.unshift(child.val()); // 내림차순으로
+    });
+
+    // 상위 10위 표시
+    const top10 = allRankings.slice(0, 10);
+    const rankingDiv = document.getElementById('ranking-' + gameId);
+    const medals = ['🥇', '🥈', '🥉'];
+    rankingDiv.innerHTML = '';
+    top10.forEach((entry, index) => {
+      const medal = index < 3 ? medals[index] : '';
+      const name = (entry.name || '익명').slice(0, 8);
+      rankingDiv.innerHTML += `<p><span class="rank">${medal} ${index + 1}위</span> <span>${name}</span> <span class="score">${entry.score}점</span></p>`;
+    });
+    if (top10.length === 0) {
+      rankingDiv.innerHTML = '<p style="text-align: center; color: #94a3b8;">아직 기록이 없어요</p>';
     }
+
+    // 내 등수 계산
+    const myRankElem = document.getElementById('my-rank-' + gameId);
+    if (window.playerName && myRankElem) {
+      const myEntry = allRankings.find(entry => entry.name === window.playerName);
+      if (myEntry) {
+        const myRank = allRankings.indexOf(myEntry) + 1;
+        myRankElem.innerHTML = `<span class="rank">내 등수 ${myRank}위</span> <span>${window.playerName}</span> <span class="score">${myEntry.score}점</span>`;
+        myRankElem.classList.add('my-rank'); // 항상 내 등수 강조
+        // 1~10위 안에 있으면 해당 랭킹 강조
+        if (myRank <= 10) {
+          rankingDiv.children[myRank - 1].classList.add('my-rank');
+        }
+      } else {
+        myRankElem.innerHTML = `<span class="rank">내 등수</span> <span>기록 없음</span> <span class="score">-</span>`;
+      }
+    }
+  });
+}
+// 전체 랭킹 모달
+const fullRankingModal = document.getElementById('full-ranking-modal');
+const fullRankingTitle = document.getElementById('full-ranking-title');
+const fullRankingList = document.getElementById('full-ranking-list');
+const closeFullRankingBtn = document.getElementById('close-full-ranking');
+
+function showFullRanking(gameId) {
+  fullRankingTitle.textContent = `전체 랭킹 - ${document.querySelector(`[data-game="${gameId}"] .game-title`).textContent}`;
+  const scoresRef = ref(db, 'scores/' + gameId);
+  const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10)); // 최대 10위
+  onValue(topScoresQuery, (snapshot) => {
+    const rankings = [];
+    snapshot.forEach((child) => {
+      rankings.unshift(child.val());
+    });
+    fullRankingList.innerHTML = '';
+    const medals = ['🥇', '🥈', '🥉'];
+    rankings.forEach((entry, index) => {
+      const medal = index < 3 ? medals[index] : '';
+      const name = (entry.name || '익명').slice(0, 8);
+      fullRankingList.innerHTML += `<p><span class="rank">${medal} ${index + 1}위</span> <span>${name}</span> <span class="score">${entry.score}점</span></p>`;
+    });
+    if (rankings.length === 0) {
+      fullRankingList.innerHTML = '<p style="text-align: center; color: #94a3b8;">아직 기록이 없어요</p>';
+    }
+  }, { onlyOnce: true });
+  fullRankingModal.classList.add('show');
+}
+
+closeFullRankingBtn.addEventListener('click', () => {
+  fullRankingModal.classList.remove('show');
+});
+
+// 버튼 이벤트 추가
+document.querySelectorAll('.view-full-ranking').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const gameId = btn.getAttribute('data-game');
+    showFullRanking(gameId);
+  });
+});
 
     ['game1', 'game2', 'game3', 'game4', 'game5'].forEach(loadRankings);
 
@@ -931,5 +1069,12 @@
       }
     });
   </script>
+  <div id="full-ranking-modal" class="modal">
+  <div class="modal-content full-ranking-modal">
+    <h2 id="full-ranking-title">전체 랭킹</h2>
+    <div class="full-ranking-list" id="full-ranking-list"></div>
+    <button id="close-full-ranking" class="primary" style="margin-top: 15px; width: 100%;">닫기</button>
+  </div>
+</div>
 </body>
 </html>
