@@ -331,12 +331,12 @@
     /* 랭킹 리스트 - 가시성 개선 */
 .ranking-list {
   margin-top: 10px;
-  font-size: clamp(0.45rem, 1vw, 0.65rem);
+  font-size: clamp(0.4rem, 0.9vw, 0.6rem);
   color: #0369a1;
   text-align: left;
   width: 100%;
   padding: 0 8px;
-  line-height: 1.2;
+  line-height: 1.4;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -534,8 +534,9 @@
         padding: 5px 0;
         font-size: 0.9rem;
       }
-      .ranking-list {
-        font-size: 0.55rem; /* 모바일에서 폰트 더 줄임 */
+            .ranking-list {
+        font-size: 0.5rem;
+        line-height: 1.4;
         gap: 4px;
       }
       .ranking-list p {
@@ -576,7 +577,8 @@
         font-size: 1.1rem;
       }
       .ranking-list {
-        font-size: 0.75rem; /* 데스크탑에서 폰트 약간 줄임 */
+        font-size: 0.7rem;
+        line-height: 1.4;
         gap: 6px;
       }
       .ranking-list p {
@@ -640,6 +642,16 @@
   border: 1px solid rgba(147, 197, 253, 0.2);
   font-size: 0.9rem;
 }
+
+#game-frame {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 0;  /* 초기 숨김 */
+}
+#game-frame.visible {
+  opacity: 1;
+  visibility: visible;
+  display: block;
+}
   </style>
 </head>
 <body>
@@ -661,7 +673,7 @@
       <div class="game-title">컬러 슈터</div>
       <div class="game-number">1</div>
       <button class="game-btn" data-game="game1">게임 시작</button>
-<button class="view-full-ranking" data-game="game1">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
+      <button class="view-full-ranking" data-game="game1">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
 <div class="ranking-list" id="ranking-game1">
   <p><span class="rank">🥇 1위</span> <span>로딩 중...</span> <span class="score">-</span></p>
   <p><span class="rank">🥈 2위</span> <span>로딩 중...</span> <span class="score">-</span></p>
@@ -682,7 +694,7 @@
       </div>
     </div>
     <div class="game-card" data-game="game3" data-angle="144">
-      <div class="game-title">전투형 2048</div>
+      <div class="game-title">싸워라! 2048</div>
       <div class="game-number">3</div>
       <button class="game-btn" data-game="game3">게임 시작</button>
       <button class="view-full-ranking" data-game="game3">전체 랭킹 보기</button> <!-- 새 버튼 추가 -->
@@ -860,7 +872,7 @@ if (top10.length === 0) {
         const myBestScore = Math.max(...myEntries.map(e => e.score));
         const myRank = allRankings.findIndex(entry => entry.score === myBestScore && entry.name === window.playerName) + 1;
         
-        myRankElem.innerHTML = `<span class="rank">내 등수: ${myRank}위</span> <span>${window.playerName}</span> <span class="score">${myBestScore}점</span>`;
+        myRankElem.innerHTML = `<span class="rank">내 등수: ${myRank}위</span> <span class="score">${myBestScore}점</span>`;
         myRankElem.classList.add('my-rank');
         myRankElem.style.display = 'flex';
         
@@ -869,12 +881,12 @@ if (top10.length === 0) {
           rankingDiv.children[myRank - 1].classList.add('my-rank');
         }
       } else {
-        myRankElem.innerHTML = `<span class="rank">내 등수</span> <span>기록 없음</span> <span class="score">-</span>`;
+        myRankElem.innerHTML = `<span class="rank">내 등수</span> <span class="score">기록 없음</span>`;
         myRankElem.classList.add('my-rank');
         myRankElem.style.display = 'flex';
       }
     } else {
-      myRankElem.innerHTML = `<span class="rank">내 등수</span> <span>이름을 입력해주세요</span> <span class="score">-</span>`;
+      myRankElem.innerHTML = `<span class="rank">내 등수</span> <span class="score">이름을 입력해주세요</span>`;
       myRankElem.classList.remove('my-rank');
       myRankElem.style.display = 'flex';
     }
@@ -1086,20 +1098,37 @@ function saveName() {
       input.value = window.playerName || '';
     });
 
-    document.querySelectorAll('.game-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const gameId = btn.getAttribute('data-game');
-        if (!window.playerName) {
-          showNameModal(false);
-          return;
-        }
-        if ('vibrate' in navigator) {
-          navigator.vibrate(50);
-        }
-        location.href = `${gameId}.html`;
-      });
-    });
+    // iframe 내용 비우기 함수 추가 (스크립트 상단에)
+function resetIframe() {
+  const frame = document.getElementById('game-frame');
+  frame.src = 'about:blank';  // 이전 콘텐츠 초기화
+  frame.classList.remove('visible');
+  frame.style.display = 'none';
+}
+
+// 게임 버튼 이벤트 수정 (resetIframe 호출 추가)
+document.querySelectorAll('.game-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const gameId = btn.getAttribute('data-game');
+    if (!window.playerName) {
+      showNameModal(false);
+      return;
+    }
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+    resetIframe();  // iframe 초기화 호출
+    const frame = document.getElementById('game-frame');
+    frame.src = `${gameId}.html`;
+    frame.classList.add('visible');
+    frame.style.display = 'block';
+    document.querySelector('h1').style.display = 'none';
+    document.getElementById('carousel').style.display = 'none';
+    document.getElementById('user-info').style.display = 'none';
+    playBGM(false); // 사용자 클릭 후 BGM 재생
+  });
+});
 
     // 페이지 로드 시 초기화
     window.addEventListener('load', () => {
@@ -1122,13 +1151,37 @@ function saveName() {
         updateCarousel();
       }
     });
+    
+    // BGM 관리 함수 (resize 밖으로 이동, duplicate 제거)
+    const bgm = document.getElementById('bgm');
+    bgm.volume = 0.3;
+
+    function playBGM(reset = false) {
+      if (reset) {
+        bgm.currentTime = 0;  // 초기만 reset (사용 안 함)
+      }
+      if (bgm.paused && localStorage.getItem('bgmEnabled') !== 'false') {
+        bgm.play().catch(err => console.warn('BGM play failed:', err));
+      }
+    }
+
+    // visibilitychange: pause/resume (reset 없이)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        playBGM(false);  // resume only, no reset
+      } else {
+        bgm.pause();  // 배터리 절약
+      }
+    });
   </script>
-  <div id="full-ranking-modal" class="modal">
+    <div id="full-ranking-modal" class="modal">
   <div class="modal-content full-ranking-modal">
     <h2 id="full-ranking-title">전체 랭킹</h2>
     <div class="full-ranking-list" id="full-ranking-list"></div>
     <button id="close-full-ranking" class="primary" style="margin-top: 15px; width: 100%;">닫기</button>
   </div>
 </div>
+  <audio id="bgm" src="assets/bgm_background.mp3" loop style="display:none;"></audio>  <!-- autoplay 제거: 정책 준수 -->
+  <iframe id="game-frame" style="display:none; width:100%; height:100vh; border:none; position:fixed; top:0; left:0; z-index:9999;"></iframe>
 </body>
 </html>

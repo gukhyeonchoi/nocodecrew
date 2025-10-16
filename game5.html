@@ -953,58 +953,13 @@ class AppleNumberGame {
         this.dragSelection.style.height = height + 'px';
         
         this.highlightTiles(left, top, width, height);
-        
     }
-
-
-highlightTiles(left, top, width, height) {
-    const self = this;
-    const tiles = this.gameBoard.querySelectorAll('.tile');
-    const currentSelected = [];
-    
-    tiles.forEach(function(tile) {
-        const tileRect = tile.getBoundingClientRect();
-        const boardRect = self.gameBoard.getBoundingClientRect();
-        const tileLeft = tileRect.left - boardRect.left;
-        const tileTop = tileRect.top - boardRect.top;
-        const tileRight = tileLeft + tileRect.width;
-        const tileBottom = tileTop + tileRect.height;
-        const selectionRight = left + width;
-        const selectionBottom = top + height;
-        
-        const isOverlapping = !(tileRight < left || tileLeft > selectionRight || tileBottom < top || tileTop > selectionBottom);
-        
-        if (isOverlapping) {
-            const tileId = parseInt(tile.dataset.id);
-            currentSelected.push(tileId);
-            tile.classList.add('selected');
-        } else if (!self.selectedTiles.includes(parseInt(tile.dataset.id))) {
-            tile.classList.remove('selected');
-        }
-    });
-    
-    // 새로운 타일이 추가되었는지 확인
-    const newTiles = currentSelected.filter(function(id) {
-        return !self.lastSelectedTiles.includes(id);
-    });
-    
-    // 새로운 타일이 선택되면 작은 진동
-    if (newTiles.length > 0) {
-        self.vibrate(15);
-    }
-    
-    // 현재 선택된 타일 목록 저장
-    self.lastSelectedTiles = currentSelected.slice();
-}
-
-
 
     endDrag(e) {
         const self = this;
         if (!this.isDragging) return;
         this.isDragging = false;
 
-        // 드래그 종료 시 초기화
         this.lastSelectedTiles = [];
         
         if (this.dragSelection) {
@@ -1059,6 +1014,7 @@ highlightTiles(left, top, width, height) {
     highlightTiles(left, top, width, height) {
         const self = this;
         const tiles = this.gameBoard.querySelectorAll('.tile');
+        const currentSelected = [];
         
         tiles.forEach(function(tile) {
             const tileRect = tile.getBoundingClientRect();
@@ -1073,11 +1029,26 @@ highlightTiles(left, top, width, height) {
             const isOverlapping = !(tileRight < left || tileLeft > selectionRight || tileBottom < top || tileTop > selectionBottom);
             
             if (isOverlapping) {
+                const tileId = parseInt(tile.dataset.id);
+                currentSelected.push(tileId);
                 tile.classList.add('selected');
             } else if (!self.selectedTiles.includes(parseInt(tile.dataset.id))) {
                 tile.classList.remove('selected');
             }
         });
+        
+        // 새로운 타일이 추가되었는지 확인
+        const newTiles = currentSelected.filter(function(id) {
+            return !self.lastSelectedTiles.includes(id);
+        });
+        
+        // 새로운 타일이 선택되면 작은 진동
+        if (newTiles.length > 0) {
+            self.vibrate(15);
+        }
+        
+        // 현재 선택된 타일 목록 저장
+        self.lastSelectedTiles = currentSelected.slice();
     }
 
     getSelectedTiles(left, top, width, height) {
