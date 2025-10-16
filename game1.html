@@ -191,17 +191,17 @@
         }
         .stage-indicator.cleared {
             background: linear-gradient(135deg, #2dd4bf, #14b8a6);
-            border-color: #14b8a6;
+            border-color: #28a745;
             color: #fff;
             transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
         .stage-indicator.current {
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
-            border-color: #38bdf8;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-color: #007bff;
             color: #fff;
             transform: scale(1.2);
-            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.5);
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
@@ -439,7 +439,7 @@
         }
         .stack-block.top-block {
             border-color: #10b981;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 0 20px rgba(16,204,113,0.6), 0 4px 12px rgba(0,0,0,0.3);
             cursor: pointer;
             transform: translateY(-4px);
             animation: breathe 3s ease-in-out infinite;
@@ -455,27 +455,27 @@
             opacity: 0.7;
             cursor: not-allowed;
         }
-        .red { 
-            --color-start: #fca5a5; 
-            --color-end: #f87171; 
+        .red {
+            --color-start: #fca5a5;
+            --color-end: #f87171;
         }
-        .blue { 
-            --color-start: #93c5fd; 
-            --color-end: #60a5fa; 
+        .blue {
+            --color-start: #93c5fd;
+            --color-end: #60a5fa;
         }
-        .green { 
-            --color-start: #86efac; 
-            --color-end: #4ade80; 
+        .green {
+            --color-start: #86efac;
+            --color-end: #4ade80;
         }
-        .yellow { 
-            --color-start: #fde047; 
+        .yellow {
+            --color-start: #fde047;
             --color-end: #facc15;
             color: #713f12 !important;
             text-shadow: 1px 1px 2px rgba(255,255,255,0.5) !important;
         }
-        .purple { 
-            --color-start: #c4b5fd; 
-            --color-end: #a78bfa; 
+        .purple {
+            --color-start: #c4b5fd;
+            --color-end: #a78bfa;
         }
         .shooting-particle {
             position: fixed;
@@ -499,15 +499,15 @@
             text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
         }
         @keyframes damageFloat {
-            0% { 
-                opacity: 1; 
-                transform: translateY(0) scale(1); 
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
             }
             50% {
                 transform: translateY(-20px) scale(1.2);
             }
-            100% { 
-                opacity: 0; 
+            100% {
+                opacity: 0;
                 transform: translateY(-40px) scale(0.8);
             }
         }
@@ -545,16 +545,16 @@
             width: 100%;
             color: #0284c7;
         }
-        .success { 
-            color: #10b981; 
+        .success {
+            color: #10b981;
             animation: successPulse 0.6s ease-out;
         }
-        .warning { 
-            color: #f59e0b; 
+        .warning {
+            color: #f59e0b;
             animation: warningShake 0.5s ease-out;
         }
-        .error { 
-            color: #f87171; 
+        .error {
+            color: #f87171;
             animation: errorShake 0.5s ease-out;
         }
         @keyframes successPulse {
@@ -997,7 +997,7 @@
                 this.colors = this.fullColorPool.slice(0, config.colors);
                 this.targetNumbers = config.numberRange;
                 this.stackNumbers = config.numberRange;
-                this.targetLanes = Array(config.lanes).fill().map(() => []);
+                this.targetLanes = Array(config.lanes).fill().fill().map(() => []);
                 this.stacks = Array(config.lanes).fill().map(() => []);
                 this.attackQueue = Array(config.queueSlots).fill(null);
                 this.clearAllParticles();
@@ -1055,47 +1055,46 @@
                 return this.attackQueue.findIndex(slot => slot === null || slot.number <= 0);
             }
             selectBlock(stackIndex) {
-    if (!this.gameRunning) {
-        this.showMessage('❌ 게임이 시작되지 않았습니다!', 'error');
-        return false;
-    }
-    if (stackIndex < 0 || stackIndex >= this.stacks.length) {
-        this.showMessage(`❌ 잘못된 스택: ${stackIndex + 1}`, 'error');
-        return false;
-    }
-    const slotIndex = this.getAvailableQueueSlot();
-    if (slotIndex === -1) {
-        this.showMessage('⚠️ 대기열이 가득 찼습니다!', 'warning');
-        return false;
-    }
-    const stack = this.stacks[stackIndex];
-    if (!stack || stack.length === 0) {
-        this.showMessage(`❌ 스택 ${stackIndex + 1}이 비었습니다!`, 'error');
-        return false;
-    }
-    const topBlock = stack[0];
-    
-    const queueBlock = {
-        ...topBlock,
-        stackIndex,
-        id: Date.now() + Math.random(),
-        isFiring: false,
-        queuePosition: slotIndex
-    };
-    this.attackQueue[slotIndex] = queueBlock;
-    this.stacks[stackIndex].shift();
-    this.showMessage(`✅ ${topBlock.color} 블록 (${topBlock.number}) 추가`, 'success');
-    console.log(`블록(${topBlock.color}, ${topBlock.number}) 추가`);
-    this.updateQueue();
-    this.scheduleUpdate(() => {
-        this.scanAndFireOnce();
-        this.checkStageClear();
-    });
-    if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-    }
-    return true;
-}
+                if (!this.gameRunning) {
+                    this.showMessage('❌ 게임이 시작되지 않았습니다!', 'error');
+                    return false;
+                }
+                if (stackIndex < 0 || stackIndex >= this.stacks.length) {
+                    this.showMessage(`❌ 잘못된 스택: ${stackIndex + 1}`, 'error');
+                    return false;
+                }
+                const slotIndex = this.getAvailableQueueSlot();
+                if (slotIndex === -1) {
+                    this.showMessage('⚠️ 대기열이 가득 찼습니다!', 'warning');
+                    return false;
+                }
+                const stack = this.stacks[stackIndex];
+                if (!stack || stack.length === 0) {
+                    this.showMessage(`❌ 스택 ${stackIndex + 1}이 비었습니다!`, 'error');
+                    return false;
+                }
+                const topBlock = stack[0];
+                const queueBlock = {
+                    ...topBlock,
+                    stackIndex,
+                    id: Date.now() + Math.random(),
+                    isFiring: false,
+                    queuePosition: slotIndex
+                };
+                this.attackQueue[slotIndex] = queueBlock;
+                this.stacks[stackIndex].shift();
+                this.showMessage(`✅ ${topBlock.color} 블록 (${topBlock.number}) 추가`, 'success');
+                console.log(`블록(${topBlock.color}, ${topBlock.number}) 추가`);
+                this.updateQueue();
+                this.scheduleUpdate(() => {
+                    this.scanAndFireOnce();
+                    this.checkStageClear();
+                });
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+                return true;
+            }
             startQueueScanLoop() {
                 if (this._queueScanTimer) {
                     clearInterval(this._queueScanTimer);
@@ -1114,43 +1113,36 @@
                 this.clearAllParticles();
             }
             scanAndFireOnce() {
-    if (!this.gameRunning) return;
-    const firingColors = new Set();
-    
-    // 먼저 현재 발사 중인 색상들을 수집
-    for (let qIndex = 0; qIndex < this.attackQueue.length; qIndex++) {
-        const q = this.attackQueue[qIndex];
-        if (q && q.isFiring) {
-            firingColors.add(q.color);
-        }
-    }
-    
-    // 발사되지 않은 블록 중에서 같은 색상이 발사 중이 아닌 것만 발사
-    for (let qIndex = 0; qIndex < this.attackQueue.length; qIndex++) {
-        const q = this.attackQueue[qIndex];
-        if (!q || q.isFiring || q.number <= 0) {
-            continue;
-        }
-        
-        // 같은 색상이 이미 발사 중이면 건너뛰기
-        if (firingColors.has(q.color)) continue;
-        
-        let foundLane = -1;
-        for (let laneIndex = 0; laneIndex < this.targetLanes.length; laneIndex++) {
-            const lane = this.targetLanes[laneIndex];
-            if (lane.length > 0 && lane[0].color === q.color) {
-                foundLane = laneIndex;
-                break;
+                if (!this.gameRunning) return;
+                const firingColors = new Set();
+                for (let qIndex = 0; qIndex < this.attackQueue.length; qIndex++) {
+                    const q = this.attackQueue[qIndex];
+                    if (q && q.isFiring) {
+                        firingColors.add(q.color);
+                    }
+                }
+                for (let qIndex = 0; qIndex < this.attackQueue.length; qIndex++) {
+                    const q = this.attackQueue[qIndex];
+                    if (!q || q.isFiring || q.number <= 0) {
+                        continue;
+                    }
+                    if (firingColors.has(q.color)) continue;
+                    let foundLane = -1;
+                    for (let laneIndex = 0; laneIndex < this.targetLanes.length; laneIndex++) {
+                        const lane = this.targetLanes[laneIndex];
+                        if (lane.length > 0 && lane[0].color === q.color) {
+                            foundLane = laneIndex;
+                            break;
+                        }
+                    }
+                    if (foundLane !== -1) {
+                        this.attackQueue[qIndex].isFiring = true;
+                        firingColors.add(q.color);
+                        this.fireFromQueueIndex(qIndex, foundLane);
+                    }
+                }
+                this.checkQueueStuck();
             }
-        }
-        if (foundLane !== -1) {
-            this.attackQueue[qIndex].isFiring = true;
-            firingColors.add(q.color);
-            this.fireFromQueueIndex(qIndex, foundLane);
-        }
-    }
-    this.checkQueueStuck();
-}
             fireFromQueueIndex(queueIndex, laneIndex) {
                 const queued = this.attackQueue[queueIndex];
                 if (!queued || queued.number <= 0) {
@@ -1367,41 +1359,41 @@
                 }
             }
             showStageClearModal(message) {
-    console.log('Showing stage clear modal');
-    const root = document.getElementById('modalRoot');
-    root.innerHTML = '';
-    const backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop';
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `<h2>🎉 스테이지 클리어!</h2><p>${message}</p>`;
-    const actions = document.createElement('div');
-    actions.className = 'modal-actions';
-    const retry = document.createElement('button');
-    retry.className = 'btn btn-retry';
-    retry.textContent = '🏠 홈으로';
-    retry.addEventListener('click', () => {
-        console.log('Home button clicked');
-        root.innerHTML = '';
-        window.location.href = 'index.html';
-    });
-    const next = document.createElement('button');
-    next.className = 'btn btn-next';
-    next.textContent = '▶️ 다음 스테이지';
-    next.addEventListener('click', () => {
-        console.log('Next stage button clicked');
-        root.innerHTML = '';
-        this.saveScoreAndAdvance();
-    });
-    actions.appendChild(retry);
-    actions.appendChild(next);
-    modal.appendChild(actions);
-    backdrop.appendChild(modal);
-    root.appendChild(backdrop);
-    if ('vibrate' in navigator) {
-        navigator.vibrate([200, 100, 200]);
-    }
-}
+                console.log('Showing stage clear modal');
+                const root = document.getElementById('modalRoot');
+                root.innerHTML = '';
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `<h2>🎉 스테이지 클리어!</h2><p>${message}</p>`;
+                const actions = document.createElement('div');
+                actions.className = 'modal-actions';
+                const retry = document.createElement('button');
+                retry.className = 'btn btn-retry';
+                retry.textContent = '🏠 홈으로';
+                retry.addEventListener('click', () => {
+                    console.log('Home button clicked');
+                    root.innerHTML = '';
+                    window.location.href = 'index.html';
+                });
+                const next = document.createElement('button');
+                next.className = 'btn btn-next';
+                next.textContent = '▶️ 다음 스테이지';
+                next.addEventListener('click', () => {
+                    console.log('Next stage button clicked');
+                    root.innerHTML = '';
+                    this.saveScoreAndAdvance();
+                });
+                actions.appendChild(retry);
+                actions.appendChild(next);
+                modal.appendChild(actions);
+                backdrop.appendChild(modal);
+                root.appendChild(backdrop);
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
+            }
             showGameOverModal(message, rankings) {
                 const root = document.getElementById('modalRoot');
                 root.innerHTML = '';
@@ -1433,6 +1425,13 @@
                     root.innerHTML = '';
                     this.resetGame();
                 };
+                const continueBtn = document.createElement('button');
+                continueBtn.className = 'btn btn-continue';
+                continueBtn.textContent = '📺 광고 보고 이어하기';
+                continueBtn.onclick = () => {
+                    root.innerHTML = '';
+                    this.showAdModal();
+                };
                 const home = document.createElement('button');
                 home.className = 'btn btn-home';
                 home.textContent = '🏠 홈으로';
@@ -1440,27 +1439,55 @@
                     window.location.href = 'index.html';
                 };
                 actions.appendChild(retry);
+                actions.appendChild(continueBtn);
                 actions.appendChild(home);
                 modal.appendChild(actions);
                 backdrop.appendChild(modal);
                 root.appendChild(backdrop);
             }
+            showAdModal() {
+                const root = document.getElementById('modalRoot');
+                root.innerHTML = '';
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <h2>📺 광고 문의</h2>
+                    <p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>
+                `;
+                const actions = document.createElement('div');
+                actions.className = 'modal-actions';
+                const close = document.createElement('button');
+                close.className = 'btn btn-close';
+                close.textContent = '❌ 닫기';
+                close.onclick = () => {
+                    root.innerHTML = '';
+                    this.resetGame();
+                };
+                actions.appendChild(close);
+                modal.appendChild(actions);
+                backdrop.appendChild(modal);
+                root.appendChild(backdrop);
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([50]);
+                }
+            }
             advanceStage() {
-    this.stopQueueScanLoop();
-    this.clearAllParticles();
-    
-    this.stage++;
-    console.log(`Advancing to stage ${this.stage}`);
-    this.initStage();
-    this.updateQueueUI();
-    this.updateStacksAndQueue();
-    this.updateTargetLanes();
-    this.updateStageProgress();
-    this.updateDisplay();
-    this.gameRunning = true;
-    this.startQueueScanLoop();
-    this.showMessage(`🚀 스테이지 ${this.stage} 시작!`, 'success');
-}
+                this.stopQueueScanLoop();
+                this.clearAllParticles();
+                this.stage++;
+                console.log(`Advancing to stage ${this.stage}`);
+                this.initStage();
+                this.updateQueueUI();
+                this.updateStacksAndQueue();
+                this.updateTargetLanes();
+                this.updateStageProgress();
+                this.updateDisplay();
+                this.gameRunning = true;
+                this.startQueueScanLoop();
+                this.showMessage(`🚀 스테이지 ${this.stage} 시작!`, 'success');
+            }
             checkQueueStuck() {
                 if (this.getAvailableQueueSlot() !== -1) {
                     this.scheduleUpdate();
@@ -1536,27 +1563,25 @@
                 this.scheduleUpdate();
             }
             updateTargetLanes() {
-    const targetContainer = document.getElementById('targetLanes');
-    const fragment = document.createDocumentFragment();
-    
-    this.targetLanes.forEach((lane, laneIndex) => {
-        const laneEl = document.createElement('div');
-        laneEl.className = 'target-lane';
-        lane.forEach((block, idx) => {
-            const blockEl = document.createElement('div');
-            blockEl.className = `target-block ${block.color}`;
-            blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
-            if (idx === 0) {
-                blockEl.classList.add('attackable');
+                const targetContainer = document.getElementById('targetLanes');
+                const fragment = document.createDocumentFragment();
+                this.targetLanes.forEach((lane, laneIndex) => {
+                    const laneEl = document.createElement('div');
+                    laneEl.className = 'target-lane';
+                    lane.forEach((block, idx) => {
+                        const blockEl = document.createElement('div');
+                        blockEl.className = `target-block ${block.color}`;
+                        blockEl.innerHTML = `<div class="block-number">${block.number}</div>`;
+                        if (idx === 0) {
+                            blockEl.classList.add('attackable');
+                        }
+                        laneEl.appendChild(blockEl);
+                    });
+                    fragment.appendChild(laneEl);
+                });
+                targetContainer.innerHTML = '';
+                targetContainer.appendChild(fragment);
             }
-            laneEl.appendChild(blockEl);
-        });
-        fragment.appendChild(laneEl);
-    });
-    
-    targetContainer.innerHTML = '';
-    targetContainer.appendChild(fragment);
-}
             updateQueueUI() {
                 const queueArea = document.getElementById('queueArea');
                 queueArea.innerHTML = '';
