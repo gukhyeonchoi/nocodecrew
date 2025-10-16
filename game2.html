@@ -599,7 +599,7 @@
 
         // 게임 로직
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: true });
         
         // 이미지 스무딩 비활성화 (픽셀 아트용)
         ctx.imageSmoothingEnabled = false;
@@ -808,7 +808,7 @@
 
         function fire(dir) {
             if (gameState.gameOver) return;
-            const speed = 520 * player.bulletSpeed;
+            const speed = 700 * player.bulletSpeed;  // 520 → 700으로 증가
             for (let i = 0; i < player.multiShot; i++) {
                 const angle = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i / 2) * 0.3;
                 const finalDir = {
@@ -848,7 +848,22 @@
             const spawnPerSecond = 1.2 + gameState.wave * 0.35;
             const p = 1 - Math.exp(-spawnPerSecond * dt);
             if (Math.random() < p) {
-                const enemy = { width: 25, height: 25, speed: 60 + gameState.wave * 30, color: '#ff4444', x: 0, y: 0, vx: 0, vy: 0 };
+                // 웨이브 10 단위마다 체력 증가 (1, 11, 21, 31...)
+                const hpMultiplier = Math.floor(gameState.wave / 10);
+                const enemyHp = 1 + hpMultiplier;
+                
+                const enemy = { 
+                    width: 25, 
+                    height: 25, 
+                    speed: 60 + gameState.wave * 30, 
+                    color: '#ff4444', 
+                    x: 0, 
+                    y: 0, 
+                    vx: 0, 
+                    vy: 0,
+                    hp: enemyHp,
+                    maxHp: enemyHp
+                };
                 const side = Math.floor(Math.random() * 4);
                 if (side === 0) { enemy.x = Math.random() * canvas.width; enemy.y = -enemy.height; }
                 if (side === 1) { enemy.x = Math.random() * canvas.width; enemy.y = canvas.height; }
@@ -946,15 +961,34 @@
             for (let i = bullets.length - 1; i >= 0; i--) {
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     if (rectHit(bullets[i], enemies[j])) {
-                        const ex = enemies[j].x + enemies[j].width / 2;
-                        const ey = enemies[j].y + enemies[j].height / 2;
-                        createExplosion(ex, ey, '#ff8844', 10);
-                        spawnItem(ex, ey);
+                        const e = enemies[j];
+                        
+                        // 체력 감소
+                        e.hp = (e.hp || 1) - 1;
+                        
+                        // 총알 제거
                         bullets.splice(i, 1);
-                        enemies.splice(j, 1);
-                        gameState.enemyCount--;
-                        gameState.score += 50;
-                        if (gameState.score > 0 && gameState.score % 500 === 0) { gameState.wave++; gameState.maxEnemies += 3; }
+                        
+                        // 체력이 0이 되면 적 제거
+                        if (e.hp <= 0) {
+                            const ex = e.x + e.width / 2;
+                            const ey = e.y + e.height / 2;
+                            createExplosion(ex, ey, '#ff8844', 10);
+                            spawnItem(ex, ey);
+                            enemies.splice(j, 1);
+                            gameState.enemyCount--;
+                            gameState.score += 50;
+                            if (gameState.score > 0 && gameState.score % 500 === 0) { 
+                                gameState.wave++; 
+                                gameState.maxEnemies += 3; 
+                            }
+                        } else {
+                            // 체력이 남았을 때 작은 이펙트
+                            const ex = e.x + e.width / 2;
+                            const ey = e.y + e.height / 2;
+                            createExplosion(ex, ey, '#ffaa44', 3);
+                        }
+                        
                         continue outer;
                     }
                 }
@@ -1024,6 +1058,7 @@
                     }
                     
                     ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
                     ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                     ctx.restore();
@@ -1060,6 +1095,7 @@
                     }
                     
                     ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(b.x + b.width / 2, b.y + b.height / 2);
                     const angle = Math.atan2(b.vy, b.vx);
                     ctx.rotate(angle);
@@ -1088,9 +1124,37 @@
                     }
                     
                     ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(e.x + e.width / 2, e.y + e.height / 2);
+                    
+                    // 체력이 감소하면 빨간색으로 깜빡임
+                    if (e.hp < e.maxHp) {
+                        const flashIntensity = 0.5;
+                        ctx.globalAlpha = 0.7;
+                        ctx.filter = `hue-rotate(${Math.sin(gameState.time * 20) * 30}deg) brightness(1.3)`;
+                    }
+                    
                     ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+                    ctx.filter = 'none';
+                    ctx.globalAlpha = 1;
                     ctx.restore();
+                    
+                    // 체력바 표시 (체력이 최대가 아닐 때)
+                    if (e.hp < e.maxHp) {
+                        const barWidth = e.width;
+                        const barHeight = 3;
+                        const barX = e.x;
+                        const barY = e.y - 8;
+                        const hpRatio = e.hp / e.maxHp;
+                        
+                        // 배경 (빨간색)
+                        ctx.fillStyle = '#ff4444';
+                        ctx.fillRect(barX, barY, barWidth, barHeight);
+                        
+                        // 현재 체력 (초록색)
+                        ctx.fillStyle = '#4ade80';
+                        ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+                    }
                 } else {
                     const cx = e.x + e.width / 2, cy = e.y + e.height / 2;
                     ctx.fillStyle = e.color;
@@ -1102,6 +1166,20 @@
                     ctx.closePath();
                     ctx.shadowColor = e.color; ctx.shadowBlur = 5;
                     ctx.fill(); ctx.shadowBlur = 0;
+                    
+                    // 체력바 표시 (기본 그래픽용)
+                    if (e.hp && e.hp < e.maxHp) {
+                        const barWidth = e.width;
+                        const barHeight = 3;
+                        const barX = e.x;
+                        const barY = e.y - 8;
+                        const hpRatio = e.hp / e.maxHp;
+                        
+                        ctx.fillStyle = '#ff4444';
+                        ctx.fillRect(barX, barY, barWidth, barHeight);
+                        ctx.fillStyle = '#4ade80';
+                        ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+                    }
                 }
             }
 
