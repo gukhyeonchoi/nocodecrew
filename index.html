@@ -842,7 +842,7 @@ function loadRankings(gameId) {
       }
     });
     
-    const top10 = allRankings.slice(0, 10);  // ✅ 10위까지
+    const top10 = allRankings.slice(0, 8);  // ✅ 8위까지
 if (top10.length === 0) {
   const emptyMsg = document.createElement('p');
   emptyMsg.style.textAlign = 'center';
@@ -850,7 +850,7 @@ if (top10.length === 0) {
   emptyMsg.textContent = '아직 기록이 없어요';
   rankingDiv.insertBefore(emptyMsg, myRankElem);
 } else {
-  top10.forEach((entry, index) => {  // ✅ 10위까지 표시
+  top10.forEach((entry, index) => {  // ✅ 8위까지 표시
     const p = document.createElement('p');
     const medal = index < 3 ? medals[index] : '';  // ✅ 4위부터는 메달 없음
     const rankText = medal ? `${medal} ${index + 1}위` : `${index + 1}위`;
@@ -901,7 +901,7 @@ const closeFullRankingBtn = document.getElementById('close-full-ranking');
 function showFullRanking(gameId) {
   fullRankingTitle.textContent = `전체 랭킹 - ${document.querySelector(`[data-game="${gameId}"] .game-title`).textContent}`;
   const scoresRef = ref(db, 'scores/' + gameId);
-  const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10)); // 최대 10위
+  const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(8)); // 최대 8위
   onValue(topScoresQuery, (snapshot) => {
   const playerBestScores = {};
   
