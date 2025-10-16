@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1, minimum-scale=1, viewport-fit=cover">
+  <title>기억력 카드 게임</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    body {
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  text-align: center;
+  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  color: #2d3748;
+  position: relative;
+  overflow: hidden;
+  animation: wave-bg 10s infinite alternate;
+  touch-action: manipulation;
+}
+
+    @keyframes wave-bg {
+      0% { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+      100% { background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%); }
+    }
+
+    h1 {
+      font-size: 2em;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      animation: logo-pulse 2s infinite ease-in-out;
+      margin: 10px 0;
+    }
+
+    @keyframes logo-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+      perspective: 1000px;
+      position: relative;
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      transition: opacity 0.5s;
+      max-width: 100%;
+      width: 300px;
+    }
+
+    .card {
+      width: 80px;
+      height: 120px;
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.4s ease-in-out;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      background: linear-gradient(45deg, #ffffff, #f0f0f0);
+      animation: reflect 3s infinite linear;
+    }
+
+    @keyframes reflect {
+      0% { box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.3); }
+      50% { box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 20px 0 20px rgba(255,255,255,0.5); }
+      100% { box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.3); }
+    }
+
+    .card:hover {
+      transform: scale(1.05) translateZ(10px);
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card .front, .card .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .card .back {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.3);
+    }
+
+    .card .front {
+      background: #fffaf0;
+      transform: rotateY(180deg);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .card.matched .front {
+      border: 3px solid #48bb78;
+      animation: glow 0.8s infinite alternate;
+    }
+
+    .card.wrong {
+      animation: shake 0.3s;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 10px #48bb78, 0 0 20px rgba(72,187,120,0.5); }
+      to { box-shadow: 0 0 20px #48bb78, 0 0 40px rgba(72,187,120,0.8); }
+    }
+
+    @keyframes shake {
+      0% { transform: rotateY(180deg) translateX(0); }
+      25% { transform: rotateY(180deg) translateX(-5px); }
+      50% { transform: rotateY(180deg) translateX(5px); }
+      75% { transform: rotateY(180deg) translateX(-5px); }
+      100% { transform: rotateY(180deg) translateX(0); }
+    }
+
+    #hearts {
+      font-size: 24px;
+      margin: 10px;
+      transition: transform 0.3s;
+    }
+
+    #hearts.gain {
+      transform: scale(1.3);
+      color: #e53e3e;
+    }
+
+    #hearts.lose {
+      animation: heart-bounce 0.5s;
+    }
+
+    @keyframes heart-bounce {
+      0% { transform: scale(1); color: #e53e3e; }
+      50% { transform: scale(0.7); color: #9b2c2c; }
+      100% { transform: scale(1); color: #e53e3e; }
+    }
+
+    #message {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+      z-index: 10;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    #message.show {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    #stage-indicator {
+      font-size: 20px;
+      margin: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stage-dot {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #718096;
+      transition: background 0.3s, color 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stage-dot.active {
+      background: #48bb78;
+      color: white;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.9;
+      pointer-events: none;
+      animation: particle-burst 0.7s ease-out forwards;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    @keyframes particle-burst {
+      0% { transform: scale(0) translate(0, 0); opacity: 1; }
+      100% { transform: scale(1.5) translate(var(--dx), var(--dy)); opacity: 0; }
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: var(--color);
+      opacity: 0.8;
+      pointer-events: none;
+      animation: confetti-fall 2.5s ease-out forwards;
+      box-shadow: 0 0 8px rgba(255,255,255,0.4);
+    }
+
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .victory-particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.9;
+      pointer-events: none;
+      animation: victory-burst 1.2s ease-out forwards;
+      box-shadow: 0 0 15px rgba(255,255,255,0.7);
+    }
+
+    @keyframes victory-burst {
+      0% { transform: scale(0) translate(0, 0); opacity: 1; }
+      100% { transform: scale(2.5) translate(var(--dx), var(--dy)); opacity: 0; }
+    }
+
+    .bg-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: bg-particle-float 5s infinite linear;
+    }
+
+    @keyframes bg-particle-float {
+      0% { transform: translateY(100vh) scale(1); opacity: 0.3; }
+      100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+    }
+
+    .screen-shake {
+      animation: screen-shake 0.5s;
+    }
+
+    @keyframes screen-shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-5px, 5px); }
+      50% { transform: translate(5px, -5px); }
+      75% { transform: translate(-3px, 3px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    #start-screen, #game-over-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 20;
+      transition: opacity 0.5s;
+      backdrop-filter: blur(10px);
+    }
+
+    #start-screen.show, #game-over-screen.show {
+      opacity: 1;
+      display: flex;
+    }
+
+    #start-screen:not(.show), #game-over-screen:not(.show) {
+      opacity: 0;
+      display: none;
+    }
+
+    #start-screen h1, #game-over-screen h1 {
+      animation: logo-bounce 1.5s infinite;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    @keyframes logo-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #welcome-message {
+      font-size: 1em;
+      margin: 15px;
+      opacity: 0;
+      animation: fade-in 1s forwards 0.5s;
+      color: #fff;
+    }
+
+    @keyframes fade-in {
+      to { opacity: 1; }
+    }
+
+    button {
+      padding: 10px 25px;
+      font-size: 16px;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+      touch-action: manipulation;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover::after {
+      left: 100%;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button.btn-ranking {
+      background: linear-gradient(135deg, #6c757d, #545b62);
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    #score, #timer {
+      font-size: 18px;
+      margin: 5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.8);
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+
+    #hint-button {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      margin: 0;
+      padding: 8px 15px;
+      font-size: 14px;
+      z-index: 15;
+    }
+
+    #progress-bar {
+      width: 250px;
+      height: 8px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 5px;
+      margin: 10px auto;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      transition: width 0.3s;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+      padding: 24px;
+      border-radius: 16px;
+      width: 90vw;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      font-family: 'Pretendard', Arial, sans-serif;
+      border: 1px solid rgba(255,255,255,0.2);
+      animation: modalSlideIn 0.4s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: scale(0.8) translateY(-20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal h2 {
+      margin: 8px 0 16px 0;
+      font-size: 24px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    .modal p {
+      margin: 12px 0 20px 0;
+      font-size: 16px;
+      color: #495057;
+      line-height: 1.5;
+    }
+
+    .modal .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .ranking-modal {
+      width: 90vw;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 16px;
+      color: #333;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .ranking-table th,
+    .ranking-table td {
+      border: 1px solid #dee2e6;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .ranking-table th {
+      background: linear-gradient(135deg, #343a40, #495057);
+      color: white;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .ranking-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .ranking-table tr:nth-child(odd) {
+      background: #fff;
+    }
+
+    .ranking-table tr:hover {
+      background: #e3f2fd;
+      transform: scale(1.02);
+      transition: all 0.2s ease;
+    }
+
+    .score-input {
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #dee2e6;
+      border-radius: 12px;
+      margin: 12px 0;
+      width: 80%;
+      max-width: 300px;
+      font-family: 'Pretendard', Arial, sans-serif;
+      background: rgba(255,255,255,0.9);
+      transition: all 0.3s ease;
+    }
+
+    .score-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: rgba(255,255,255,1);
+    }
+
+    .loading {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding-bottom: 80px;
+      }
+      #game-board {
+        width: 240px;
+        grid-gap: 6px;
+        padding: 8px;
+        border-radius: 10px;
+      }
+      #game-board.stage-5 {
+        width: 300px;
+      }
+      .card {
+        width: 64px;
+        height: 96px;
+        font-size: 20px;
+      }
+      .stage-5 .card {
+        width: 60px;
+        height: 90px;
+        font-size: 18px;
+      }
+      .stage-5 .card .front, .stage-5 .card .back {
+        font-size: 18px;
+      }
+      #progress-bar {
+        width: 200px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+      button {
+        padding: 8px 20px;
+        font-size: 14px;
+      }
+      #message {
+        font-size: 24px;
+      }
+      #score, #timer {
+        font-size: 16px;
+      }
+      #stage-indicator {
+        font-size: 18px;
+      }
+      .stage-dot {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+      }
+      .modal h2 {
+        font-size: 20px;
+      }
+      .modal p {
+        font-size: 14px;
+      }
+      .ranking-table {
+        font-size: 14px;
+      }
+      .ranking-table th,
+      .ranking-table td {
+        padding: 8px;
+      }
+      .score-input {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, #93c5fd, transparent);
+      border-radius: 50%;
+      animation: sparkleAnim var(--duration) ease-in-out infinite;
+      opacity: 0;
+      box-shadow: 0 0 10px rgba(147, 197, 253, 0.8);
+      pointer-events: none;
+    }
+
+    @keyframes sparkleAnim {
+      0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
+    }
+
+        #intro {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
+      max-width: 90vw;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      z-index: 10;
+      position: relative;
+      border: 3px solid rgba(147, 197, 253, 0.5);
+    }
+
+    #intro h1 {
+      margin: 0;
+      font-size: 36px;
+      color: #0284c7;
+      font-weight: 800;
+    }
+
+    #intro p {
+      margin: 0;
+      font-size: 18px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+     .game-instructions {
+      background: rgba(240, 249, 255, 0.8);
+      border-radius: 15px;
+      padding: 25px;
+      margin: 10px 0;
+      text-align: left;
+      font-size: 14px;
+      color: #0369a1;
+      line-height: 1.6;
+      border: 2px solid rgba(147, 197, 253, 0.3);
+    }
+
+    .game-instructions h3 {
+      margin: 0 0 10px 0;
+      color: #0284c7;
+      font-size: 16px;
+    }
+
+    .intro-btn {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #fff;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      touch-action: manipulation;
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intro-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .intro-btn:hover::before {
+      left: 100%;
+    }
+
+    .intro-btn:active {
+      transform: scale(0.95);
+    }
+
+    .intro-btn.btn-home {
+      background: linear-gradient(135deg, #94a3b8, #64748b);
+      box-shadow: 0 8px 20px rgba(100, 116, 139, 0.3);
+    }
+
+    .game-container {
+      display: none;
+      background: transparent; /* Or rgba(255, 255, 255, 0.1) for a subtle tint */
+  backdrop-filter: none; /* Remove blur if not needed, or reduce to blur(5px) */
+      border-radius: 25px;
+      padding: 8px;
+      box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
+      width: 100vw;
+      max-width: 95vw;
+      height: 100vh;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: center;
+      overflow: hidden;
+      touch-action: manipulation;
+      z-index: 10;
+      position: relative;
+      border: 3px solid rgba(147, 197, 253, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      #intro {
+        padding: 30px 25px;
+      }
+
+      #intro h1 {
+        font-size: 28px;
+      }
+
+      .game-container {
+        padding: 4px;
+        max-width: 100vw;
+        max-height: 100vh;
+        justify-content: space-evenly;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .game-container {
+        padding: 4px;
+        max-height: 100vh;
+        justify-content: space-evenly;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      .game-container {
+        padding: 2px;
+        justify-content: space-evenly;
+      }
+    }
+        #game-over-screen button {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="intro">
+    <h1>🎯 기억력 카드 게임</h1>
+    <p>카드를 뒤집어 매칭하세요!</p>
+    <div class="game-instructions">
+      <h3>📖 게임 방법</h3>
+      <p>• 카드를 뒤집어 동일한 그림을 매칭하세요</p>
+      <p>• 매칭할 때마다 점수 획득</p>
+      <p>• 모든 카드를 매칭하면 다음 스테이지</p>
+      <p>• 하트가 0이 되거나 시간 초과 시 게임 오버</p>
+    </div>
+    <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
+    <button class="intro-btn btn-home" id="goHomeBtn">🏠 홈으로</button>
+  </div>
+    <div id="game-over-screen">
+    <h1>게임 오버!</h1>
+    <p id="final-score"></p>
+    <p>다시 도전하여 최고 점수를 갱신하세요!</p>
+    <button id="restart-button">다시 시작</button>
+    <button id="continue-ad-btn">📺 광고 보고 이어하기</button>
+    <button id="show-ranking-gameover" class="btn-ranking">🏆 랭킹 보기</button>
+  </div>
+  <div id="name-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); align-items:center; justify-content:center; z-index:4000;">
+    <div style="background:linear-gradient(135deg, #fff 0%, #f8f9fa 100%); padding:24px; border-radius:16px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2);">
+      <h3 style="margin:8px 0 16px 0; font-size:20px; background:linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700;">🎉 이름을 입력하세요</h3>
+      <input id="player-name-input" placeholder="이름을 입력하세요 (예: 홍길동)" style="width:88%; padding:12px; border-radius:12px; border:2px solid #dee2e6; font-size:16px; font-family: 'Pretendard', Arial, sans-serif; background:rgba(255,255,255,0.9); transition:all 0.3s ease;">
+      <div style="margin-top:16px; display:flex; gap:12px; justify-content:center;">
+        <button id="save-name-btn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #667eea, #764ba2); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(102, 126, 234, 0.3);">✅ 확인</button>
+        <button id="cancel-name-btn" style="padding:12px 20px; border-radius:12px; border:none; background:linear-gradient(135deg, #6c757d, #545b62); color:white; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease; box-shadow:0 4px 12px rgba(108, 117, 125, 0.3);">❌ 취소</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal-root"></div>
+  <div class="game-container" id="gameContainer" style="display: none;">
+    <h1>기억력 카드 게임</h1>
+    <div id="score">점수: 0</div>
+    <div id="timer">남은 시간: 60초</div>
+    <div id="stage-indicator"></div>
+    <div id="progress-bar"><div id="progress-fill" style="width: 0%;"></div></div>
+    <div id="hearts"></div>
+    <div id="game-board"></div>
+    <div id="message"></div>
+    <button id="hint-button">힌트 (하트 2개)</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
+      authDomain: "gukhyeon-ce3ba.firebaseapp.com",
+      databaseURL: "https://gukhyeon-ce3ba-default-rtdb.firebaseio.com",
+      projectId: "gukhyeon-ce3ba",
+      storageBucket: "gukhyeon-ce3ba.firebasestorage.app",
+      messagingSenderId: "751956972723",
+      appId: "1:751956972723:web:cedb2e5f483529732e8cc6",
+      measurementId: "G-JBBLJNDGY1"
+    };
+
+    // Firebase 초기화
+    let app, db;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      console.log("Firebase initialized successfully");
+    } catch (error) {
+      console.error("Firebase initialization failed:", error);
+    }
+
+    const CONFIG = {
+      MAX_STAGES: 5,
+      HEARTS_PER_STAGE: [10, 8, 6, 6, 5],
+      TIME_LIMITS: [60, 50, 40, 35, 30],
+      CARD_PAIRS: [6, 6, 6, 8, 8],
+      CARD_FLIP_DURATION: 400,
+      WRONG_CARD_RESET_DELAY: 400,
+      SHAKE_ANIMATION_DURATION: 300,
+      GLOW_ANIMATION_DURATION: 800,
+      MESSAGE_DISPLAY_DURATION: 1500,
+      STAGE_TRANSITION_DELAY: 2500,
+      HEART_GAIN_ANIMATION: 300,
+      HEART_LOSE_ANIMATION: 500,
+      PARTICLE_COUNT: 40,
+      PARTICLE_DISTANCE: { MIN: 20, MAX: 120 },
+      CONFETTI_COUNT: 80,
+      VICTORY_PARTICLE_COUNT: 150,
+      VICTORY_PARTICLE_DISTANCE: { MIN: 50, MAX: 250 },
+      PARTICLE_COLORS: ['#ffcccb', '#b2fefa', '#b5f5ec', '#fefcbf', '#fed7aa', '#f5d0fe'],
+      SCORE_PER_MATCH: 100,
+      HINT_COST: 2,
+      COMBO_MULTIPLIER: 1.5,
+      COMBO_THRESHOLD: 2,
+    };
+
+    const STAGE_THEMES = [
+      { bg: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)', cardBack: 'linear-gradient(45deg, #667eea, #764ba2)' },
+      { bg: 'linear-gradient(135deg, #b2fefa 0%, #81ecec 100%)', cardBack: 'linear-gradient(45deg, #00b894, #00cec9)' },
+      { bg: 'linear-gradient(135deg, #fed7aa 0%, #fab1a0 100%)', cardBack: 'linear-gradient(45deg, #e17055, #fdcb6e)' },
+      { bg: 'linear-gradient(135deg, #fd79a8 0%, #e84393 100%)', cardBack: 'linear-gradient(45deg, #d63031, #e84393)' },
+      { bg: 'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)', cardBack: 'linear-gradient(45deg, #6c5ce7, #a29bfe)' },
+    ];
+
+    const audioFiles = {
+      flip: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      match: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      mismatch: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      stageClear: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      gameOver: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      victory: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      hint: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
+      bgm: 'https://www.bensound.com/bensound-music/bensound-ukulele.mp3',
+      button: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3'
+    };
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const sounds = {};
+    let isAudioUnlocked = false;
+
+    async function unlockAudioContext() {
+      if (audioContext.state === 'suspended') {
+        try {
+          await audioContext.resume();
+          console.log('AudioContext resumed successfully');
+          isAudioUnlocked = true;
+        } catch (err) {
+          console.warn('Failed to resume AudioContext:', err);
+        }
+      } else {
+        isAudioUnlocked = true;
+      }
+    }
+
+    function loadSound(key, url) {
+      return new Promise((resolve, reject) => {
+        const audio = new Audio(url);
+        audio.preload = 'auto';
+        audio.volume = key === 'bgm' ? 0.2 : 0.6;
+        if (key === 'bgm') audio.loop = true;
+        audio.addEventListener('canplaythrough', () => {
+          console.log(`Sound ${key} loaded successfully`);
+          resolve(audio);
+        }, { once: true });
+        audio.addEventListener('error', (e) => {
+          console.warn(`Error loading sound ${key}:`, e);
+          resolve(null);
+        }, { once: true });
+        audio.load();
+      });
+    }
+
+    async function initializeSounds() {
+      for (const [key, url] of Object.entries(audioFiles)) {
+        try {
+          sounds[key] = await loadSound(key, url);
+        } catch (err) {
+          console.warn(`Failed to initialize sound ${key}:`, err);
+        }
+      }
+    }
+
+    async function playSound(key) {
+      if (!sounds[key]) {
+        console.warn(`Sound ${key} not found or failed to load`);
+        return;
+      }
+      if (!isAudioUnlocked) {
+        await unlockAudioContext();
+      }
+      try {
+        sounds[key].currentTime = 0;
+        await sounds[key].play();
+        console.log(`Playing sound: ${key}`);
+      } catch (err) {
+        console.warn(`Failed to play sound ${key}:`, err);
+      }
+    }
+
+    // DOM 요소 캐싱
+    const board = document.getElementById("game-board");
+    const heartsDiv = document.getElementById("hearts");
+    const messageDiv = document.getElementById("message");
+    const stageIndicator = document.getElementById("stage-indicator");
+    const scoreDiv = document.getElementById("score");
+    const timerDiv = document.getElementById("timer");
+    const gameOverScreen = document.getElementById("game-over-screen");
+    const restartButton = document.getElementById("restart-button");
+    const hintButton = document.getElementById("hint-button");
+    const showRankingButton = document.getElementById("show-ranking-button");
+    const showRankingGameOver = document.getElementById("show-ranking-gameover");
+    const modalRoot = document.getElementById("modal-root");
+    const progressFill = document.getElementById("progress-fill");
+
+    let stage = 1;
+    let hearts = 0;
+    let score = 0;
+    let timeLeft = 0;
+    let timerInterval = null;
+    let firstCard = null;
+    let lockBoard = false;
+    let cards = [];
+    let comboCount = 0;
+    let playerName = localStorage.getItem('playerName') || '익명';
+
+    function createBackgroundParticles() {
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('bg-particle');
+        particle.style.left = `${Math.random() * 100}vw`;
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 5000);
+      }
+    }
+
+    function startIntroGame() {
+      playerName = localStorage.getItem('playerName') || 'Guest';
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('gameContainer').style.display = 'flex';
+      startGameLogic();
+    }
+
+    function startGameLogic() {
+      if (board) {
+        board.innerHTML = "";
+        board.style.opacity = "0";
+        console.log("Board initialized for new game");
+      }
+      cards = [];
+      createBackgroundParticles();
+      setInterval(createBackgroundParticles, 3000);
+      requestAnimationFrame(() => {
+        startStage();
+        playSound('bgm').catch(err => console.warn("BGM play failed:", err));
+      });
+    }
+
+function goHome() {
+  if (parent.resetIframe) {
+    parent.resetIframe();  // 부모의 iframe 초기화 호출
+  }
+  parent.document.querySelector('h1').style.display = 'block';
+  parent.document.getElementById('carousel').style.display = 'block';
+  parent.document.getElementById('user-info').style.display = 'flex';
+  if (parent.playBGM) {
+    parent.playBGM(false);  // BGM 유지
+  }
+  if ('vibrate' in navigator) {
+    navigator.vibrate(50);
+  }
+}
+
+    function endGame() {
+      if (timerInterval) clearInterval(timerInterval);
+      if (gameOverScreen && scoreDiv) {
+        gameOverScreen.querySelector("#final-score").textContent = `최종 점수: ${score}`;
+        gameOverScreen.classList.add("show");
+        gameOverScreen.style.display = "flex";
+      }
+      playSound('bgm').then(() => {
+        if (sounds.bgm) sounds.bgm.pause();
+      }).catch(err => console.warn("BGM pause failed:", err));
+      if (db) {
+        saveScore(playerName, score).then(() => {
+          showRankingModal(score);
+        }).catch(err => console.error("Score save failed:", err));
+      }
+    }
+
+    function startStage() {
+      console.log(`Starting stage ${stage}`);
+      hearts = CONFIG.HEARTS_PER_STAGE[stage - 1];
+      timeLeft = CONFIG.TIME_LIMITS[stage - 1];
+      comboCount = 0;
+      cards = [];
+      if (scoreDiv) scoreDiv.textContent = `점수: ${score}`;
+      updateHearts();
+      updateStageIndicator();
+      updateTimer();
+      updateProgress();
+      showMessage(`스테이지 ${stage}`);
+      if (document.body) document.body.style.background = STAGE_THEMES[stage - 1].bg;
+      if (board) {
+        board.classList.remove('stage-5');
+        board.innerHTML = "";
+        board.style.opacity = "0";
+        if (stage === 4 || stage === 5) {
+          board.classList.add('stage-5');
+          board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+          board.style.gridTemplateRows = 'repeat(4, 1fr)';
+        } else {
+          board.style.gridTemplateColumns = 'repeat(3, 1fr)';
+          board.style.gridTemplateRows = 'repeat(4, 1fr)';
+        }
+      }
+      cards = generateCards();
+      console.log("Generated cards:", cards);
+      shuffle(cards);
+      cards.forEach((img, index) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        const front = document.createElement("div");
+        front.classList.add("front");
+        const imgElement = document.createElement("img");
+        imgElement.src = img;
+        imgElement.style.width = "80%";
+        imgElement.style.height = "80%";
+        imgElement.style.objectFit = "contain";
+        imgElement.style.borderRadius = "10px";
+        imgElement.style.margin = "auto";
+        front.appendChild(imgElement);
+        const back = document.createElement("div");
+        back.classList.add("back");
+        back.style.background = STAGE_THEMES[stage - 1].cardBack;
+        card.appendChild(front);
+        card.appendChild(back);
+        card.dataset.img = img;
+        card.addEventListener("click", flipCard);
+        card.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          flipCard.call(card);
+        });
+        if (board) {
+          board.appendChild(card);
+          console.log(`Card ${index + 1} appended: ${img}`);
+        }
+      });
+      if (board) {
+        console.log(`Total cards appended: ${board.children.length}`);
+        requestAnimationFrame(() => {
+          board.style.opacity = "1";
+          console.log("Board opacity set to 1");
+        });
+      }
+      startTimer();
+      console.log("startTimer called");
+      if (sounds.bgm) sounds.bgm.volume = 0.2 + (stage - 1) * 0.05;
+    }
+
+    function updateHearts(change = 0) {
+      hearts += change;
+      if (heartsDiv) heartsDiv.textContent = "❤️".repeat(hearts);
+      if (change > 0) {
+        if (heartsDiv) heartsDiv.classList.add("gain");
+        setTimeout(() => heartsDiv && heartsDiv.classList.remove("gain"), CONFIG.HEART_GAIN_ANIMATION);
+      } else if (change < 0) {
+        if (heartsDiv) heartsDiv.classList.add("lose");
+        setTimeout(() => heartsDiv && heartsDiv.classList.remove("lose"), CONFIG.HEART_LOSE_ANIMATION);
+      }
+    }
+
+    function updateScore(points) {
+      score += points;
+      if (scoreDiv) scoreDiv.textContent = `점수: ${score}`;
+      if (points > 0) {
+        if (scoreDiv) scoreDiv.classList.add("gain");
+        setTimeout(() => scoreDiv && scoreDiv.classList.remove("gain"), CONFIG.HEART_GAIN_ANIMATION);
+      }
+    }
+
+    function updateTimer() {
+      if (timerDiv) {
+        timerDiv.textContent = `남은 시간: ${timeLeft}초`;
+        if (timeLeft <= 10) {
+          timerDiv.style.color = "#e53e3e";
+        } else {
+          timerDiv.style.color = "#2d3748";
+        }
+      }
+    }
+
+    function updateProgress() {
+      const matchedPairs = document.querySelectorAll(".matched").length / 2;
+      const totalPairs = CONFIG.CARD_PAIRS[stage - 1];
+      const progress = (matchedPairs / totalPairs) * 100;
+      if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+        console.log(`Progress updated: ${progress}%`);
+      }
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        console.log(`Timer tick: ${timeLeft} seconds remaining`);
+        if (timeLeft <= 0) {
+          playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
+          showMessage("시간 초과!");
+          endGame();
+        }
+      }, 1000);
+      console.log("Timer started with interval ID:", timerInterval);
+    }
+
+    function showMessage(text) {
+      if (messageDiv) {
+        messageDiv.textContent = text;
+        messageDiv.classList.add("show");
+        setTimeout(() => {
+          if (messageDiv) messageDiv.classList.remove("show");
+        }, CONFIG.MESSAGE_DISPLAY_DURATION);
+      }
+    }
+
+    function updateStageIndicator() {
+      if (stageIndicator) {
+        stageIndicator.innerHTML = '';
+        for (let i = 1; i <= CONFIG.MAX_STAGES; i++) {
+          if (i > 1) {
+            const connector = document.createTextNode('-');
+            stageIndicator.appendChild(connector);
+          }
+          const dot = document.createElement('div');
+          dot.classList.add('stage-dot');
+          dot.textContent = i;
+          if (i === stage) dot.classList.add('active');
+          stageIndicator.appendChild(dot);
+        }
+      }
+    }
+
+    function generateCards() {
+      const base = [
+        "assets/card_1.png",
+        "assets/card_2.png",
+        "assets/card_3.png",
+        "assets/card_4.png",
+        "assets/card_5.png",
+        "assets/card_6.png",
+        "assets/card_7.png",
+        "assets/card_8.png",
+        "assets/card_9.png",
+        "assets/card_10.png",
+        "assets/card_11.png",
+        "assets/card_12.png"
+      ];
+      const pairCount = CONFIG.CARD_PAIRS[stage - 1];
+      const selected = base.slice(0, pairCount);
+      return [...selected, ...selected];
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function flipCard() {
+  if (lockBoard || this.classList.contains("flipped")) return;
+  this.classList.add("flipped");
+  if ('vibrate' in navigator) {
+    navigator.vibrate(30); // 짧은 진동 (카드 플립)
+  }
+  playSound('flip').catch(err => console.warn("Flip sound failed:", err));
+  if (!firstCard) {
+    firstCard = this;
+  } else {
+    checkMatch(this);
+  }
+}
+
+    function useHint() {
+      if (hearts < CONFIG.HINT_COST || lockBoard) return;
+      playSound('hint').catch(err => console.warn("Hint sound failed:", err));
+      updateHearts(-CONFIG.HINT_COST);
+      const unmatched = cards.filter((_, i) => !board.children[i].classList.contains("matched"));
+      if (unmatched.length < 2) return;
+      const pairValue = unmatched[0];
+      const pairIndices = [];
+      unmatched.forEach((value, i) => {
+        if (value === pairValue) pairIndices.push(i);
+      });
+      if (pairIndices.length < 2) return;
+      const [index1, index2] = pairIndices;
+      const card1 = board.children[cards.indexOf(pairValue)];
+      const card2 = board.children[cards.lastIndexOf(pairValue)];
+      if (card1 && card2) {
+        card1.classList.add("flipped");
+        card2.classList.add("flipped");
+        setTimeout(() => {
+          if (card1) card1.classList.remove("flipped");
+          if (card2) card2.classList.remove("flipped");
+        }, CONFIG.MESSAGE_DISPLAY_DURATION);
+      }
+    }
+
+    function createMatchParticles(x, y) {
+      for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        const size = Math.random() * 10 + 5;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * (CONFIG.PARTICLE_DISTANCE.MAX - CONFIG.PARTICLE_DISTANCE.MIN) + CONFIG.PARTICLE_DISTANCE.MIN;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        particle.style.setProperty('--dx', `${dx}px`);
+        particle.style.setProperty('--dy', `${dy}px`);
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        if (board) board.appendChild(particle);
+        setTimeout(() => particle.remove(), 700);
+      }
+    }
+
+    function createConfetti() {
+      for (let i = 0; i < CONFIG.CONFETTI_COUNT; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.width = `${Math.random() * 10 + 5}px`;
+        confetti.style.height = `${Math.random() * 10 + 5}px`;
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 2500);
+      }
+    }
+
+    function createVictoryParticles() {
+      document.body.classList.add('screen-shake');
+      setTimeout(() => document.body.classList.remove('screen-shake'), 500);
+      for (let i = 0; i < CONFIG.VICTORY_PARTICLE_COUNT; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('victory-particle');
+        const size = Math.random() * 15 + 8;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * (CONFIG.VICTORY_PARTICLE_DISTANCE.MAX - CONFIG.VICTORY_PARTICLE_DISTANCE.MIN) + CONFIG.VICTORY_PARTICLE_DISTANCE.MIN;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        particle.style.setProperty('--dx', `${dx}px`);
+        particle.style.setProperty('--dy', `${dy}px`);
+        particle.style.left = `${window.innerWidth / 2}px`;
+        particle.style.top = `${window.innerHeight / 2}px`;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 1200);
+      }
+    }
+
+    function checkMatch(secondCard) {
+  lockBoard = true;
+  if (firstCard.dataset.img === secondCard.dataset.img) {
+    firstCard.classList.add("matched");
+    secondCard.classList.add("matched");
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]); // 성공 패턴 진동 (매치)
+    }
+    playSound('match').catch(err => console.warn("Match sound failed:", err));
+    comboCount++;
+    const points = comboCount >= CONFIG.COMBO_THRESHOLD ? Math.round(CONFIG.SCORE_PER_MATCH * CONFIG.COMBO_MULTIPLIER) : CONFIG.SCORE_PER_MATCH;
+    updateHearts(+1);
+    updateScore(points);
+    const rect1 = firstCard.getBoundingClientRect();
+    const rect2 = secondCard.getBoundingClientRect();
+    const boardRect = board.getBoundingClientRect();
+    const centerX = (rect1.left + rect2.left + rect1.width) / 2 - boardRect.left;
+    const centerY = (rect1.top + rect2.top + rect1.height) / 2 - boardRect.top;
+    createMatchParticles(centerX, centerY);
+    updateProgress();
+    firstCard = null;
+    lockBoard = false;
+  } else {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(200); // 오류 진동 (미스매치)
+    }
+    playSound('mismatch').catch(err => console.warn("Mismatch sound failed:", err));
+    firstCard.classList.add("wrong");
+    secondCard.classList.add("wrong");
+    comboCount = 0;
+    updateHearts(-1);
+    setTimeout(() => {
+      if (firstCard) firstCard.classList.remove("flipped", "wrong");
+      if (secondCard) secondCard.classList.remove("flipped", "wrong");
+      firstCard = null;
+      lockBoard = false;
+    }, CONFIG.WRONG_CARD_RESET_DELAY);
+    if (hearts <= 0) {
+      playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
+      showMessage("게임 오버!");
+      endGame();
+      return;
+    }
+  }
+  if (document.querySelectorAll(".matched").length === cards.length) {
+    if (timerInterval) clearInterval(timerInterval);
+    playSound('stageClear').catch(err => console.warn("StageClear sound failed:", err));
+    showMessage(`스테이지 ${stage} 클리어!`);
+    createConfetti();
+    if (stage === CONFIG.MAX_STAGES) {
+      setTimeout(() => {
+        showMessage("모든 스테이지 클리어! 승리!");
+        playSound('victory').catch(err => console.warn("Victory sound failed:", err));
+        createVictoryParticles();
+        endGame();
+      }, CONFIG.STAGE_TRANSITION_DELAY);
+    } else {
+      stage += 1;
+      setTimeout(() => startStage(), CONFIG.STAGE_TRANSITION_DELAY);
+    }
+  }
+}
+
+    async function saveScore(name, score) {
+      if (!db) {
+        console.error("Database not initialized");
+        return;
+      }
+      try {
+        console.log(`Saving score: name=${name}, score=${score}`);
+        await push(ref(db, 'scores/game4'), {
+          name: name || '익명',
+          score: Number(score),
+          timestamp: Date.now()
+        });
+        console.log('Score saved successfully');
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error('Error saving score:', error.message, error.code);
+      }
+    }
+
+    async function showRankingModal(currentScore = null) {
+      if (!modalRoot) {
+        console.error("Modal root element not found");
+        return;
+      }
+      modalRoot.innerHTML = '';
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      const modal = document.createElement('div');
+      modal.className = 'modal ranking-modal';
+      modal.innerHTML = `
+        <h2>🏆 랭킹</h2>
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>순위</th>
+              <th>이름</th>
+              <th>점수</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-table-body">
+            <tr><td colspan="3" class="loading">랭킹을 불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      `;
+      const actions = document.createElement('div');
+      actions.className = 'modal-actions';
+      const close = document.createElement('button');
+      close.className = 'btn btn-close';
+      close.textContent = '❌ 닫기';
+      close.onclick = () => {
+        modalRoot.innerHTML = '';
+      };
+      actions.appendChild(close);
+      modal.appendChild(actions);
+      backdrop.appendChild(modal);
+      modalRoot.appendChild(backdrop);
+      if (!db) {
+        console.error("Database not initialized");
+        document.getElementById('ranking-table-body').innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 데이터베이스 초기화 오류.</td></tr>';
+        return;
+      }
+      try {
+        console.log('Fetching scores from Firebase...');
+        const scoresRef = ref(db, 'scores/game4');
+        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+        const snapshot = await get(topScoresQuery);
+        console.log('Snapshot received:', snapshot.exists());
+        const scores = [];
+        snapshot.forEach(child => {
+          const data = child.val();
+          if (data && typeof data.score === 'number' && typeof data.name === 'string' && typeof data.timestamp === 'number') {
+            scores.push({ name: data.name, score: Number(data.score), timestamp: data.timestamp });
+          }
+        });
+        scores.sort((a, b) => {
+          if (b.score === a.score) {
+            return b.timestamp - a.timestamp;
+          }
+          return b.score - a.score;
+        });
+        const rankingTableBody = document.getElementById('ranking-table-body');
+        if (rankingTableBody) {
+          rankingTableBody.innerHTML = '';
+          if (scores.length === 0) {
+            rankingTableBody.innerHTML = '<tr><td colspan="3">아직 랭킹 데이터가 없습니다.</td></tr>';
+            console.log('No ranking data found.');
+          } else {
+            scores.forEach((entry, index) => {
+              const row = document.createElement('tr');
+              const rank = index + 1;
+              const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}위`;
+              const isCurrentScore = currentScore !== null && entry.score === currentScore && entry.name === playerName;
+              const nameCell = document.createElement('td');
+              nameCell.textContent = entry.name || '익명';
+              const rankCell = document.createElement('td');
+              rankCell.textContent = rankEmoji;
+              const scoreCell = document.createElement('td');
+              scoreCell.textContent = entry.score.toLocaleString();
+              row.appendChild(rankCell);
+              row.appendChild(nameCell);
+              row.appendChild(scoreCell);
+              if (isCurrentScore) {
+                row.style.background = '#e3f2fd';
+              }
+              rankingTableBody.appendChild(row);
+            });
+            console.log(`Rankings loaded: ${scores.length} entries`);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching rankings:', error.message, error.code);
+        const rankingTableBody = document.getElementById('ranking-table-body');
+        if (rankingTableBody) {
+          rankingTableBody.innerHTML = '<tr><td colspan="3">랭킹을 불러올 수 없습니다. 네트워크 연결을 확인해주세요.</td></tr>';
+        }
+      }
+    }
+
+    function showNameModal(callback = null) {
+      console.log('Showing name modal for game start');
+      const modal = document.getElementById('name-modal');
+      const input = document.getElementById('player-name-input');
+      const saveBtn = document.getElementById('save-name-btn');
+      const cancelBtn = document.getElementById('cancel-name-btn');
+      if (!modal || !input || !saveBtn || !cancelBtn) {
+        console.error("Name modal elements not found");
+        if (callback) callback();
+        return;
+      }
+      modal.style.display = 'flex';
+      input.value = playerName || '';
+      input.focus();
+      function onSave() {
+        const name = input.value.trim();
+        if (!name) {
+          alert('이름을 입력하세요.');
+          input.focus();
+          return;
+        }
+        playerName = name;
+        localStorage.setItem('playerName', name);
+        modal.style.display = 'none';
+        cleanup();
+        if (callback) callback();
+      }
+      function onCancel() {
+        modal.style.display = 'none';
+        playerName = '익명';
+        localStorage.setItem('playerName', '익명');
+        cleanup();
+        if (callback) callback();
+      }
+      function onKeydown(e) {
+        if (e.key === 'Enter') onSave();
+      }
+      function cleanup() {
+        saveBtn.removeEventListener('click', onSave);
+        cancelBtn.removeEventListener('click', onCancel);
+        input.removeEventListener('keydown', onKeydown);
+      }
+      saveBtn.removeEventListener('click', onSave);
+      cancelBtn.removeEventListener('click', onCancel);
+      input.removeEventListener('keydown', onKeydown);
+      saveBtn.addEventListener('click', onSave);
+      cancelBtn.addEventListener('click', onCancel);
+      input.addEventListener('keydown', onKeydown);
+      console.log("Name modal event listeners added");
+    }
+
+    function escapeHtml(unsafe) {
+      if (typeof unsafe !== 'string') return '';
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function initializeEventListeners() {
+      document.getElementById('startGameBtn').addEventListener('click', () => {
+        console.log("Start button clicked");
+        unlockAudioContext().then(() => {
+          playSound('button').then(() => {
+            console.log("Button sound played, prompting for name if needed");
+            if (!playerName || playerName === '익명') {
+              showNameModal(startIntroGame);
+            } else {
+              startIntroGame();
+            }
+          }).catch(err => {
+            console.warn("Button sound failed, prompting for name anyway:", err);
+            if (!playerName || playerName === '익명') {
+              showNameModal(startIntroGame);
+            } else {
+              startIntroGame();
+            }
+          });
+        });
+      });
+      document.getElementById('goHomeBtn').addEventListener('click', goHome);
+      if (restartButton) {
+        restartButton.removeEventListener('click', restartGame);
+        restartButton.addEventListener('click', restartGame);
+        restartButton.removeEventListener('touchstart', handleRestartTouch);
+        restartButton.addEventListener('touchstart', handleRestartTouch);
+      }
+      if (hintButton) {
+        hintButton.removeEventListener('click', handleHint);
+        hintButton.addEventListener('click', handleHint);
+        hintButton.removeEventListener('touchstart', handleHintTouch);
+        hintButton.addEventListener('touchstart', handleHintTouch);
+      }
+      if (showRankingButton) {
+        showRankingButton.removeEventListener('click', handleShowRanking);
+        showRankingButton.addEventListener('click', handleShowRanking);
+      }
+      if (showRankingGameOver) {
+        showRankingGameOver.removeEventListener('click', handleShowRankingGameOver);
+        showRankingGameOver.addEventListener('click', handleShowRankingGameOver);
+      }
+    }
+
+    function handleRestartTouch(e) {
+      e.preventDefault();
+      restartGame();
+    }
+
+    function handleHint(e) {
+      console.log("Hint button clicked");
+      playSound('button').catch(err => console.warn("Button sound failed:", err));
+      useHint();
+    }
+
+    function handleHintTouch(e) {
+      e.preventDefault();
+      console.log("Hint button touched");
+      playSound('button').catch(err => console.warn("Button sound failed:", err));
+      useHint();
+    }
+
+    function handleShowRanking() {
+      console.log("Show ranking button clicked");
+      showRankingModal();
+    }
+
+    function handleShowRankingGameOver() {
+      console.log("Show ranking button (game over) clicked");
+      showRankingModal(score);
+    }
+
+    function restartGame() {
+      console.log("Restart button clicked");
+      unlockAudioContext().then(() => {
+        playSound('button').then(() => {
+          if (gameOverScreen) {
+            gameOverScreen.classList.remove("show");
+            gameOverScreen.style.display = "none";
+          }
+          score = 0;
+          stage = 1;
+          playSound('bgm').then(() => {
+            if (sounds.bgm) sounds.bgm.currentTime = 0;
+          }).catch(err => console.warn("BGM reset failed:", err));
+          if (!playerName || playerName === '익명') {
+            showNameModal(() => {
+              startStage();
+            });
+          } else {
+            startStage();
+          }
+        }).catch(err => {
+          console.warn("Button sound failed:", err);
+          if (gameOverScreen) {
+            gameOverScreen.classList.remove("show");
+            gameOverScreen.style.display = "none";
+          }
+          score = 0;
+          stage = 1;
+          if (!playerName || playerName === '익명') {
+            showNameModal(() => {
+              startStage();
+            });
+          } else {
+            startStage();
+          }
+        });
+      });
+    }
+
+        document.addEventListener('DOMContentLoaded', () => {
+      console.log("DOM fully loaded");
+      initializeSounds().then(() => {
+        console.log("All sounds initialized");
+      }).catch(err => {
+        console.warn("Sound initialization failed:", err);
+      });
+      document.getElementById('intro').style.display = 'flex';
+      document.getElementById('gameContainer').style.display = 'none';
+      const nameDisplay = document.createElement('p');
+      nameDisplay.style.color = '#0284c7';
+      nameDisplay.style.fontWeight = '700';
+      nameDisplay.textContent = `👤 플레이어: ${playerName}`;
+      document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
+      initializeEventListeners();
+      if (board) board.style.opacity = "0";
+      try {
+        const styleSheet = document.createElement('style');
+        document.head.appendChild(styleSheet);
+        styleSheet.sheet.insertRule(`.card { transition: transform ${CONFIG.CARD_FLIP_DURATION / 1000}s ease-in-out; }`, 0);
+        styleSheet.sheet.insertRule(`.card.wrong { animation: shake ${CONFIG.SHAKE_ANIMATION_DURATION / 1000}s; }`, 1);
+        styleSheet.sheet.insertRule(`.card.matched .front { animation: glow ${CONFIG.GLOW_ANIMATION_DURATION / 1000}s infinite alternate; }`, 2);
+      } catch (err) {
+        console.error("Failed to insert stylesheet rules:", err);
+      }
+      console.log("Game initialized");
+      document.getElementById('continue-ad-btn').addEventListener('click', showAdModal);
+    });
+        function showAdModal() {
+      const root = document.getElementById('modal-root');
+      root.innerHTML = '';
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <h2>📺 광고 문의</h2>
+        <p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>
+      `;
+      const actions = document.createElement('div');
+      actions.className = 'modal-actions';
+      const close = document.createElement('button');
+      close.className = 'primary';
+      close.textContent = '❌ 닫기';
+      close.onclick = () => {
+        root.innerHTML = '';
+        restartGame();
+      };
+      actions.appendChild(close);
+      modal.appendChild(actions);
+      backdrop.appendChild(modal);
+      root.appendChild(backdrop);
+      if ('vibrate' in navigator) {
+        navigator.vibrate([50]);
+      }
+    }
+  </script>
+</body>
+</html>
