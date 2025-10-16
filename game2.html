@@ -438,6 +438,61 @@
         #statusModal.show {
             display: flex;
         }
+        /* 추가: 탭 스타일 */
+        .tab-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(226, 232, 240, 0.8);
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+        }
+        .tab-btn:hover {
+            transform: translateY(-2px);
+        }
+        .tab-content {
+            text-align: left;
+            font-size: 14px;
+            color: #0284c7;
+        }
+        #playerHighScores {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        #playerHighScores p {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(147, 197, 253, 0.15);
+            border-radius: 8px;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+        #playerHighScores p span {
+            color: #7c3aed;
+            font-weight: 700;
+        }
+        #playerHighScores .empty {
+            text-align: center;
+            color: #94a3b8;
+        }
+
+
         #finalStatus {
             text-align: left;
             font-size: 14px;
@@ -583,8 +638,12 @@
     <!-- 추가: 최종 상태 팝업창 -->
     <div id="statusModal" class="modal-backdrop">
         <div class="modal">
-            <h2>📊 최종 상태</h2>
-            <div id="finalStatus">
+            <h2>📊 게임 결과</h2>
+            <div class="tab-group">
+                <button class="tab-btn active" id="statusTabBtn">최종 상태</button>
+                <button class="tab-btn" id="highScoreTabBtn">내 하이스코어</button>
+            </div>
+            <div id="statusTab" class="tab-content">
                 <h3>🧳 수집한 아이템</h3>
                 <p class="item-count">🔥 연사력 강화: <span id="finalFireRateCount">0</span></p>
                 <p class="item-count">💫 멀티샷: <span id="finalMultiShotCount">0</span></p>
@@ -597,6 +656,10 @@
                 <p>💫 멀티샷: <span id="finalMultiShot">0</span>발</p>
                 <p>🛡️ 보호막: <span id="finalShield">0</span></p>
                 <p>🚀 이알 속도: <span id="finalBulletSpeed">0</span>x</p>
+            </div>
+            <div id="highScoreTab" class="tab-content" style="display: none;">
+                <h3>🏆 내 하이스코어 (최대 10개)</h3>
+                <div id="playerHighScores"></div>
             </div>
             <p style="color: #10b981; font-weight: 700;">터치하여 닫기</p>
         </div>
@@ -667,6 +730,63 @@
                 const li = document.createElement('li');
                 li.textContent = `${row.name} — ${row.score}`;
                 list.appendChild(li);
+            });
+        }
+
+        // 추가: 플레이어의 하이스코어 조회
+        async function loadPlayerHighScores() {
+            try {
+                const scoresRef = ref(db, 'scores/game2');
+                const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(1000)); // 전체 점수 조회 (최대 1000개)
+                const snapshot = await get(topScoresQuery);
+                const allScores = [];
+                const playerScores = [];
+                
+                // 전체 점수 수집
+                snapshot.forEach((child) => {
+                    const scoreData = child.val();
+                    allScores.push(scoreData);
+                    if (scoreData.name === playerName) {
+                        playerScores.push(scoreData);
+                    }
+                });
+                
+                // 점수 내림차순 정렬
+                allScores.sort((a, b) => b.score - a.score);
+                playerScores.sort((a, b) => b.score - a.score);
+                
+                // 플레이어 점수에 전체 순위 추가
+                const rankedPlayerScores = playerScores.slice(0, 10).map(playerScore => {
+                    const globalRank = allScores.findIndex(score => 
+                        score.score === playerScore.score && 
+                        score.name === playerScore.name && 
+                        score.timestamp === playerScore.timestamp
+                    ) + 1;
+                    return { ...playerScore, globalRank };
+                });
+                
+                return rankedPlayerScores;
+            } catch (error) {
+                console.error('Error loading player high scores:', error);
+                return [];
+            }
+        }
+
+        // 추가: 하이스코어 렌더링
+        function renderPlayerHighScores(scores) {
+            const highScoreDiv = document.getElementById('playerHighScores');
+            highScoreDiv.innerHTML = '';
+            if (scores.length === 0) {
+                const p = document.createElement('p');
+                p.className = 'empty';
+                p.textContent = '기록된 점수가 없습니다.';
+                highScoreDiv.appendChild(p);
+                return;
+            }
+            scores.forEach((score, index) => {
+                const p = document.createElement('p');
+                p.innerHTML = `<span>${index + 1}위</span> <span>${score.score}점 (전체 ${score.globalRank}위)</span>`;
+                highScoreDiv.appendChild(p);
             });
         }
 
@@ -937,7 +1057,7 @@
                 const enemy = { 
                     width: 25, 
                     height: 25, 
-                    speed: Math.min(200, 60 + gameState.wave * 10), // 적군 속도 조절 
+                    speed: Math.min(250, 60 + gameState.wave * 10), // 적군 속도 조절 
                     color: '#ff4444', 
                     x: 0, 
                     y: 0, 
@@ -1250,7 +1370,8 @@
         function showStatusModal() {
             const modal = document.getElementById('statusModal');
             modal.classList.add('show');
-            updateUI(); // 최종 상태 업데이트
+            switchTab('status'); // 초기 탭을 상태로 설정
+            updateUI();
             if ('vibrate' in navigator) {
                 navigator.vibrate([50]);
             }
@@ -1265,6 +1386,30 @@
             }
         }
 
+        // 추가: 탭 전환
+        function switchTab(event, tab) {
+            event.stopPropagation(); // 상위 이벤트 전파 차단
+            const statusTab = document.getElementById('statusTab');
+            const highScoreTab = document.getElementById('highScoreTab');
+            const statusBtn = document.getElementById('statusTabBtn');
+            const highScoreBtn = document.getElementById('highScoreTabBtn');
+
+            if (tab === 'status') {
+                statusTab.style.display = 'block';
+                highScoreTab.style.display = 'none';
+                statusBtn.classList.add('active');
+                highScoreBtn.classList.remove('active');
+                updateUI();
+            } else {
+                statusTab.style.display = 'none';
+                highScoreTab.style.display = 'block';
+                statusBtn.classList.remove('active');
+                highScoreBtn.classList.add('active');
+                loadPlayerHighScores().then(renderPlayerHighScores);
+            }
+        }
+
+
         function updateUI() {
             document.getElementById('score').textContent = gameState.score;
             document.getElementById('lives').textContent = gameState.lives;
@@ -1277,17 +1422,19 @@
             document.getElementById('speedUpCount').textContent = gameState.itemCounts.SPEED_UP;
             document.getElementById('shieldCount').textContent = gameState.itemCounts.SHIELD;
             document.getElementById('bulletSpeedCount').textContent = gameState.itemCounts.BULLET_SPEED;
-            // 추가: 최종 상태 모달 업데이트
-            document.getElementById('finalFireRateCount').textContent = gameState.itemCounts.FIRE_RATE;
-            document.getElementById('finalMultiShotCount').textContent = gameState.itemCounts.MULTI_SHOT;
-            document.getElementById('finalSpeedUpCount').textContent = gameState.itemCounts.SPEED_UP;
-            document.getElementById('finalShieldCount').textContent = gameState.itemCounts.SHIELD;
-            document.getElementById('finalBulletSpeedCount').textContent = gameState.itemCounts.BULLET_SPEED;
-            document.getElementById('finalSpeed').textContent = player.speed.toFixed(0);
-            document.getElementById('finalFireRate').textContent = player.fireRate.toFixed(1);
-            document.getElementById('finalMultiShot').textContent = player.multiShot;
-            document.getElementById('finalShield').textContent = player.shield;
-            document.getElementById('finalBulletSpeed').textContent = player.bulletSpeed.toFixed(1);
+            // 최종 상태 탭 업데이트
+            if (document.getElementById('statusTab').style.display !== 'none') {
+                document.getElementById('finalFireRateCount').textContent = gameState.itemCounts.FIRE_RATE;
+                document.getElementById('finalMultiShotCount').textContent = gameState.itemCounts.MULTI_SHOT;
+                document.getElementById('finalSpeedUpCount').textContent = gameState.itemCounts.SPEED_UP;
+                document.getElementById('finalShieldCount').textContent = gameState.itemCounts.SHIELD;
+                document.getElementById('finalBulletSpeedCount').textContent = gameState.itemCounts.BULLET_SPEED;
+                document.getElementById('finalSpeed').textContent = player.speed.toFixed(0);
+                document.getElementById('finalFireRate').textContent = player.fireRate.toFixed(1);
+                document.getElementById('finalMultiShot').textContent = player.multiShot;
+                document.getElementById('finalShield').textContent = player.shield;
+                document.getElementById('finalBulletSpeed').textContent = player.bulletSpeed.toFixed(1);
+            }
         }
 
         function showAdModal() {
@@ -1462,7 +1609,17 @@
                 e.preventDefault();
                 hideStatusModal();
             }, { passive: false });
-
+            // 추가: 탭 버튼 이벤트 리스너
+            document.getElementById('statusTabBtn').addEventListener('click', (e) => switchTab(e, 'status'));
+            document.getElementById('highScoreTabBtn').addEventListener('click', (e) => switchTab(e, 'highScore'));
+            document.getElementById('statusTabBtn').addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+                switchTab(e, 'status');
+            }, { passive: false });
+            document.getElementById('highScoreTabBtn').addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+                switchTab(e, 'highScore');
+            }, { passive: false });
         });
 
     </script>
