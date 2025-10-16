@@ -2,13 +2,18 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>게임 선택 화면</title>
   <link rel="stylesheet" href="https://cdn.pixabay.com/font/pretendard.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
+      -webkit-text-size-adjust: 100%;
+      -moz-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+
     }
     html, body {
       margin: 0;
@@ -17,6 +22,7 @@
       font-family: 'Pretendard', 'Segoe UI', Arial, sans-serif;
       min-height: 100vh;
       overflow: hidden;
+      font-size: 16px;
     }
     body {
       display: flex;
@@ -132,7 +138,7 @@
     /* 타이틀 - 한 줄 처리 */
     h1 {
       color: #0ea5e9;
-      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-size: 2rem;
       font-weight: 800;
       text-align: center;
       letter-spacing: 1px;
@@ -256,7 +262,7 @@
 
     /* 게임 제목 */
     .game-title {
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-size: 1.1rem;
   font-weight: 700;
   color: #0284c7;
   margin-bottom: 8px;

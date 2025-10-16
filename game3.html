@@ -1126,7 +1126,7 @@
             navigator.vibrate(50);
         }
         
-        // iframe 내부에서 실행 중인지 확인
+        // iframe 내부에서 실행 중인지 확인 업로드 확인 
         if (window.parent && window.parent !== window) {
             // iframe 안에서 실행 중이면 부모에게 메시지 전송
             window.parent.postMessage('goHome', '*');
