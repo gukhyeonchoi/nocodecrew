@@ -1128,42 +1128,40 @@ function saveName() {
         radius = newRadius;
         updateCarousel();
       }
-      // BGM 관리 함수
-const bgm = document.getElementById('bgm');
-bgm.volume = 0.3;  // 낮은 볼륨으로 파스텔 느낌 유지
+    });
+    
+    // BGM 관리 함수 (resize 밖으로 이동, duplicate 제거)
+    const bgm = document.getElementById('bgm');
+    bgm.volume = 0.3;
 
-function playBGM() {
-  if (bgm.paused) {
-    bgm.play().catch(err => console.warn('BGM play failed:', err));  // 정책 오류 방지
-  }
-}
+    function playBGM(reset = false) {
+      if (reset) {
+        bgm.currentTime = 0;  // 초기만 reset (사용 안 함)
+      }
+      if (bgm.paused) {
+        bgm.play().catch(err => console.warn('BGM play failed:', err));
+      }
+    }
 
-// 사용자 상호작용 후 BGM 시작 (예: 게임 버튼 클릭 시)
-document.querySelectorAll('.game-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    // 기존 코드 유지
-    // ...
-    playBGM();  // BGM 재생 보장
-  });
-});
+    // 초기 로드 시 1회 재생 (sessionStorage로 체크)
+    window.addEventListener('load', () => {
+      // 기존 코드 유지
+      // ...
+      if (sessionStorage.getItem('bgmStarted') !== 'true' && localStorage.getItem('bgmEnabled') !== 'false') {
+        playBGM(false);  // 초기 재생 (reset 안 함)
+        sessionStorage.setItem('bgmStarted', 'true');  // 세션 동안 1회만
+      }
+    });
 
-// 페이지 visibility 변경 시 BGM 유지 (백그라운드/포커스 아웃 방지)
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    playBGM();
-  } else {
-    bgm.pause();  // 배터리/데이터 절약 (선택적)
-  }
-});
-
-// 로드 시 BGM 준비 (autoplay 대신 첫 상호작용 대기)
-window.addEventListener('load', () => {
-  // 기존 코드
-  // ...
-  if (localStorage.getItem('bgmEnabled') !== 'false') {  // 사용자 설정 저장 예시
-    playBGM();
-  }
-});
+    // visibilitychange: pause/resume (reset 없이)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        if (localStorage.getItem('bgmEnabled') !== 'false') {
+          playBGM(false);  // resume only, no reset
+        }
+      } else {
+        bgm.pause();  // 배터리 절약
+      }
     });
   </script>
     <div id="full-ranking-modal" class="modal">
