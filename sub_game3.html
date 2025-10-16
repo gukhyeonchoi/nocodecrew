@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전투형 2048 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #a8c0ff 0%, #c3cfe2 100%);
+            padding: 10px;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+        }
+
+        h1 {
+            color: #5b7c99;
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 28px;
+                margin-bottom: 8px;
+            }
+        }
+
+        .battle-arena {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 10px rgba(100,149,237,0.15);
+        }
+
+        @media (max-width: 600px) {
+            .battle-arena {
+                padding: 8px;
+                margin-bottom: 8px;
+                border-radius: 10px;
+            }
+        }
+
+        .combatants {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .combatants {
+                gap: 10px;
+            }
+        }
+
+        .character {
+            flex: 1;
+            text-align: center;
+        }
+
+        .character-sprite {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            transition: transform 0.3s;
+        }
+
+        @media (max-width: 600px) {
+            .character-sprite {
+                width: 50px;
+                height: 50px;
+                font-size: 30px;
+                margin: 0 auto 5px;
+            }
+        }
+
+        .character-sprite.attacking {
+            transform: scale(1.2);
+        }
+
+        .player-sprite {
+            background: linear-gradient(135deg, #a8c0ff 0%, #89a5d6 100%);
+        }
+
+        .boss-sprite {
+            background: linear-gradient(135deg, #fbc2eb 0%, #d4a5d3 100%);
+        }
+
+        .character-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #5b7c99;
+        }
+
+        @media (max-width: 600px) {
+            .character-name {
+                font-size: 13px;
+                margin-bottom: 3px;
+            }
+        }
+
+        .player-level {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .hp-bar-container {
+            background: #ddd;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        @media (max-width: 600px) {
+            .hp-bar-container {
+                height: 16px;
+                margin-bottom: 3px;
+            }
+        }
+
+        .hp-bar {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .player-hp {
+            background: linear-gradient(90deg, #a8c0ff 0%, #89a5d6 100%);
+        }
+
+        .boss-hp {
+            background: linear-gradient(90deg, #fbc2eb 0%, #d4a5d3 100%);
+        }
+
+        .hp-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 600px) {
+            .hp-text {
+                line-height: 16px;
+                font-size: 10px;
+            }
+        }
+
+        .stats {
+            font-size: 14px;
+            color: #7a99bb;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .stats {
+                font-size: 11px;
+                margin-top: 3px;
+            }
+        }
+
+        .vs {
+            font-size: 36px;
+            font-weight: bold;
+            color: #89a5d6;
+            text-shadow: 2px 2px 4px rgba(100,149,237,0.3);
+        }
+
+        @media (max-width: 600px) {
+            .vs {
+                font-size: 24px;
+            }
+        }
+
+        .boss-level {
+            background: #f5576c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .score-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .score-container {
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+        }
+
+        .score-box {
+            background: #b3cde0;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .score-box {
+                padding: 6px 12px;
+            }
+        }
+
+        .score-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .score-label {
+                font-size: 11px;
+            }
+        }
+
+        .score-value {
+            font-size: 24px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .score-value {
+                font-size: 18px;
+                margin-top: 3px;
+            }
+        }
+
+        #game-board {
+            background: #b3cde0;
+            border-radius: 10px;
+            padding: 15px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 600px) {
+            #game-board {
+                padding: 10px;
+                margin: 8px 0;
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(4, 70px);
+                grid-template-rows: repeat(4, 70px);
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .grid {
+                grid-template-columns: repeat(4, 60px);
+                grid-template-rows: repeat(4, 60px);
+                gap: 8px;
+            }
+        }
+
+        .cell {
+            background: rgba(227, 242, 253, 0.5);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #5b7c99;
+            transition: all 0.15s ease;
+        }
+
+        .cell[data-value="2"] { background: #e3f2fd; }
+        .cell[data-value="4"] { background: #bbdefb; }
+        .cell[data-value="8"] { background: #90caf9; color: #fff; }
+        .cell[data-value="16"] { background: #64b5f6; color: #fff; }
+        .cell[data-value="32"] { background: #42a5f5; color: #fff; }
+        .cell[data-value="64"] { background: #2196f3; color: #fff; }
+        .cell[data-value="128"] { background: #1e88e5; color: #fff; font-size: 32px; }
+        .cell[data-value="256"] { background: #1976d2; color: #fff; font-size: 32px; }
+        .cell[data-value="512"] { background: #1565c0; color: #fff; font-size: 32px; }
+        .cell[data-value="1024"] { background: #0d47a1; color: #fff; font-size: 28px; }
+        .cell[data-value="2048"] { background: #0a2f6e; color: #fff; font-size: 28px; }
+
+        @media (max-width: 600px) {
+            .cell {
+                font-size: 28px;
+            }
+            .cell[data-value="128"], 
+            .cell[data-value="256"], 
+            .cell[data-value="512"] { 
+                font-size: 24px; 
+            }
+            .cell[data-value="1024"], 
+            .cell[data-value="2048"] { 
+                font-size: 20px; 
+            }
+        }
+
+        @media (max-width: 400px) {
+            .cell {
+                font-size: 24px;
+            }
+            .cell[data-value="128"], 
+            .cell[data-value="256"], 
+            .cell[data-value="512"] { 
+                font-size: 20px; 
+            }
+            .cell[data-value="1024"], 
+            .cell[data-value="2048"] { 
+                font-size: 18px; 
+            }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .buttons {
+                margin-top: 8px;
+                gap: 8px;
+            }
+        }
+
+        button {
+            background: #8f7a66;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        @media (max-width: 600px) {
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        button:hover {
+            background: #9f8a76;
+        }
+
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(227, 242, 253, 0.98);
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 50px rgba(100,149,237,0.3);
+        }
+
+        .game-over h2 {
+            font-size: 48px;
+            color: #5b7c99;
+            margin-bottom: 20px;
+        }
+
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(168, 192, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            cursor: pointer;
+        }
+
+        .start-screen-content {
+            background: rgba(168, 192, 255, 0.95);
+            padding: 60px 80px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 50px rgba(100,149,237,0.4);
+            transition: all 0.3s ease;
+        }
+
+        .start-screen:hover .start-screen-content {
+            background: rgba(168, 192, 255, 0.98);
+            transform: scale(1.05);
+        }
+
+        .start-screen h2 {
+            font-size: 48px;
+            color: white;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(91, 124, 153, 0.3);
+        }
+
+        .start-screen p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 15px;
+        }
+
+        .ranking-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(227, 242, 253, 0.98);
+            padding: 30px 40px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 150;
+            box-shadow: 0 10px 40px rgba(100,149,237,0.4);
+            min-width: 280px;
+        }
+
+        .ranking-popup h3 {
+            font-size: 28px;
+            color: #5b7c99;
+            margin: 0 0 15px 0;
+        }
+
+        .ranking-popup p {
+            font-size: 18px;
+            color: #7a99bb;
+            margin: 0 0 20px 0;
+        }
+
+        .ranking-popup button {
+            padding: 10px 25px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .start-screen-content {
+                padding: 40px 50px;
+            }
+            .start-screen h2 {
+                font-size: 36px;
+            }
+            .start-screen p {
+                font-size: 16px;
+            }
+            .ranking-popup {
+                padding: 25px 30px;
+                min-width: 240px;
+            }
+            .ranking-popup h3 {
+                font-size: 24px;
+            }
+            .ranking-popup p {
+                font-size: 16px;
+            }
+        }
+
+        .instructions {
+            margin-top: 15px;
+            color: #5b7c99;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .instructions {
+                margin-top: 8px;
+                font-size: 11px;
+            }
+        }
+
+        .damage-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 24px;
+            color: #89a5d6;
+            animation: floatUp 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>전투형 2048</h1>
+        
+        <div class="battle-arena">
+            <div class="combatants">
+                <div class="character">
+                    <div class="player-level" id="player-level">LV.1</div>
+                    <div class="character-sprite player-sprite" id="player-sprite">🗡️</div>
+                    <div class="character-name">플레이어</div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar player-hp" id="player-hp-bar"></div>
+                        <div class="hp-text" id="player-hp-text"></div>
+                    </div>
+                    <div class="stats">공격력: <span id="player-atk">0</span></div>
+                </div>
+
+                <div class="vs">⚔️</div>
+
+                <div class="character">
+                    <div class="boss-level" id="boss-level">BOSS LV.1</div>
+                    <div class="character-sprite boss-sprite" id="boss-sprite">👹</div>
+                    <div class="character-name" id="boss-name">슬라임 킹</div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar boss-hp" id="boss-hp-bar"></div>
+                        <div class="hp-text" id="boss-hp-text"></div>
+                    </div>
+                    <div class="stats">공격력: <span id="boss-atk">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="score-container">
+            <div class="score-box">
+                <div class="score-label">점수</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-label">처치한 보스</div>
+                <div class="score-value" id="boss-kills">0</div>
+            </div>
+        </div>
+
+        <div id="game-board">
+            <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="buttons">
+            <button onclick="newGame()">새 게임</button>
+            <button onclick="showRanking()">랭킹</button>
+        </div>
+
+        <div class="instructions">
+            <p>방향키로 타일을 움직이세요!</p>
+            <p>점수가 높을수록 더 강한 공격을 합니다!</p>
+        </div>
+    </div>
+
+    <div class="start-screen" id="start-screen" onclick="startGame()" style="display: flex;">
+        <div class="start-screen-content">
+            <h2>TOUCH TO START</h2>
+            <p>방향키 또는 스와이프로 플레이</p>
+        </div>
+    </div>
+
+    <div class="ranking-popup" id="ranking-popup">
+        <h3>🏆 랭킹</h3>
+        <p>랭킹 시스템은 준비 중입니다!</p>
+        <button onclick="closeRanking()">닫기</button>
+    </div>
+
+    <div class="game-over" id="game-over">
+        <h2>게임 오버!</h2>
+        <p style="font-size: 20px; margin-bottom: 10px;">최종 점수: <span id="final-score"></span></p>
+        <p style="font-size: 18px; margin-bottom: 20px;">처치한 보스: <span id="final-boss-kills"></span></p>
+        <button onclick="newGame()">다시 시작</button>
+    </div>
+
+    <script>
+        let board = [];
+        let score = 0;
+        let bossKills = 0;
+        let gameOver = false;
+
+        let playerHP = 500;
+        let playerMaxHP = 500;
+        let playerAtk = 0;
+        let playerLevel = 1;
+        let previousPlayerLevel = 1;
+
+        let bossLevel = 1;
+        let bossHP = 500;
+        let bossMaxHP = 500;
+        let bossAtk = 10;
+        let bossName = "슬라임 킹";
+        let bossEmoji = "👹";
+
+        let combatInterval = null;
+        let gameStarted = false;
+        let hasPlayedBefore = false;
+
+        const bossData = [
+            { name: "슬라임 킹", emoji: "👹", hp: 300, atk: 10 },
+            { name: "고블린 전사", emoji: "👺", hp: 600, atk: 20 },
+            { name: "오크 대장", emoji: "🧟", hp: 1000, atk: 35 },
+            { name: "다크 나이트", emoji: "⚔️", hp: 1500, atk: 50 },
+            { name: "드래곤 로드", emoji: "🐉", hp: 2500, atk: 75 },
+            { name: "리치 킹", emoji: "💀", hp: 4000, atk: 100 },
+            { name: "악마 군주", emoji: "😈", hp: 6000, atk: 150 },
+            { name: "고대 드래곤", emoji: "🔥", hp: 9000, atk: 200 },
+            { name: "파괴의 신", emoji: "👿", hp: 13000, atk: 300 },
+            { name: "절대자", emoji: "💫", hp: 20000, atk: 500 }
+        ];
+
+        function initGame() {
+            board = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
+            score = 0;
+            bossKills = 0;
+            gameOver = false;
+            gameStarted = false;
+            
+            playerHP = 500;
+            playerMaxHP = 500;
+            playerLevel = 1;
+            previousPlayerLevel = 1;
+            bossLevel = 1;
+            
+            spawnBoss(1);
+            
+            addNewTile();
+            addNewTile();
+            updateBoard();
+            updateScore();
+            updateBattle();
+
+            if (combatInterval) clearInterval(combatInterval);
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            gameStarted = true;
+            hasPlayedBefore = true;
+            combatInterval = setInterval(combat, 2000);
+        }
+
+        function spawnBoss(level) {
+            const bossIndex = Math.min(level - 1, bossData.length - 1);
+            const boss = bossData[bossIndex];
+            
+            bossLevel = level;
+            bossName = boss.name;
+            bossEmoji = boss.emoji;
+            bossMaxHP = boss.hp;
+            bossHP = boss.hp;
+            bossAtk = boss.atk;
+            
+            document.getElementById('boss-level').textContent = `BOSS LV.${level}`;
+            document.getElementById('boss-name').textContent = bossName;
+            document.getElementById('boss-sprite').textContent = bossEmoji;
+            
+            updateBattle();
+        }
+
+        function combat() {
+            if (gameOver) return;
+
+            playerAtk = Math.floor(score / 2) + 20;
+            playerLevel = Math.floor(playerAtk / 50) + 1;
+
+            // 점수가 0이면 플레이어는 공격하지 않음
+            if (score === 0) {
+                // 보스만 공격
+                setTimeout(() => {
+                    const bossSprite = document.getElementById('boss-sprite');
+                    bossSprite.classList.add('attacking');
+                    setTimeout(() => bossSprite.classList.remove('attacking'), 300);
+                    
+                    const playerSprite = document.getElementById('player-sprite');
+                    playerHP -= bossAtk;
+                    showDamage(playerSprite, bossAtk);
+                    
+                    if (playerHP <= 0) {
+                        playerHP = 0;
+                        endGame();
+                    }
+                    
+                    updateBattle();
+                }, 1000);
+                return;
+            }
+
+            const playerSprite = document.getElementById('player-sprite');
+            const bossSprite = document.getElementById('boss-sprite');
+            
+            playerSprite.classList.add('attacking');
+            setTimeout(() => playerSprite.classList.remove('attacking'), 300);
+            
+            bossHP -= playerAtk;
+            showDamage(bossSprite, playerAtk);
+
+            if (bossHP <= 0) {
+                bossHP = 0;
+                bossKills++;
+                setTimeout(() => {
+                    spawnBoss(bossLevel + 1);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    bossSprite.classList.add('attacking');
+                    setTimeout(() => bossSprite.classList.remove('attacking'), 300);
+                    
+                    playerHP -= bossAtk;
+                    showDamage(playerSprite, bossAtk);
+                    
+                    if (playerHP <= 0) {
+                        playerHP = 0;
+                        endGame();
+                    }
+                    
+                    updateBattle();
+                }, 1000);
+                
+                return;
+            }
+
+            updateBattle();
+        }
+
+        function showDamage(element, damage) {
+            const rect = element.getBoundingClientRect();
+            const damageText = document.createElement('div');
+            damageText.className = 'damage-text';
+            damageText.textContent = `-${damage}`;
+            damageText.style.left = rect.left + rect.width / 2 + 'px';
+            damageText.style.top = rect.top + 'px';
+            damageText.style.position = 'fixed';
+            document.body.appendChild(damageText);
+            
+            setTimeout(() => damageText.remove(), 1000);
+        }
+
+        function updateBattle() {
+            const playerHPPercent = (playerHP / playerMaxHP) * 100;
+            const bossHPPercent = (bossHP / bossMaxHP) * 100;
+            
+            playerAtk = score === 0 ? 0 : Math.floor(score / 2) + 20;
+            playerLevel = Math.floor(playerAtk / 50) + 1;
+            
+            // 레벨업 체크 및 HP 회복
+            if (playerLevel > previousPlayerLevel) {
+                const levelDiff = playerLevel - previousPlayerLevel;
+                playerHP = Math.min(playerHP + (levelDiff * 5), playerMaxHP);
+                previousPlayerLevel = playerLevel;
+            }
+            
+            document.getElementById('player-level').textContent = `LV.${playerLevel}`;
+            document.getElementById('player-hp-bar').style.width = playerHPPercent + '%';
+            document.getElementById('player-hp-text').textContent = `${playerHP}/${playerMaxHP}`;
+            document.getElementById('player-atk').textContent = playerAtk;
+            
+            document.getElementById('boss-hp-bar').style.width = bossHPPercent + '%';
+            document.getElementById('boss-hp-text').textContent = `${bossHP}/${bossMaxHP}`;
+            document.getElementById('boss-atk').textContent = bossAtk;
+            
+            document.getElementById('boss-kills').textContent = bossKills;
+        }
+
+        function endGame() {
+            gameOver = true;
+            if (combatInterval) {
+                clearInterval(combatInterval);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('final-score').textContent = score;
+                document.getElementById('final-boss-kills').textContent = bossKills;
+                document.getElementById('game-over').style.display = 'block';
+            }, 500);
+        }
+
+        function addNewTile() {
+            const emptyCells = [];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (board[i][j] === 0) {
+                        emptyCells.push({row: i, col: j});
+                    }
+                }
+            }
+            
+            if (emptyCells.length > 0) {
+                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                board[randomCell.row][randomCell.col] = Math.random() < 0.9 ? 2 : 4;
+            }
+        }
+
+        function updateBoard() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    const value = board[i][j];
+                    if (value !== 0) {
+                        cell.textContent = value;
+                        cell.setAttribute('data-value', value);
+                    }
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function move(direction) {
+            if (gameOver) return;
+            
+            // 게임이 시작되지 않았으면 시작
+            if (!gameStarted) {
+                startGame();
+            }
+            
+            let moved = false;
+
+            if (direction === 'left') {
+                moved = moveLeft();
+            } else if (direction === 'right') {
+                moved = moveRight();
+            } else if (direction === 'up') {
+                moved = moveUp();
+            } else if (direction === 'down') {
+                moved = moveDown();
+            }
+
+            if (moved) {
+                addNewTile();
+                updateBoard();
+                updateScore();
+                
+                playerAtk = score === 0 ? 0 : Math.floor(score / 2) + 20;
+                playerLevel = Math.floor(playerAtk / 50) + 1;
+                
+                updateBattle();
+                
+                if (checkGameOver()) {
+                    endGame();
+                }
+            }
+        }
+
+        function moveLeft() {
+            let moved = false;
+            for (let i = 0; i < 4; i++) {
+                let row = board[i].filter(val => val !== 0);
+                for (let j = 0; j < row.length - 1; j++) {
+                    if (row[j] === row[j + 1]) {
+                        row[j] *= 2;
+                        score += row[j];
+                        row.splice(j + 1, 1);
+                    }
+                }
+                while (row.length < 4) {
+                    row.push(0);
+                }
+                if (JSON.stringify(board[i]) !== JSON.stringify(row)) {
+                    moved = true;
+                }
+                board[i] = row;
+            }
+            return moved;
+        }
+
+        function moveRight() {
+            let moved = false;
+            for (let i = 0; i < 4; i++) {
+                let row = board[i].filter(val => val !== 0);
+                for (let j = row.length - 1; j > 0; j--) {
+                    if (row[j] === row[j - 1]) {
+                        row[j] *= 2;
+                        score += row[j];
+                        row.splice(j - 1, 1);
+                        j--;
+                    }
+                }
+                while (row.length < 4) {
+                    row.unshift(0);
+                }
+                if (JSON.stringify(board[i]) !== JSON.stringify(row)) {
+                    moved = true;
+                }
+                board[i] = row;
+            }
+            return moved;
+        }
+
+        function moveUp() {
+            let moved = false;
+            for (let j = 0; j < 4; j++) {
+                let col = [];
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== 0) {
+                        col.push(board[i][j]);
+                    }
+                }
+                for (let i = 0; i < col.length - 1; i++) {
+                    if (col[i] === col[i + 1]) {
+                        col[i] *= 2;
+                        score += col[i];
+                        col.splice(i + 1, 1);
+                    }
+                }
+                while (col.length < 4) {
+                    col.push(0);
+                }
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== col[i]) {
+                        moved = true;
+                    }
+                    board[i][j] = col[i];
+                }
+            }
+            return moved;
+        }
+
+        function moveDown() {
+            let moved = false;
+            for (let j = 0; j < 4; j++) {
+                let col = [];
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== 0) {
+                        col.push(board[i][j]);
+                    }
+                }
+                for (let i = col.length - 1; i > 0; i--) {
+                    if (col[i] === col[i - 1]) {
+                        col[i] *= 2;
+                        score += col[i];
+                        col.splice(i - 1, 1);
+                        i--;
+                    }
+                }
+                while (col.length < 4) {
+                    col.unshift(0);
+                }
+                for (let i = 0; i < 4; i++) {
+                    if (board[i][j] !== col[i]) {
+                        moved = true;
+                    }
+                    board[i][j] = col[i];
+                }
+            }
+            return moved;
+        }
+
+        function checkGameOver() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (board[i][j] === 0) {
+                        return false;
+                    }
+                    if (j < 3 && board[i][j] === board[i][j + 1]) {
+                        return false;
+                    }
+                    if (i < 3 && board[i][j] === board[i + 1][j]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function newGame() {
+            document.getElementById('game-over').style.display = 'none';
+            
+            // 이미 한 번 플레이한 적이 있다면 바로 시작
+            if (hasPlayedBefore) {
+                initGame();
+                gameStarted = true;
+                combatInterval = setInterval(combat, 2000);
+            } else {
+                // 처음이라면 touch to start 팝업 표시
+                document.getElementById('start-screen').style.display = 'flex';
+                initGame();
+            }
+        }
+
+        function showRanking() {
+            document.getElementById('ranking-popup').style.display = 'block';
+        }
+
+        function closeRanking() {
+            document.getElementById('ranking-popup').style.display = 'none';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                move('left');
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                move('right');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                move('up');
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                move('down');
+            }
+        });
+
+        // 터치 이벤트 처리 (모바일 스와이프)
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        // 터치 이동 중 스크롤 방지
+        document.addEventListener('touchmove', (e) => {
+            if (gameStarted && !gameOver) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const minSwipeDistance = 30;
+
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                return;
+            }
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // 좌우 스와이프
+                if (deltaX > 0) {
+                    move('right');
+                } else {
+                    move('left');
+                }
+            } else {
+                // 상하 스와이프
+                if (deltaY > 0) {
+                    move('down');
+                } else {
+                    move('up');
+                }
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
