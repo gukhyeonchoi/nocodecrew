@@ -503,15 +503,34 @@
                 transform: translateY(-50px);
             }
         }
+
+
+
+            /* 태블릿 (768px 이하) */
         @media (max-width: 768px) {
             #intro {
-                padding: 30px 20px;
+                padding: 25px 20px;
             }
             #intro h1 {
                 font-size: 28px;
             }
+            .game-instructions {
+                font-size: 14px;
+                padding: 15px;
+            }
             .game-container {
                 padding: 15px;
+                width: 90%;
+            }
+            .score-board {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+            .score-label {
+                font-size: 12px;
+            }
+            .score-value {
+                font-size: 20px;
             }
             .character-sprite {
                 width: 60px;
@@ -524,12 +543,274 @@
             .combatants {
                 gap: 10px;
             }
+            .character-level {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+            .character-name {
+                font-size: 14px;
+            }
+            .stats {
+                font-size: 12px;
+            }
+            .grid {
+                gap: 8px;
+            }
+            .cell {
+                font-size: clamp(20px, 4.5vw, 32px);
+            }
+            .btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
         }
+
+
+                /* 작은 모바일 (480px 이하) */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px 10px;
+            }
+            #intro {
+                padding: 20px 15px;
+                max-width: 95vw;
+            }
+            #intro h1 {
+                font-size: 24px;
+            }
+            #intro p {
+                font-size: 16px;
+            }
+            .game-instructions {
+                font-size: 13px;
+                padding: 12px;
+                margin: 8px 0;
+            }
+            .game-instructions h3 {
+                font-size: 14px;
+            }
+            .intro-btn {
+                padding: 14px 28px;
+                font-size: 16px;
+            }
+            .game-container {
+                padding: 12px;
+                width: 95vw;
+            }
+            .score-board {
+                padding: 10px 12px;
+                gap: 8px;
+                font-size: 16px;
+            }
+            .score-label {
+                font-size: 11px;
+            }
+            .score-value {
+                font-size: 18px;
+            }
+            .battle-arena {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            .character-sprite {
+                width: 50px;
+                height: 50px;
+                font-size: 30px;
+            }
+            .character-level {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+            .character-name {
+                font-size: 13px;
+            }
+            .hp-bar-container {
+                height: 20px;
+            }
+            .hp-text {
+                font-size: 11px;
+                line-height: 20px;
+            }
+            .stats {
+                font-size: 11px;
+            }
+            .vs {
+                font-size: 20px;
+            }
+            .combatants {
+                gap: 8px;
+            }
+            #game-board {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            .grid {
+                gap: 6px;
+            }
+            .cell {
+                font-size: clamp(18px, 4vw, 28px);
+                border-radius: 8px;
+            }
+            .cell[data-value="128"],
+            .cell[data-value="256"],
+            .cell[data-value="512"] {
+                font-size: clamp(16px, 3.5vw, 24px);
+            }
+            .cell[data-value="1024"],
+            .cell[data-value="2048"] {
+                font-size: clamp(14px, 3vw, 22px);
+            }
+            .game-controls {
+                gap: 8px;
+                margin-top: 12px;
+            }
+            .btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+            .modal {
+                padding: 30px 20px;
+                max-width: 90vw;
+            }
+            .modal h2 {
+                font-size: 26px;
+            }
+            .modal p {
+                font-size: 16px;
+            }
+            .modal .score-highlight {
+                font-size: 24px;
+            }
+            .modal button {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+
+
+        /* 아주 작은 모바일 (360px 이하) */
+        @media (max-width: 360px) {
+            body {
+                padding: 3px 8px;
+            }
+            #intro {
+                padding: 15px 12px;
+            }
+            #intro h1 {
+                font-size: 20px;
+            }
+            #intro p {
+                font-size: 14px;
+            }
+            .game-instructions {
+                font-size: 12px;
+                padding: 10px;
+            }
+            .intro-btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+            .game-container {
+                padding: 10px;
+            }
+            .score-board {
+                padding: 8px 10px;
+                gap: 6px;
+                font-size: 14px;
+            }
+            .score-label {
+                font-size: 10px;
+            }
+            .score-value {
+                font-size: 16px;
+            }
+            .battle-arena {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            .character-sprite {
+                width: 45px;
+                height: 45px;
+                font-size: 26px;
+            }
+            .character-level {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+            .character-name {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+            .hp-bar-container {
+                height: 18px;
+                margin-bottom: 6px;
+            }
+            .hp-text {
+                font-size: 10px;
+                line-height: 18px;
+            }
+            .stats {
+                font-size: 10px;
+            }
+            .vs {
+                font-size: 18px;
+            }
+            .combatants {
+                gap: 6px;
+            }
+            #game-board {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            .grid {
+                gap: 5px;
+            }
+            .cell {
+                font-size: clamp(16px, 3.5vw, 24px);
+                border-radius: 6px;
+            }
+            .cell[data-value="128"],
+            .cell[data-value="256"],
+            .cell[data-value="512"] {
+                font-size: clamp(14px, 3vw, 20px);
+            }
+            .cell[data-value="1024"],
+            .cell[data-value="2048"] {
+                font-size: clamp(12px, 2.5vw, 18px);
+            }
+            .game-controls {
+                gap: 6px;
+                margin-top: 10px;
+            }
+            .btn {
+                padding: 8px 14px;
+                font-size: 11px;
+            }
+            .modal {
+                padding: 25px 15px;
+            }
+            .modal h2 {
+                font-size: 22px;
+            }
+            .modal p {
+                font-size: 14px;
+            }
+            .modal .score-highlight {
+                font-size: 20px;
+            }
+            .modal button {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+
+
+
     </style>
 </head>
 <body>
     <div id="intro">
-        <h1>🎯 배틀 2048 v16</h1>
+        <h1>🎯 싸워라! 2048</h1>
         <p>타일을 합쳐서 보스를 물리치세요!</p>
         
         <div class="game-instructions">
