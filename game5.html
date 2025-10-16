@@ -858,6 +858,14 @@ class AppleNumberGame {
         this.startStage(1);
     }
 
+    vibrate(pattern) {
+        // Vibration API 지원 여부 확인
+        if ('vibrate' in navigator) {
+            navigator.vibrate(pattern);
+        }
+    }
+
+
     initElements() {
         this.gameBoard = document.getElementById('gameBoard');
         this.stageInfo = document.getElementById('stageInfo');
@@ -963,6 +971,8 @@ class AppleNumberGame {
                         this.removeTiles(selected);
                         this.combo++;
                         const points = selected.length * 100 * this.combo;
+
+                        this.vibrate(50);
                         
                         if (this.isInfiniteMode) {
                             this.infiniteScore += points;
