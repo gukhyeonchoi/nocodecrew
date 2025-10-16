@@ -204,13 +204,13 @@
     }
 
     /* 3D 도넛 컨테이너 */
-    .btn-container {
+     .btn-container {
   position: absolute;
   left: 50%;
   top: 35%;
   transform: translate(-50%, -50%) rotateX(-45deg); /* 회전 방향 반대로 */
-  width: clamp(320px, 45vw, 450px);
-  height: clamp(320px, 45vw, 450px);
+  width: clamp(350px, 50vw, 500px);
+  height: clamp(350px, 50vw, 500px);
   perspective: 1000px;
   z-index: 10;
   transform-style: preserve-3d;
@@ -223,7 +223,7 @@
   top: 50%;
   margin-left: calc(-1 * clamp(60px, 9vw, 90px));
   margin-top: calc(-1 * clamp(100px, 15vw, 150px));
-  width: clamp(120px, 18vw, 180px);
+  width: clamp(140px, 20vw, 200px);
   height: clamp(300px, 40vw, 400px);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
@@ -262,12 +262,12 @@
   margin-bottom: 8px;
   text-align: center;
   -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
-  transform: translateZ(0.01px); /* 3D 왜곡 보정 */
+  transform: rotateX(45deg) scaleY(1.414) translateZ(0.01px); /* 3D 왜곡 보정 */
   backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
 }
 
     /* 게임 번호 배지 */
-    .game-number {
+.game-number {
       position: absolute;
       top: 8px;
       right: 8px;
@@ -287,6 +287,7 @@
         0 3px 8px rgba(125, 211, 252, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
       animation: badgePulse 2s ease-in-out infinite;
+      transform: rotateX(45deg) scaleY(1.414);
     }
 
     @keyframes badgePulse {
@@ -312,7 +313,7 @@
     0 4px 8px rgba(56, 189, 248, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
-  transform: translateZ(0.01px); /* 3D 왜곡 보정 */
+  transform: rotateX(45deg) scaleY(1.414) translateZ(0.01px); /* 3D 왜곡 보정 */
   backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
 }
 
@@ -341,7 +342,7 @@
   flex-direction: column;
   gap: 3px;
   -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
-  transform: translateZ(0.01px); /* 3D 왜곡 보정 */
+  transform: rotateX(45deg) scaleY(1.414) translateZ(0.01px); /* 3D 왜곡 보정 */
   backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
 }
 
@@ -361,7 +362,7 @@
 }
 
 .ranking-list span:nth-child(2) { /* 이름 부분에만 최대 너비 적용 */
-  max-width: 40%; /* 이름이 너무 길면 ...으로 잘림 */
+  max-width: 50%; /* 이름이 너무 길면 ...으로 잘림 */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -515,11 +516,11 @@
     /* 반응형 */
     @media (max-width: 600px) {
       .btn-container {
-    max-width: 320px;
-    height: 320px;
+    max-width: 350px;
+    height: 350px;
   }
   .game-card {
-    width: 120px;
+    width: 140px;
     height: 350px; /* 모바일에서도 높이 증가 */
     padding: 6px;
   }
@@ -556,11 +557,11 @@
 
     @media (min-width: 768px) {
       .btn-container {
-    max-width: 450px;
-    height: 450px;
+    max-width: 500px;
+    height: 500px;
   }
   .game-card {
-    width: 180px;
+    width: 200px;
     height: 500px; /* 데스크탑 높이 증가 */
     padding: 10px;
   }
@@ -594,7 +595,7 @@
         font-size: clamp(2rem, 4vw, 2.5rem);
       }
     }
-    .view-full-ranking {
+.view-full-ranking {
   margin-top: 8px;
   padding: 4px 0;
   font-size: clamp(0.7rem, 1.5vw, 0.9rem);
@@ -607,6 +608,7 @@
   width: 100%;
   transition: all 0.3s ease;
   box-shadow: 0 3px 6px rgba(165, 180, 252, 0.3);
+  transform: rotateX(45deg) scaleY(1.414);
 }
 
 .view-full-ranking:hover {
