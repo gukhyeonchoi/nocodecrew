@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -896,7 +897,6 @@
       gameOver: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
       victory: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
       hint: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3',
-      bgm: 'https://www.bensound.com/bensound-music/bensound-ukulele.mp3',
       button: 'https://cdn.pixabay.com/audio/2022/03/10/audio_6b1a7650c2.mp3'
     };
 
@@ -1022,19 +1022,19 @@
       });
     }
 
-function goHome() {
-  if (parent.resetIframe) {
-    parent.resetIframe();  // 부모의 iframe 초기화 호출
-  }
-  parent.document.querySelector('h1').style.display = 'block';
-  parent.document.getElementById('carousel').style.display = 'block';
-  parent.document.getElementById('user-info').style.display = 'flex';
-  if (parent.playBGM) {
-    parent.playBGM(false);  // BGM 유지
-  }
-  if ('vibrate' in navigator) {
-    navigator.vibrate(50);
-  }
+window.goHome = function() {
+    if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+    }
+    
+    // iframe 내부에서 실행 중인지 확인 
+    if (window.parent && window.parent !== window) {
+        // iframe 안에서 실행 중이면 부모에게 메시지 전송
+        window.parent.postMessage('goHome', '*');
+    } else {
+        // 직접 실행 중이면 바로 이동
+        window.location.href = 'index.html';
+    }
 }
 
     function endGame() {
@@ -1595,7 +1595,7 @@ function goHome() {
           });
         });
       });
-      document.getElementById('goHomeBtn').addEventListener('click', goHome);
+      document.getElementById('goHomeBtn').addEventListener('click', window.goHome);
       if (restartButton) {
         restartButton.removeEventListener('click', restartGame);
         restartButton.addEventListener('click', restartGame);

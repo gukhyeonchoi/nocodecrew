@@ -499,14 +499,14 @@
         <div class="modal">
             <h2>🎮 게임 오버</h2>
             <p>최종 점수: <span id="finalScore" style="color: #7c3aed; font-weight: 800; font-size: 24px;">0</span></p>
-            
-            <input type="text" id="playerNameInput" placeholder="이름을 입력하세요 (최대 12자)" maxlength="12">
-            
-            <div class="ranking-in-modal" id="rankingInModal"></div>
-            
+            <p style="color: #10b981; font-weight: 700;">랭킹에 등록되었습니다!</p>
+            <div class="ranking-in-modal" id="rankingInModal">
+                <h3>🏆 랭킹</h3>
+            </div>
             <div class="button-group">
                 <button class="secondary" onclick="restartGame()">🔄 재도전</button>
-                <button class="primary" id="saveScoreBtn">💾 저장하고 홈으로</button>
+                <button class="primary" id="continueAdBtn">📺 광고 보고 이어하기</button>
+                <button class="secondary" onclick="goHome()">🏠 홈으로</button>
             </div>
         </div>
     </div>
@@ -599,7 +599,7 @@
 
         // 게임 로직
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: true });
         
         // 이미지 스무딩 비활성화 (픽셀 아트용)
         ctx.imageSmoothingEnabled = false;
@@ -746,12 +746,21 @@
 
         // 게임 컨테이너에서만 터치 이벤트 활성화
         const gameContainer = document.getElementById('gameContainer');
+        const gameControls = document.querySelector('.game-controls');
 
         gameContainer.addEventListener('touchstart', (e) => {
             if (gameState.gameOver || gameState.paused) return;
-            e.preventDefault();
             
+            // 버튼 영역 터치 체크
             const touch = e.changedTouches[0];
+            const controlsRect = gameControls.getBoundingClientRect();
+            
+            // 버튼 영역이면 조이스틱 생성 안함
+            if (touch.clientY >= controlsRect.top) {
+                return;
+            }
+            
+            e.preventDefault();
             joystick.id = touch.identifier;
             
             showJoystick(touch.clientX, touch.clientY);
@@ -808,7 +817,7 @@
 
         function fire(dir) {
             if (gameState.gameOver) return;
-            const speed = 520 * player.bulletSpeed;
+            const speed = 700 * player.bulletSpeed;  // 520 → 700으로 증가
             for (let i = 0; i < player.multiShot; i++) {
                 const angle = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i / 2) * 0.3;
                 const finalDir = {
@@ -848,7 +857,22 @@
             const spawnPerSecond = 1.2 + gameState.wave * 0.35;
             const p = 1 - Math.exp(-spawnPerSecond * dt);
             if (Math.random() < p) {
-                const enemy = { width: 25, height: 25, speed: 60 + gameState.wave * 30, color: '#ff4444', x: 0, y: 0, vx: 0, vy: 0 };
+                // 웨이브 10 단위마다 체력 증가 (1, 11, 21, 31...)
+                const hpMultiplier = Math.floor(gameState.wave / 10);
+                const enemyHp = 1 + hpMultiplier;
+                
+                const enemy = { 
+                    width: 25, 
+                    height: 25, 
+                    speed: 60 + gameState.wave * 30, 
+                    color: '#ff4444', 
+                    x: 0, 
+                    y: 0, 
+                    vx: 0, 
+                    vy: 0,
+                    hp: enemyHp,
+                    maxHp: enemyHp
+                };
                 const side = Math.floor(Math.random() * 4);
                 if (side === 0) { enemy.x = Math.random() * canvas.width; enemy.y = -enemy.height; }
                 if (side === 1) { enemy.x = Math.random() * canvas.width; enemy.y = canvas.height; }
@@ -946,15 +970,34 @@
             for (let i = bullets.length - 1; i >= 0; i--) {
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     if (rectHit(bullets[i], enemies[j])) {
-                        const ex = enemies[j].x + enemies[j].width / 2;
-                        const ey = enemies[j].y + enemies[j].height / 2;
-                        createExplosion(ex, ey, '#ff8844', 10);
-                        spawnItem(ex, ey);
+                        const e = enemies[j];
+                        
+                        // 체력 감소
+                        e.hp = (e.hp || 1) - 1;
+                        
+                        // 총알 제거
                         bullets.splice(i, 1);
-                        enemies.splice(j, 1);
-                        gameState.enemyCount--;
-                        gameState.score += 50;
-                        if (gameState.score > 0 && gameState.score % 500 === 0) { gameState.wave++; gameState.maxEnemies += 3; }
+                        
+                        // 체력이 0이 되면 적 제거
+                        if (e.hp <= 0) {
+                            const ex = e.x + e.width / 2;
+                            const ey = e.y + e.height / 2;
+                            createExplosion(ex, ey, '#ff8844', 10);
+                            spawnItem(ex, ey);
+                            enemies.splice(j, 1);
+                            gameState.enemyCount--;
+                            gameState.score += 50;
+                            if (gameState.score > 0 && gameState.score % 500 === 0) { 
+                                gameState.wave++; 
+                                gameState.maxEnemies += 3; 
+                            }
+                        } else {
+                            // 체력이 남았을 때 작은 이펙트
+                            const ex = e.x + e.width / 2;
+                            const ey = e.y + e.height / 2;
+                            createExplosion(ex, ey, '#ffaa44', 3);
+                        }
+                        
                         continue outer;
                     }
                 }
@@ -1024,6 +1067,7 @@
                     }
                     
                     ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
                     ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                     ctx.restore();
@@ -1060,6 +1104,7 @@
                     }
                     
                     ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(b.x + b.width / 2, b.y + b.height / 2);
                     const angle = Math.atan2(b.vy, b.vx);
                     ctx.rotate(angle);
@@ -1088,9 +1133,37 @@
                     }
                     
                     ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(e.x + e.width / 2, e.y + e.height / 2);
+                    
+                    // 체력이 감소하면 빨간색으로 깜빡임
+                    if (e.hp < e.maxHp) {
+                        const flashIntensity = 0.5;
+                        ctx.globalAlpha = 0.7;
+                        ctx.filter = `hue-rotate(${Math.sin(gameState.time * 20) * 30}deg) brightness(1.3)`;
+                    }
+                    
                     ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+                    ctx.filter = 'none';
+                    ctx.globalAlpha = 1;
                     ctx.restore();
+                    
+                    // 체력바 표시 (체력이 최대가 아닐 때)
+                    if (e.hp < e.maxHp) {
+                        const barWidth = e.width;
+                        const barHeight = 3;
+                        const barX = e.x;
+                        const barY = e.y - 8;
+                        const hpRatio = e.hp / e.maxHp;
+                        
+                        // 배경 (빨간색)
+                        ctx.fillStyle = '#ff4444';
+                        ctx.fillRect(barX, barY, barWidth, barHeight);
+                        
+                        // 현재 체력 (초록색)
+                        ctx.fillStyle = '#4ade80';
+                        ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+                    }
                 } else {
                     const cx = e.x + e.width / 2, cy = e.y + e.height / 2;
                     ctx.fillStyle = e.color;
@@ -1102,6 +1175,20 @@
                     ctx.closePath();
                     ctx.shadowColor = e.color; ctx.shadowBlur = 5;
                     ctx.fill(); ctx.shadowBlur = 0;
+                    
+                    // 체력바 표시 (기본 그래픽용)
+                    if (e.hp && e.hp < e.maxHp) {
+                        const barWidth = e.width;
+                        const barHeight = 3;
+                        const barX = e.x;
+                        const barY = e.y - 8;
+                        const hpRatio = e.hp / e.maxHp;
+                        
+                        ctx.fillStyle = '#ff4444';
+                        ctx.fillRect(barX, barY, barWidth, barHeight);
+                        ctx.fillStyle = '#4ade80';
+                        ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+                    }
                 }
             }
 
@@ -1138,27 +1225,78 @@
             document.getElementById('multiShot').textContent = player.multiShot;
         }
 
+        function showAdModal() {
+            const modal = document.getElementById('gameOverModal');
+            modal.classList.remove('show');
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop';
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal';
+            modalContent.innerHTML = `
+                <h2>📺 광고 문의</h2>
+                <p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>
+            `;
+            const actions = document.createElement('div');
+            actions.className = 'button-group';
+            const close = document.createElement('button');
+            close.className = 'primary';
+            close.textContent = '❌ 닫기';
+            close.onclick = () => {
+                backdrop.remove();
+                restartGame();
+            };
+            actions.appendChild(close);
+            modalContent.appendChild(actions);
+            backdrop.appendChild(modalContent);
+            document.body.appendChild(backdrop);
+            if ('vibrate' in navigator) {
+                navigator.vibrate([50]);
+            }
+        }
+
+
+
+
+
         async function endGame() {
             gameState.gameOver = true;
             document.getElementById('finalScore').textContent = gameState.score;
-            document.getElementById('playerNameInput').value = localStorage.getItem('playerName') || '';
             
-            const rankings = await loadHighScores();
-            const rankingDiv = document.getElementById('rankingInModal');
-            const medals = ['🥇', '🥈', '🥉'];
-            rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
-            if (rankings.length === 0) {
-                rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
-            } else {
-                rankings.slice(0, 5).forEach((entry, index) => {
-                    const medal = index < 3 ? medals[index] : `${index + 1}위`;
-                    rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
-                });
+            try {
+                console.log('Saving final score:', gameState.score, 'for player:', playerName);
+                const scoreData = {
+                    name: playerName || '익명',
+                    score: Number(gameState.score),
+                    timestamp: Date.now()
+                };
+                await push(ref(db, 'scores/game2'), scoreData);
+                console.log('Score saved successfully');
+                const rankings = await loadHighScores();
+                const rankingDiv = document.getElementById('rankingInModal');
+                const medals = ['🥇', '🥈', '🥉'];
+                rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+                if (rankings.length === 0) {
+                    rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
+                } else {
+                    rankings.slice(0, 5).forEach((entry, index) => {
+                        const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                        rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+                    });
+                }
+                document.getElementById('gameOverModal').classList.add('show');
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
+            } catch (error) {
+                console.error('Score save error:', error);
+                const rankingDiv = document.getElementById('rankingInModal');
+                rankingDiv.innerHTML = '<h3>🏆 랭킹</h3><p style="text-align: center;">⚠️ 랭킹 등록 실패: ' + error.message + '</p>';
+                document.getElementById('gameOverModal').classList.add('show');
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
             }
-            
-            document.getElementById('gameOverModal').classList.add('show');
-            scoreSaved = false;
-        }
+         }
 
         window.restartGame = function() {
             gameState = { score: 0, lives: 3, wave: 1, gameOver: false, paused: false, keys: {}, enemyCount: 0, maxEnemies: 15, time: 0, shotTimer: 0, baseFireRate: 0.22 };
@@ -1182,7 +1320,8 @@
             document.getElementById('intro').style.display = 'none';
             const gameContainer = document.getElementById('gameContainer');
             gameContainer.style.display = 'flex';
-            document.getElementById('leaderboard').style.display = 'block';
+            // 랭킹 표시 제거
+            // document.getElementById('leaderboard').style.display = 'block';
             
             // 캔버스 크기 조정
             const canvas = document.getElementById('gameCanvas');
@@ -1204,29 +1343,30 @@
             requestAnimationFrame(loop);
         }
 
-        function goHome() {
-            window.location.href = 'index.html';
-        }
-
+function goHome() {
+  const parentDoc = window.parent.document;
+  const frame = parentDoc.getElementById('game-frame');
+  if (frame) {
+    frame.src = 'about:blank';  // iframe 초기화
+    frame.style.display = 'none';
+  }
+  parentDoc.querySelector('h1').style.display = 'block';
+  parentDoc.getElementById('carousel').style.display = 'block';
+  parentDoc.getElementById('user-info').style.display = 'flex';
+  if (window.parent.playBGM) {
+    window.parent.playBGM(false);  // BGM 유지
+  }
+  if ('vibrate' in navigator) {
+    navigator.vibrate(50);
+  }
+}
         document.getElementById('startGameBtn').addEventListener('click', startGame);
         document.getElementById('goHomeBtn').addEventListener('click', goHome);
         document.getElementById('resetGameBtn').addEventListener('click', restartGame);
         document.getElementById('goHomeBtn2').addEventListener('click', goHome);
 
-        document.getElementById('saveScoreBtn').addEventListener('click', async () => {
-            if (scoreSaved) {
-                goHome();
-                return;
-            }
-            const name = document.getElementById('playerNameInput').value.trim();
-            if (!name) {
-                alert('이름을 입력해주세요 😊');
-                return;
-            }
-            await saveHighScore(name, gameState.score);
-            scoreSaved = true;
-            document.getElementById('saveScoreBtn').textContent = '✅ 저장 완료';
-            setTimeout(goHome, 1000);
+        document.getElementById('continueAdBtn').addEventListener('click', () => {
+            showAdModal();
         });
 
         document.addEventListener('DOMContentLoaded', () => {

@@ -499,14 +499,14 @@
         <div class="modal">
             <h2>🎮 게임 오버</h2>
             <p>최종 점수: <span id="finalScore" style="color: #7c3aed; font-weight: 800; font-size: 24px;">0</span></p>
-            
-            <input type="text" id="playerNameInput" placeholder="이름을 입력하세요 (최대 12자)" maxlength="12">
-            
-            <div class="ranking-in-modal" id="rankingInModal"></div>
-            
+            <p style="color: #10b981; font-weight: 700;">랭킹에 등록되었습니다!</p>
+            <div class="ranking-in-modal" id="rankingInModal">
+                <h3>🏆 랭킹</h3>
+            </div>
             <div class="button-group">
                 <button class="secondary" onclick="restartGame()">🔄 재도전</button>
-                <button class="primary" id="saveScoreBtn">💾 저장하고 홈으로</button>
+                <button class="primary" id="continueAdBtn">📺 광고 보고 이어하기</button>
+                <button class="secondary" onclick="goHome()">🏠 홈으로</button>
             </div>
         </div>
     </div>
@@ -1225,27 +1225,78 @@
             document.getElementById('multiShot').textContent = player.multiShot;
         }
 
+        function showAdModal() {
+            const modal = document.getElementById('gameOverModal');
+            modal.classList.remove('show');
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop';
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal';
+            modalContent.innerHTML = `
+                <h2>📺 광고 문의</h2>
+                <p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>
+            `;
+            const actions = document.createElement('div');
+            actions.className = 'button-group';
+            const close = document.createElement('button');
+            close.className = 'primary';
+            close.textContent = '❌ 닫기';
+            close.onclick = () => {
+                backdrop.remove();
+                restartGame();
+            };
+            actions.appendChild(close);
+            modalContent.appendChild(actions);
+            backdrop.appendChild(modalContent);
+            document.body.appendChild(backdrop);
+            if ('vibrate' in navigator) {
+                navigator.vibrate([50]);
+            }
+        }
+
+
+
+
+
         async function endGame() {
             gameState.gameOver = true;
             document.getElementById('finalScore').textContent = gameState.score;
-            document.getElementById('playerNameInput').value = localStorage.getItem('playerName') || '';
             
-            const rankings = await loadHighScores();
-            const rankingDiv = document.getElementById('rankingInModal');
-            const medals = ['🥇', '🥈', '🥉'];
-            rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
-            if (rankings.length === 0) {
-                rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
-            } else {
-                rankings.slice(0, 5).forEach((entry, index) => {
-                    const medal = index < 3 ? medals[index] : `${index + 1}위`;
-                    rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
-                });
+            try {
+                console.log('Saving final score:', gameState.score, 'for player:', playerName);
+                const scoreData = {
+                    name: playerName || '익명',
+                    score: Number(gameState.score),
+                    timestamp: Date.now()
+                };
+                await push(ref(db, 'scores/game2'), scoreData);
+                console.log('Score saved successfully');
+                const rankings = await loadHighScores();
+                const rankingDiv = document.getElementById('rankingInModal');
+                const medals = ['🥇', '🥈', '🥉'];
+                rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+                if (rankings.length === 0) {
+                    rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
+                } else {
+                    rankings.slice(0, 5).forEach((entry, index) => {
+                        const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                        rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+                    });
+                }
+                document.getElementById('gameOverModal').classList.add('show');
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
+            } catch (error) {
+                console.error('Score save error:', error);
+                const rankingDiv = document.getElementById('rankingInModal');
+                rankingDiv.innerHTML = '<h3>🏆 랭킹</h3><p style="text-align: center;">⚠️ 랭킹 등록 실패: ' + error.message + '</p>';
+                document.getElementById('gameOverModal').classList.add('show');
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
             }
-            
-            document.getElementById('gameOverModal').classList.add('show');
-            scoreSaved = false;
-        }
+         }
 
         window.restartGame = function() {
             gameState = { score: 0, lives: 3, wave: 1, gameOver: false, paused: false, keys: {}, enemyCount: 0, maxEnemies: 15, time: 0, shotTimer: 0, baseFireRate: 0.22 };
@@ -1314,20 +1365,8 @@ function goHome() {
         document.getElementById('resetGameBtn').addEventListener('click', restartGame);
         document.getElementById('goHomeBtn2').addEventListener('click', goHome);
 
-        document.getElementById('saveScoreBtn').addEventListener('click', async () => {
-            if (scoreSaved) {
-                goHome();
-                return;
-            }
-            const name = document.getElementById('playerNameInput').value.trim();
-            if (!name) {
-                alert('이름을 입력해주세요 😊');
-                return;
-            }
-            await saveHighScore(name, gameState.score);
-            scoreSaved = true;
-            document.getElementById('saveScoreBtn').textContent = '✅ 저장 완료';
-            setTimeout(goHome, 1000);
+        document.getElementById('continueAdBtn').addEventListener('click', () => {
+            showAdModal();
         });
 
         document.addEventListener('DOMContentLoaded', () => {

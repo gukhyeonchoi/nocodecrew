@@ -1377,7 +1377,7 @@
                 retry.addEventListener('click', () => {
                     console.log('Home button clicked');
                     root.innerHTML = '';
-                    window.location.href = 'index.html';
+                    window.goHome();
                 });
                 const next = document.createElement('button');
                 next.className = 'btn btn-next';
@@ -1438,7 +1438,8 @@
                 home.className = 'btn btn-home';
                 home.textContent = '🏠 홈으로';
                 home.onclick = () => {
-                    window.location.href = 'index.html';
+                    root.innerHTML = '';
+                    window.goHome();
                 };
                 actions.appendChild(retry);
                 actions.appendChild(continueBtn);
@@ -1671,20 +1672,20 @@
         function resetGame() {
             if (game) game.resetGame();
         }
-        function goHome() {
-  if (parent.resetIframe) {
-    parent.resetIframe();  // 부모의 iframe 초기화 호출
-  }
-  parent.document.querySelector('h1').style.display = 'block';
-  parent.document.getElementById('carousel').style.display = 'block';
-  parent.document.getElementById('user-info').style.display = 'flex';
-  if (parent.playBGM) {
-    parent.playBGM(false);  // BGM 유지
-  }
-  if ('vibrate' in navigator) {
-    navigator.vibrate(50);
-  }
-}
+        window.goHome = function() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+            
+            // iframe 내부에서 실행 중인지 확인 
+            if (window.parent && window.parent !== window) {
+                // iframe 안에서 실행 중이면 부모에게 메시지 전송
+                window.parent.postMessage('goHome', '*');
+            } else {
+                // 직접 실행 중이면 바로 이동
+                window.location.href = 'index.html';
+            }
+        }
         document.addEventListener('DOMContentLoaded', function() {
             createBackgroundEffects();
             document.getElementById('intro').style.display = 'flex';
@@ -1695,9 +1696,9 @@
             nameDisplay.textContent = `👤 플레이어: ${playerName}`;
             document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
             document.getElementById('startGameBtn').addEventListener('click', startIntroGame);
-            document.getElementById('goHomeBtn').addEventListener('click', goHome);
+            document.getElementById('goHomeBtn').addEventListener('click', window.goHome);
             document.getElementById('resetGameBtn').addEventListener('click', resetGame);
-            document.getElementById('goHomeBtn2').addEventListener('click', goHome);
+            document.getElementById('goHomeBtn2').addEventListener('click', window.goHome);
             console.log('Game loaded at', new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }));
         });
     </script>

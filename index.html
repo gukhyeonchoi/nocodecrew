@@ -2,18 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
   <title>게임 선택 화면</title>
   <link rel="stylesheet" href="https://cdn.pixabay.com/font/pretendard.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
-      -webkit-text-size-adjust: 100%;
-      -moz-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-
     }
     html, body {
       margin: 0;
@@ -22,7 +17,6 @@
       font-family: 'Pretendard', 'Segoe UI', Arial, sans-serif;
       min-height: 100vh;
       overflow: hidden;
-      font-size: 16px;
     }
     body {
       display: flex;
@@ -138,7 +132,7 @@
     /* 타이틀 - 한 줄 처리 */
     h1 {
       color: #0ea5e9;
-      font-size: 2rem;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
       font-weight: 800;
       text-align: center;
       letter-spacing: 1px;
@@ -262,7 +256,7 @@
 
     /* 게임 제목 */
     .game-title {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 700;
   color: #0284c7;
   margin-bottom: 8px;
@@ -286,13 +280,14 @@
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 0.9rem;
+      font-size: clamp(0.7rem, 1.5vw, 0.9rem);
       color: #fff;
       text-shadow: 0 1px 3px rgba(14, 165, 233, 0.5);
       box-shadow: 
         0 3px 8px rgba(125, 211, 252, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
       animation: badgePulse 2s ease-in-out infinite;
+      transform: rotateX(45deg) scaleY(1.414);
     }
 
     @keyframes badgePulse {
@@ -303,7 +298,7 @@
     /* 게임 버튼 */
 .game-btn {
   padding: 6px 0;
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
   border-radius: 10px;
   background: linear-gradient(135deg, #38bdf8, #818cf8);
   color: #fff;
@@ -318,6 +313,7 @@
     0 4px 8px rgba(56, 189, 248, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
+  transform: rotateX(45deg) scaleY(1.414) translateZ(0.01px); /* 3D 왜곡 보정 */
   backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
 }
 
@@ -335,7 +331,7 @@
     /* 랭킹 리스트 - 가시성 개선 */
 .ranking-list {
   margin-top: 10px;
-  font-size: 0.6rem;
+  font-size: clamp(0.4rem, 0.9vw, 0.6rem);
   color: #0369a1;
   text-align: left;
   width: 100%;
@@ -440,13 +436,13 @@
     .modal-content h2 {
       color: #0284c7;
       margin: 0 0 8px 0;
-      font-size: 1.8rem;
+      font-size: clamp(1.4rem, 3vw, 1.8rem);
       font-weight: 800;
     }
 
     .modal-content p {
       color: #64748b;
-      font-size: 1rem;
+      font-size: clamp(0.8rem, 1.5vw, 1rem);
       margin: 0 0 15px 0;
     }
 
@@ -456,7 +452,7 @@
       margin: 8px 0;
       border: 2px solid rgba(147, 197, 253, 0.5);
       border-radius: 12px;
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
       font-family: 'Pretendard', sans-serif;
       background: rgba(240, 249, 255, 0.8);
       color: #0c4a6e;
@@ -486,7 +482,7 @@
       padding: 10px 15px;
       border: none;
       border-radius: 12px;
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -557,7 +553,7 @@
         max-width: 280px;
       }
       h1 {
-        font-size: 1.6rem;
+        font-size: clamp(1.4rem, 3.5vw, 1.8rem);
       }
     }
 
@@ -599,13 +595,13 @@
         max-width: 350px;
       }
       h1 {
-        font-size: 2.2rem;
+        font-size: clamp(2rem, 4vw, 2.5rem);
       }
     }
 .view-full-ranking {
   margin-top: 8px;
   padding: 4px 0;
-  font-size: 0.9rem;
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
   border-radius: 8px;
   background: linear-gradient(135deg, #a5b4fc, #c4b5fd);
   color: #fff;
@@ -615,6 +611,7 @@
   width: 100%;
   transition: all 0.3s ease;
   box-shadow: 0 3px 6px rgba(165, 180, 252, 0.3);
+  transform: rotateX(45deg) scaleY(1.414);
 }
 
 .view-full-ranking:hover {
