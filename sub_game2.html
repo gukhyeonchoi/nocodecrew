@@ -31,7 +31,6 @@
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
-        /* 배경 효과 */
         .sparkle {
             position: absolute;
             width: 8px;
@@ -217,7 +216,6 @@
             background: linear-gradient(145deg, #94a3b8, #64748b);
             box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
         }
-        /* 조이스틱 - 터치 시에만 표시 */
         #joystick {
             position: fixed;
             width: 140px;
@@ -253,7 +251,6 @@
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
             touch-action: none;
         }
-        /* 리더보드 */
         #leaderboard {
             position: fixed;
             top: 20px;
@@ -289,7 +286,6 @@
             text-align: center;
             list-style: none;
         }
-        /* 게임오버 모달 */
         .modal-backdrop {
             position: fixed;
             left: 0;
@@ -417,6 +413,39 @@
             border-radius: 8px;
             margin: 5px 0;
         }
+        #item-counter {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(147, 197, 253, 0.5);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0284c7;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        #item-counter h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        .item-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        .item-count span {
+            color: #7c3aed;
+            font-weight: 700;
+        }
         @media (max-width: 768px) {
             #intro {
                 padding: 30px 20px;
@@ -442,6 +471,15 @@
                 right: 10px;
                 padding: 10px;
             }
+            #item-counter {
+                top: 10px;
+                left: 10px;
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            .item-count {
+                font-size: 10px;
+            }
         }
     </style>
 </head>
@@ -449,22 +487,26 @@
     <div id="intro">
         <h1>🎯 탕탕특공대</h1>
         <p>적을 물리치고 최고 점수에 도전하세요!</p>
-        
         <div class="game-instructions">
             <h3>📖 게임 방법</h3>
-            <p>• 조이스틱으로 이동 (PC는 방향키)</p>
+            <p>• 조이스틱으로 이동</p>
             <p>• 자동으로 가장 가까운 적 공격</p>
             <p>• 아이템을 수집해 파워업</p>
-            <p>• P키로 일시정지, R키로 재시작</p>
         </div>
-        
         <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
         <button class="intro-btn btn-home" id="goHomeBtn">🏠 홈으로</button>
     </div>
 
     <div class="game-container" id="gameContainer">
+        <div id="item-counter">
+            <h3>🧳 아이템</h3>
+            <div class="item-count">🔥 연사력 강화: <span id="fireRateCount">0</span></div>
+            <div class="item-count">💫 멀티샷: <span id="multiShotCount">0</span></div>
+            <div class="item-count">🏃 이동속도: <span id="speedUpCount">0</span></div>
+            <div class="item-count">🛡️ 보호막: <span id="shieldCount">0</span></div>
+            <div class="item-count">🚀 이알 속도: <span id="bulletSpeedCount">0</span></div>
+        </div>
         <canvas id="gameCanvas" width="400" height="736"></canvas>
-        
         <div class="game-ui">
             <div>🎯 점수: <span id="score">0</span></div>
             <div>❤️ 생명: <span id="lives">3</span></div>
@@ -473,20 +515,17 @@
             <div>🔥 연사: <span id="fireRate">1.0</span>x</div>
             <div>💫 멀티: <span id="multiShot">1</span>발</div>
         </div>
-
         <div class="game-controls">
             <button class="btn" id="resetGameBtn">🔄 재시작</button>
             <button class="btn btn-home" id="goHomeBtn2">🏠 홈으로</button>
         </div>
     </div>
 
-    <!-- 조이스틱 (터치 시에만 표시) -->
     <div id="joystick">
         <div id="joyBase"></div>
         <div id="joyStick"></div>
     </div>
 
-    <!-- 리더보드 -->
     <div id="leaderboard" style="display: none;">
         <h3>🏆 랭킹 TOP 10</h3>
         <ol id="lbList">
@@ -494,7 +533,6 @@
         </ol>
     </div>
 
-    <!-- 게임오버 모달 -->
     <div id="gameOverModal" class="modal-backdrop">
         <div class="modal">
             <h2>🎮 게임 오버</h2>
@@ -532,7 +570,6 @@
         let playerName = localStorage.getItem('playerName') || 'Guest';
         let scoreSaved = false;
 
-        // 배경 효과 생성
         function createBackgroundEffects() {
             for (let i = 0; i < 30; i++) {
                 const sparkle = document.createElement('div');
@@ -545,7 +582,6 @@
             }
         }
 
-        // 랭킹 로드
         async function loadHighScores() {
             try {
                 const scoresRef = ref(db, 'scores/game2');
@@ -597,11 +633,8 @@
             }
         }
 
-        // 게임 로직
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { alpha: true });
-        
-        // 이미지 스무딩 비활성화 (픽셀 아트용)
         ctx.imageSmoothingEnabled = false;
         ctx.webkitImageSmoothingEnabled = false;
         ctx.mozImageSmoothingEnabled = false;
@@ -619,6 +652,13 @@
             time: 0,
             shotTimer: 0,
             baseFireRate: 0.22,
+            itemCounts: {
+                FIRE_RATE: 0,
+                MULTI_SHOT: 0,
+                SPEED_UP: 0,
+                SHIELD: 0,
+                BULLET_SPEED: 0
+            }
         };
 
         const player = {
@@ -640,7 +680,6 @@
         let particles = [];
         let items = [];
 
-        // 이미지 로드
         const images = {
             player: new Image(),
             enemy: new Image(),
@@ -655,7 +694,6 @@
             background: false
         };
 
-        // 이미지 로드 시도
         images.player.onload = () => { imagesLoaded.player = true; };
         images.player.onerror = () => { imagesLoaded.player = false; };
         images.player.src = 'assets/player.png';
@@ -683,7 +721,6 @@
         });
         document.addEventListener('keyup', (e) => gameState.keys[e.code] = false);
 
-        // 동적 조이스틱 시스템
         const joyBase = document.getElementById('joyBase');
         const joyStick = document.getElementById('joyStick');
         const joyWrap = document.getElementById('joystick');
@@ -699,7 +736,7 @@
         };
 
         const DEADZONE = 0.15;
-        const JOYSTICK_RADIUS = 70; // 조이스틱 반경
+        const JOYSTICK_RADIUS = 70;
 
         function showJoystick(x, y) {
             joyWrap.style.left = `${x - JOYSTICK_RADIUS}px`;
@@ -725,51 +762,36 @@
         function updateJoystickFromTouch(touchX, touchY) {
             const dx = touchX - joystick.startX;
             const dy = touchY - joystick.startY;
-
             const dist = Math.hypot(dx, dy);
             const amp = Math.min(dist / JOYSTICK_RADIUS, 1);
-
             const nx = dist ? dx / dist : 0;
             const ny = dist ? dy / dist : 0;
-
             const clampedX = nx * amp * JOYSTICK_RADIUS;
             const clampedY = ny * amp * JOYSTICK_RADIUS;
-
             joyStick.style.left = `${JOYSTICK_RADIUS - joyStick.offsetWidth / 2 + clampedX}px`;
             joyStick.style.top = `${JOYSTICK_RADIUS - joyStick.offsetHeight / 2 + clampedY}px`;
-
             joystick.dx = nx;
             joystick.dy = ny;
             joystick.amp = amp;
             joystick.active = amp > DEADZONE;
         }
 
-        // 게임 컨테이너에서만 터치 이벤트 활성화
         const gameContainer = document.getElementById('gameContainer');
         const gameControls = document.querySelector('.game-controls');
 
         gameContainer.addEventListener('touchstart', (e) => {
             if (gameState.gameOver || gameState.paused) return;
-            
-            // 버튼 영역 터치 체크
             const touch = e.changedTouches[0];
             const controlsRect = gameControls.getBoundingClientRect();
-            
-            // 버튼 영역이면 조이스틱 생성 안함
-            if (touch.clientY >= controlsRect.top) {
-                return;
-            }
-            
+            if (touch.clientY >= controlsRect.top) return;
             e.preventDefault();
             joystick.id = touch.identifier;
-            
             showJoystick(touch.clientX, touch.clientY);
             updateJoystickFromTouch(touch.clientX, touch.clientY);
         }, { passive: false });
 
         gameContainer.addEventListener('touchmove', (e) => {
             if (gameState.gameOver || gameState.paused) return;
-            
             for (const touch of e.changedTouches) {
                 if (touch.identifier === joystick.id) {
                     e.preventDefault();
@@ -817,7 +839,7 @@
 
         function fire(dir) {
             if (gameState.gameOver) return;
-            const speed = 700 * player.bulletSpeed;  // 520 → 700으로 증가
+            const speed = 700 * player.bulletSpeed;
             for (let i = 0; i < player.multiShot; i++) {
                 const angle = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i / 2) * 0.3;
                 const finalDir = {
@@ -854,17 +876,15 @@
 
         function spawnEnemy(dt) {
             if (gameState.enemyCount >= gameState.maxEnemies) return;
-            const spawnPerSecond = 1.2 + gameState.wave * 0.35;
+            const spawnPerSecond = 1.2 + Math.min(20, gameState.wave) * 0.35; // 수정: 웨이브 20 이상에서 고정
             const p = 1 - Math.exp(-spawnPerSecond * dt);
             if (Math.random() < p) {
-                // 웨이브 10 단위마다 체력 증가 (1, 11, 21, 31...)
                 const hpMultiplier = Math.floor(gameState.wave / 10);
                 const enemyHp = 1 + hpMultiplier;
-                
                 const enemy = { 
                     width: 25, 
                     height: 25, 
-                    speed: 60 + gameState.wave * 30, 
+                    speed: Math.min(200, 60 + gameState.wave * 10), // 적군 속도 조절 
                     color: '#ff4444', 
                     x: 0, 
                     y: 0, 
@@ -902,13 +922,19 @@
         function collectItem(item) {
             const type = item.type;
             createExplosion(item.x + 10, item.y + 10, itemTypes[type].color, 8);
+            gameState.itemCounts[type]++; // Increment the counter for the specific item type
             switch (type) {
                 case 'FIRE_RATE': player.fireRate = Math.min(3.0, player.fireRate + 0.3); player.powerUpTimer = 15; break;
                 case 'MULTI_SHOT': player.multiShot = Math.min(5, player.multiShot + 1); player.powerUpTimer = 15; break;
-                case 'SPEED_UP': player.speed = Math.min(350, player.speed + 30); player.powerUpTimer = 15; break;
+                case 'SPEED_UP': 
+                    player.speed = Math.min(500, player.speed + 30); 
+                    player.powerUpTimer = 10; 
+                    createExplosion(player.x + player.width / 2, player.y + player.height / 2, '#66ff66', 12); // 속도 증가 이펙트
+                    break;      
                 case 'SHIELD': player.shield = Math.min(3, player.shield + 1); break;
                 case 'BULLET_SPEED': player.bulletSpeed = Math.min(2.0, player.bulletSpeed + 0.2); player.powerUpTimer = 15; break;
             }
+            updateUI();
         }
 
         function createExplosion(x, y, color = '#ffff00', count = 12) {
@@ -925,26 +951,21 @@
 
         function update(dt) {
             if (gameState.gameOver || gameState.paused) return;
-
             gameState.time += dt;
             if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
-
             if (player.powerUpTimer > 0) {
                 player.powerUpTimer = Math.max(0, player.powerUpTimer - dt);
                 if (player.powerUpTimer <= 0) {
                     player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.speed = 220;
                 }
             }
-
             movePlayer(dt);
             autoFire(dt);
             spawnEnemy(dt);
-
             bullets = bullets.filter(b => {
                 b.x += b.vx * dt; b.y += b.vy * dt;
                 return b.x > -10 && b.x < canvas.width + 10 && b.y > -10 && b.y < canvas.height + 10;
             });
-
             for (const e of enemies) {
                 const dx = (player.x + player.width / 2) - (e.x + e.width / 2);
                 const dy = (player.y + player.height / 2) - (e.y + e.height / 2);
@@ -957,28 +978,19 @@
                 if (!inBounds) gameState.enemyCount--;
                 return inBounds;
             });
-
             items = items.filter(item => { item.life -= dt; item.bob += dt * 3; return item.life > 0; });
-
             particles = particles.filter(p => {
                 p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
                 p.vx *= (1 - 1.5 * dt); p.vy *= (1 - 1.5 * dt);
                 return p.life > 0;
             });
-
             outer:
             for (let i = bullets.length - 1; i >= 0; i--) {
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     if (rectHit(bullets[i], enemies[j])) {
                         const e = enemies[j];
-                        
-                        // 체력 감소
                         e.hp = (e.hp || 1) - 1;
-                        
-                        // 총알 제거
                         bullets.splice(i, 1);
-                        
-                        // 체력이 0이 되면 적 제거
                         if (e.hp <= 0) {
                             const ex = e.x + e.width / 2;
                             const ey = e.y + e.height / 2;
@@ -992,21 +1004,17 @@
                                 gameState.maxEnemies += 3; 
                             }
                         } else {
-                            // 체력이 남았을 때 작은 이펙트
                             const ex = e.x + e.width / 2;
                             const ey = e.y + e.height / 2;
                             createExplosion(ex, ey, '#ffaa44', 3);
                         }
-                        
                         continue outer;
                     }
                 }
             }
-
             for (let i = items.length - 1; i >= 0; i--) {
                 if (rectHit(player, items[i])) { collectItem(items[i]); items.splice(i, 1); }
             }
-
             if (player.invuln <= 0) {
                 for (let i = enemies.length - 1; i >= 0; i--) {
                     if (rectHit(enemies[i], player)) {
@@ -1036,36 +1044,28 @@
                     }
                 }
             }
-
             updateUI();
         }
 
         function draw() {
-            // 배경 그리기
             if (imagesLoaded.background) {
                 ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
             } else {
                 ctx.fillStyle = 'rgba(0,17,34,0.35)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
-
             const blink = player.invuln > 0 ? Math.floor(gameState.time * 10) % 2 === 0 : true;
             if (blink) {
-                // 플레이어 그리기 (비율 유지)
                 if (imagesLoaded.player) {
                     const img = images.player;
                     const aspectRatio = img.width / img.height;
                     let drawWidth = player.width;
                     let drawHeight = player.height;
-                    
                     if (aspectRatio > 1) {
-                        // 가로가 더 긴 경우
                         drawHeight = drawWidth / aspectRatio;
                     } else {
-                        // 세로가 더 긴 경우
                         drawWidth = drawHeight * aspectRatio;
                     }
-                    
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
@@ -1079,7 +1079,6 @@
                     ctx.fillRect(player.x + 12, player.y + 12, 6, 6);
                     ctx.shadowBlur = 0;
                 }
-                
                 if (player.shield > 0) {
                     ctx.strokeStyle = '#ffff66';
                     ctx.lineWidth = 2;
@@ -1088,21 +1087,17 @@
                     ctx.stroke();
                 }
             }
-
-            // 총알 그리기 (비율 유지)
             for (const b of bullets) {
                 if (imagesLoaded.bullet) {
                     const img = images.bullet;
                     const aspectRatio = img.width / img.height;
                     let drawWidth = b.width * 3;
                     let drawHeight = b.height * 3;
-                    
                     if (aspectRatio > 1) {
                         drawHeight = drawWidth / aspectRatio;
                     } else {
                         drawWidth = drawHeight * aspectRatio;
                     }
-                    
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(b.x + b.width / 2, b.y + b.height / 2);
@@ -1117,50 +1112,37 @@
                     ctx.shadowBlur = 0;
                 }
             }
-
-            // 적 그리기 (비율 유지)
             for (const e of enemies) {
                 if (imagesLoaded.enemy) {
                     const img = images.enemy;
                     const aspectRatio = img.width / img.height;
                     let drawWidth = e.width;
                     let drawHeight = e.height;
-                    
                     if (aspectRatio > 1) {
                         drawHeight = drawWidth / aspectRatio;
                     } else {
                         drawWidth = drawHeight * aspectRatio;
                     }
-                    
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.translate(e.x + e.width / 2, e.y + e.height / 2);
-                    
-                    // 체력이 감소하면 빨간색으로 깜빡임
                     if (e.hp < e.maxHp) {
                         const flashIntensity = 0.5;
                         ctx.globalAlpha = 0.7;
                         ctx.filter = `hue-rotate(${Math.sin(gameState.time * 20) * 30}deg) brightness(1.3)`;
                     }
-                    
                     ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                     ctx.filter = 'none';
                     ctx.globalAlpha = 1;
                     ctx.restore();
-                    
-                    // 체력바 표시 (체력이 최대가 아닐 때)
                     if (e.hp < e.maxHp) {
                         const barWidth = e.width;
                         const barHeight = 3;
                         const barX = e.x;
                         const barY = e.y - 8;
                         const hpRatio = e.hp / e.maxHp;
-                        
-                        // 배경 (빨간색)
                         ctx.fillStyle = '#ff4444';
                         ctx.fillRect(barX, barY, barWidth, barHeight);
-                        
-                        // 현재 체력 (초록색)
                         ctx.fillStyle = '#4ade80';
                         ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
                     }
@@ -1175,15 +1157,12 @@
                     ctx.closePath();
                     ctx.shadowColor = e.color; ctx.shadowBlur = 5;
                     ctx.fill(); ctx.shadowBlur = 0;
-                    
-                    // 체력바 표시 (기본 그래픽용)
                     if (e.hp && e.hp < e.maxHp) {
                         const barWidth = e.width;
                         const barHeight = 3;
                         const barX = e.x;
                         const barY = e.y - 8;
                         const hpRatio = e.hp / e.maxHp;
-                        
                         ctx.fillStyle = '#ff4444';
                         ctx.fillRect(barX, barY, barWidth, barHeight);
                         ctx.fillStyle = '#4ade80';
@@ -1191,7 +1170,6 @@
                     }
                 }
             }
-
             for (const item of items) {
                 const bobOffset = Math.sin(item.bob) * 3;
                 const alpha = item.life < 2 ? Math.sin(item.life * 5) * 0.5 + 0.5 : 1;
@@ -1206,7 +1184,6 @@
                 ctx.fillText(itemTypes[item.type].symbol, item.x + item.width / 2, item.y + item.height / 2 + 4 + bobOffset);
                 ctx.globalAlpha = 1;
             }
-
             for (const p of particles) {
                 const a = Math.max(0, p.life / p.maxLife);
                 ctx.globalAlpha = a;
@@ -1223,6 +1200,11 @@
             document.getElementById('shield').textContent = player.shield;
             document.getElementById('fireRate').textContent = player.fireRate.toFixed(1);
             document.getElementById('multiShot').textContent = player.multiShot;
+            document.getElementById('fireRateCount').textContent = gameState.itemCounts.FIRE_RATE;
+            document.getElementById('multiShotCount').textContent = gameState.itemCounts.MULTI_SHOT;
+            document.getElementById('speedUpCount').textContent = gameState.itemCounts.SPEED_UP;
+            document.getElementById('shieldCount').textContent = gameState.itemCounts.SHIELD;
+            document.getElementById('bulletSpeedCount').textContent = gameState.itemCounts.BULLET_SPEED;
         }
 
         function showAdModal() {
@@ -1254,14 +1236,9 @@
             }
         }
 
-
-
-
-
         async function endGame() {
             gameState.gameOver = true;
             document.getElementById('finalScore').textContent = gameState.score;
-            
             try {
                 console.log('Saving final score:', gameState.score, 'for player:', playerName);
                 const scoreData = {
@@ -1296,10 +1273,29 @@
                     navigator.vibrate([200, 100, 200]);
                 }
             }
-         }
+        }
 
         window.restartGame = function() {
-            gameState = { score: 0, lives: 3, wave: 1, gameOver: false, paused: false, keys: {}, enemyCount: 0, maxEnemies: 15, time: 0, shotTimer: 0, baseFireRate: 0.22 };
+            gameState = { 
+                score: 0, 
+                lives: 3, 
+                wave: 1, 
+                gameOver: false, 
+                paused: false, 
+                keys: {}, 
+                enemyCount: 0, 
+                maxEnemies: 15, 
+                time: 0, 
+                shotTimer: 0, 
+                baseFireRate: 0.22,
+                itemCounts: {
+                    FIRE_RATE: 0,
+                    MULTI_SHOT: 0,
+                    SPEED_UP: 0,
+                    SHIELD: 0,
+                    BULLET_SPEED: 0
+                }
+            };
             player.x = 200; player.y = 368; player.lastDir = {x: 0, y: -1}; player.invuln = 0;
             player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.shield = 0; player.powerUpTimer = 0; player.speed = 220;
             bullets = []; enemies = []; particles = []; items = [];
@@ -1320,46 +1316,45 @@
             document.getElementById('intro').style.display = 'none';
             const gameContainer = document.getElementById('gameContainer');
             gameContainer.style.display = 'flex';
-            // 랭킹 표시 제거
-            // document.getElementById('leaderboard').style.display = 'block';
-            
-            // 캔버스 크기 조정
             const canvas = document.getElementById('gameCanvas');
             const rect = canvas.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
-            
-            // 실제 캔버스 크기를 표시 크기에 맞춤
             canvas.width = 400;
             canvas.height = 736;
-            
-            // 이미지 스무딩 재설정
             ctx.imageSmoothingEnabled = false;
             ctx.webkitImageSmoothingEnabled = false;
             ctx.mozImageSmoothingEnabled = false;
             ctx.msImageSmoothingEnabled = false;
-            
+            gameState.itemCounts = {
+                FIRE_RATE: 0,
+                MULTI_SHOT: 0,
+                SPEED_UP: 0,
+                SHIELD: 0,
+                BULLET_SPEED: 0
+            };
             loadHighScores();
             updateUI();
             requestAnimationFrame(loop);
         }
 
-function goHome() {
-  const parentDoc = window.parent.document;
-  const frame = parentDoc.getElementById('game-frame');
-  if (frame) {
-    frame.src = 'about:blank';  // iframe 초기화
-    frame.style.display = 'none';
-  }
-  parentDoc.querySelector('h1').style.display = 'block';
-  parentDoc.getElementById('carousel').style.display = 'block';
-  parentDoc.getElementById('user-info').style.display = 'flex';
-  if (window.parent.playBGM) {
-    window.parent.playBGM(false);  // BGM 유지
-  }
-  if ('vibrate' in navigator) {
-    navigator.vibrate(50);
-  }
-}
+        function goHome() {
+            const parentDoc = window.parent.document;
+            const frame = parentDoc.getElementById('game-frame');
+            if (frame) {
+                frame.src = 'about:blank';
+                frame.style.display = 'none';
+            }
+            parentDoc.querySelector('h1').style.display = 'block';
+            parentDoc.getElementById('carousel').style.display = 'block';
+            parentDoc.getElementById('user-info').style.display = 'flex';
+            if (window.parent.playBGM) {
+                window.parent.playBGM(false);
+            }
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+        }
+
         document.getElementById('startGameBtn').addEventListener('click', startGame);
         document.getElementById('goHomeBtn').addEventListener('click', goHome);
         document.getElementById('resetGameBtn').addEventListener('click', restartGame);
