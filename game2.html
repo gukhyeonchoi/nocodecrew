@@ -746,12 +746,21 @@
 
         // 게임 컨테이너에서만 터치 이벤트 활성화
         const gameContainer = document.getElementById('gameContainer');
+        const gameControls = document.querySelector('.game-controls');
 
         gameContainer.addEventListener('touchstart', (e) => {
             if (gameState.gameOver || gameState.paused) return;
-            e.preventDefault();
             
+            // 버튼 영역 터치 체크
             const touch = e.changedTouches[0];
+            const controlsRect = gameControls.getBoundingClientRect();
+            
+            // 버튼 영역이면 조이스틱 생성 안함
+            if (touch.clientY >= controlsRect.top) {
+                return;
+            }
+            
+            e.preventDefault();
             joystick.id = touch.identifier;
             
             showJoystick(touch.clientX, touch.clientY);
@@ -1260,7 +1269,8 @@
             document.getElementById('intro').style.display = 'none';
             const gameContainer = document.getElementById('gameContainer');
             gameContainer.style.display = 'flex';
-            document.getElementById('leaderboard').style.display = 'block';
+            // 랭킹 표시 제거
+            // document.getElementById('leaderboard').style.display = 'block';
             
             // 캔버스 크기 조정
             const canvas = document.getElementById('gameCanvas');
