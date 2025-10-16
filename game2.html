@@ -1293,8 +1293,19 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html';
-        }
+  if (parent.resetIframe) {
+    parent.resetIframe();  // 부모의 iframe 초기화 호출
+  }
+  parent.document.querySelector('h1').style.display = 'block';
+  parent.document.getElementById('carousel').style.display = 'block';
+  parent.document.getElementById('user-info').style.display = 'flex';
+  if (parent.playBGM) {
+    parent.playBGM(false);  // BGM 유지
+  }
+  if ('vibrate' in navigator) {
+    navigator.vibrate(50);
+  }
+}
 
         document.getElementById('startGameBtn').addEventListener('click', startGame);
         document.getElementById('goHomeBtn').addEventListener('click', goHome);
