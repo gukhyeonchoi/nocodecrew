@@ -780,6 +780,9 @@
         justify-content: space-evenly;
       }
     }
+        #game-over-screen button {
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -796,11 +799,12 @@
     <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
     <button class="intro-btn btn-home" id="goHomeBtn">🏠 홈으로</button>
   </div>
-  <div id="game-over-screen">
+    <div id="game-over-screen">
     <h1>게임 오버!</h1>
     <p id="final-score"></p>
     <p>다시 도전하여 최고 점수를 갱신하세요!</p>
     <button id="restart-button">다시 시작</button>
+    <button id="continue-ad-btn">📺 광고 보고 이어하기</button>
     <button id="show-ranking-gameover" class="btn-ranking">🏆 랭킹 보기</button>
   </div>
   <div id="name-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); align-items:center; justify-content:center; z-index:4000;">
@@ -1661,7 +1665,7 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
       console.log("DOM fully loaded");
       initializeSounds().then(() => {
         console.log("All sounds initialized");
@@ -1687,7 +1691,36 @@
         console.error("Failed to insert stylesheet rules:", err);
       }
       console.log("Game initialized");
+      document.getElementById('continue-ad-btn').addEventListener('click', showAdModal);
     });
+        function showAdModal() {
+      const root = document.getElementById('modal-root');
+      root.innerHTML = '';
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <h2>📺 광고 문의</h2>
+        <p>이 영역 광고 문의 받습니다! 😄<br>지금은 광고가 없으니 그냥 재미로 즐겨주세요!</p>
+      `;
+      const actions = document.createElement('div');
+      actions.className = 'modal-actions';
+      const close = document.createElement('button');
+      close.className = 'primary';
+      close.textContent = '❌ 닫기';
+      close.onclick = () => {
+        root.innerHTML = '';
+        restartGame();
+      };
+      actions.appendChild(close);
+      modal.appendChild(actions);
+      backdrop.appendChild(modal);
+      root.appendChild(backdrop);
+      if ('vibrate' in navigator) {
+        navigator.vibrate([50]);
+      }
+    }
   </script>
 </body>
 </html>
