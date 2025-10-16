@@ -1225,15 +1225,18 @@
     }
 
     function flipCard() {
-      if (lockBoard || this.classList.contains("flipped")) return;
-      this.classList.add("flipped");
-      playSound('flip').catch(err => console.warn("Flip sound failed:", err));
-      if (!firstCard) {
-        firstCard = this;
-      } else {
-        checkMatch(this);
-      }
-    }
+  if (lockBoard || this.classList.contains("flipped")) return;
+  this.classList.add("flipped");
+  if ('vibrate' in navigator) {
+    navigator.vibrate(30); // 짧은 진동 (카드 플립)
+  }
+  playSound('flip').catch(err => console.warn("Flip sound failed:", err));
+  if (!firstCard) {
+    firstCard = this;
+  } else {
+    checkMatch(this);
+  }
+}
 
     function useHint() {
       if (hearts < CONFIG.HINT_COST || lockBoard) return;
@@ -1319,61 +1322,67 @@
     }
 
     function checkMatch(secondCard) {
-      lockBoard = true;
-      if (firstCard.dataset.img === secondCard.dataset.img) {
-        firstCard.classList.add("matched");
-        secondCard.classList.add("matched");
-        playSound('match').catch(err => console.warn("Match sound failed:", err));
-        comboCount++;
-        const points = comboCount >= CONFIG.COMBO_THRESHOLD ? Math.round(CONFIG.SCORE_PER_MATCH * CONFIG.COMBO_MULTIPLIER) : CONFIG.SCORE_PER_MATCH;
-        updateHearts(+1);
-        updateScore(points);
-        const rect1 = firstCard.getBoundingClientRect();
-        const rect2 = secondCard.getBoundingClientRect();
-        const boardRect = board.getBoundingClientRect();
-        const centerX = (rect1.left + rect2.left + rect1.width) / 2 - boardRect.left;
-        const centerY = (rect1.top + rect2.top + rect1.height) / 2 - boardRect.top;
-        createMatchParticles(centerX, centerY);
-        updateProgress();
-        firstCard = null;
-        lockBoard = false;
-      } else {
-        playSound('mismatch').catch(err => console.warn("Mismatch sound failed:", err));
-        firstCard.classList.add("wrong");
-        secondCard.classList.add("wrong");
-        comboCount = 0;
-        updateHearts(-1);
-        setTimeout(() => {
-          if (firstCard) firstCard.classList.remove("flipped", "wrong");
-          if (secondCard) secondCard.classList.remove("flipped", "wrong");
-          firstCard = null;
-          lockBoard = false;
-        }, CONFIG.WRONG_CARD_RESET_DELAY);
-        if (hearts <= 0) {
-          playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
-          showMessage("게임 오버!");
-          endGame();
-          return;
-        }
-      }
-      if (document.querySelectorAll(".matched").length === cards.length) {
-        if (timerInterval) clearInterval(timerInterval);
-        playSound('stageClear').catch(err => console.warn("StageClear sound failed:", err));
-        showMessage(`스테이지 ${stage} 클리어!`);
-        createConfetti();
-        if (stage === CONFIG.MAX_STAGES) {
-          setTimeout(() => {
-            showMessage("모든 스테이지 클리어! 승리!");
-            playSound('victory').catch(err => console.warn("Victory sound failed:", err));
-            createVictoryParticles();
-            endGame();
-          }, CONFIG.STAGE_TRANSITION_DELAY);
-        } else {
-          stage += 1;
-          setTimeout(() => startStage(), CONFIG.STAGE_TRANSITION_DELAY);
-        }
-      }
+  lockBoard = true;
+  if (firstCard.dataset.img === secondCard.dataset.img) {
+    firstCard.classList.add("matched");
+    secondCard.classList.add("matched");
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]); // 성공 패턴 진동 (매치)
     }
+    playSound('match').catch(err => console.warn("Match sound failed:", err));
+    comboCount++;
+    const points = comboCount >= CONFIG.COMBO_THRESHOLD ? Math.round(CONFIG.SCORE_PER_MATCH * CONFIG.COMBO_MULTIPLIER) : CONFIG.SCORE_PER_MATCH;
+    updateHearts(+1);
+    updateScore(points);
+    const rect1 = firstCard.getBoundingClientRect();
+    const rect2 = secondCard.getBoundingClientRect();
+    const boardRect = board.getBoundingClientRect();
+    const centerX = (rect1.left + rect2.left + rect1.width) / 2 - boardRect.left;
+    const centerY = (rect1.top + rect2.top + rect1.height) / 2 - boardRect.top;
+    createMatchParticles(centerX, centerY);
+    updateProgress();
+    firstCard = null;
+    lockBoard = false;
+  } else {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(200); // 오류 진동 (미스매치)
+    }
+    playSound('mismatch').catch(err => console.warn("Mismatch sound failed:", err));
+    firstCard.classList.add("wrong");
+    secondCard.classList.add("wrong");
+    comboCount = 0;
+    updateHearts(-1);
+    setTimeout(() => {
+      if (firstCard) firstCard.classList.remove("flipped", "wrong");
+      if (secondCard) secondCard.classList.remove("flipped", "wrong");
+      firstCard = null;
+      lockBoard = false;
+    }, CONFIG.WRONG_CARD_RESET_DELAY);
+    if (hearts <= 0) {
+      playSound('gameOver').catch(err => console.warn("GameOver sound failed:", err));
+      showMessage("게임 오버!");
+      endGame();
+      return;
+    }
+  }
+  if (document.querySelectorAll(".matched").length === cards.length) {
+    if (timerInterval) clearInterval(timerInterval);
+    playSound('stageClear').catch(err => console.warn("StageClear sound failed:", err));
+    showMessage(`스테이지 ${stage} 클리어!`);
+    createConfetti();
+    if (stage === CONFIG.MAX_STAGES) {
+      setTimeout(() => {
+        showMessage("모든 스테이지 클리어! 승리!");
+        playSound('victory').catch(err => console.warn("Victory sound failed:", err));
+        createVictoryParticles();
+        endGame();
+      }, CONFIG.STAGE_TRANSITION_DELAY);
+    } else {
+      stage += 1;
+      setTimeout(() => startStage(), CONFIG.STAGE_TRANSITION_DELAY);
+    }
+  }
+}
 
     async function saveScore(name, score) {
       if (!db) {
