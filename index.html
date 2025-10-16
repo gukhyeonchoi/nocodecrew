@@ -830,24 +830,25 @@ function loadRankings(gameId) {
       }
     });
     
-    const top3 = allRankings.slice(0, 3);
-    if (top3.length === 0) {
-      const emptyMsg = document.createElement('p');
-      emptyMsg.style.textAlign = 'center';
-      emptyMsg.style.color = '#94a3b8';
-      emptyMsg.textContent = '아직 기록이 없어요';
-      rankingDiv.insertBefore(emptyMsg, myRankElem);
-    } else {
-      top3.forEach((entry, index) => {
-        const p = document.createElement('p');
-        const medal = medals[index];
-        const name = (entry.name || '익명').slice(0, 8);
-        p.innerHTML = `<span class="rank">${medal} ${index + 1}위</span> <span>${name}</span> <span class="score">${entry.score}점</span>`;
-        
-        // 내 등수 요소 앞에 삽입
-        rankingDiv.insertBefore(p, myRankElem);
-      });
-    }
+    const top10 = allRankings.slice(0, 10);  // ✅ 10위까지
+if (top10.length === 0) {
+  const emptyMsg = document.createElement('p');
+  emptyMsg.style.textAlign = 'center';
+  emptyMsg.style.color = '#94a3b8';
+  emptyMsg.textContent = '아직 기록이 없어요';
+  rankingDiv.insertBefore(emptyMsg, myRankElem);
+} else {
+  top10.forEach((entry, index) => {  // ✅ 10위까지 표시
+    const p = document.createElement('p');
+    const medal = index < 3 ? medals[index] : '';  // ✅ 4위부터는 메달 없음
+    const rankText = medal ? `${medal} ${index + 1}위` : `${index + 1}위`;
+    const name = (entry.name || '익명').slice(0, 8);
+    p.innerHTML = `<span class="rank">${rankText}</span> <span>${name}</span> <span class="score">${entry.score}점</span>`;
+    
+    // 내 등수 요소 앞에 삽입
+    rankingDiv.insertBefore(p, myRankElem);
+  });
+}
 
     // 내 등수 계산 및 표시
     if (!myRankElem) return;
