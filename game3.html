@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>배틀 2048  - Battle 2048</title>
+    <title>배틀 2048 v16 - Battle 2048</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
     <style>
         * {
@@ -529,7 +529,7 @@
 </head>
 <body>
     <div id="intro">
-        <h1>🎯 배틀 2048 </h1>
+        <h1>🎯 배틀 2048 v16</h1>
         <p>타일을 합쳐서 보스를 물리치세요!</p>
         
         <div class="game-instructions">
@@ -538,6 +538,7 @@
             <p>• 같은 숫자를 합쳐서 점수 획득</p>
             <p>• 점수가 높을수록 강한 공격!</p>
             <p>• 보스를 물리치고 다음 스테이지로!</p>
+            <p style="margin-top: 10px; color: #7c3aed; font-weight: 700;">✨ v16: Firebase 연동 최적화</p>
         </div>
         
         <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>
@@ -729,6 +730,12 @@
                     const playerSprite = document.getElementById('player-sprite');
                     playerHP -= bossAtk;
                     showDamage(playerSprite, bossAtk);
+                    
+                    // 플레이어가 공격받을 때 진동
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(100);
+                    }
+                    
                     if (playerHP <= 0) {
                         playerHP = 0;
                         endGame();
@@ -743,9 +750,21 @@
             setTimeout(() => playerSprite.classList.remove('attacking'), 300);
             bossHP -= playerAtk;
             showDamage(bossSprite, playerAtk);
+            
+            // 플레이어 공격 시 약한 진동
+            if ('vibrate' in navigator) {
+                navigator.vibrate(30);
+            }
+            
             if (bossHP <= 0) {
                 bossHP = 0;
                 bossKills++;
+                
+                // 보스 처치 시 강한 진동
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                
                 setTimeout(() => {
                     spawnBoss(bossLevel + 1);
                 }, 500);
@@ -755,6 +774,12 @@
                     setTimeout(() => bossSprite.classList.remove('attacking'), 300);
                     playerHP -= bossAtk;
                     showDamage(playerSprite, bossAtk);
+                    
+                    // 플레이어가 공격받을 때 진동
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(100);
+                    }
+                    
                     if (playerHP <= 0) {
                         playerHP = 0;
                         endGame();
@@ -800,6 +825,11 @@
         async function endGame() {
             gameOver = true;
             if (combatInterval) clearInterval(combatInterval);
+            
+            // 게임오버 시 진동
+            if ('vibrate' in navigator) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+            }
             
             document.getElementById('final-score').textContent = score;
             document.getElementById('final-boss-kills').textContent = bossKills;
@@ -944,6 +974,7 @@
 
         function moveLeft() {
             let moved = false;
+            let merged = false;
             for (let i = 0; i < 4; i++) {
                 let row = board[i].filter(val => val !== 0);
                 for (let j = 0; j < row.length - 1; j++) {
@@ -951,17 +982,29 @@
                         row[j] *= 2;
                         score += row[j];
                         row.splice(j + 1, 1);
+                        merged = true;
                     }
                 }
                 while (row.length < 4) row.push(0);
                 if (JSON.stringify(board[i]) !== JSON.stringify(row)) moved = true;
                 board[i] = row;
             }
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
+                }
+            }
+            
             return moved;
         }
 
         function moveRight() {
             let moved = false;
+            let merged = false;
             for (let i = 0; i < 4; i++) {
                 let row = board[i].filter(val => val !== 0);
                 for (let j = row.length - 1; j > 0; j--) {
@@ -970,17 +1013,29 @@
                         score += row[j];
                         row.splice(j - 1, 1);
                         j--;
+                        merged = true;
                     }
                 }
                 while (row.length < 4) row.unshift(0);
                 if (JSON.stringify(board[i]) !== JSON.stringify(row)) moved = true;
                 board[i] = row;
             }
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
+                }
+            }
+            
             return moved;
         }
 
         function moveUp() {
             let moved = false;
+            let merged = false;
             for (let j = 0; j < 4; j++) {
                 let col = [];
                 for (let i = 0; i < 4; i++) {
@@ -991,6 +1046,7 @@
                         col[i] *= 2;
                         score += col[i];
                         col.splice(i + 1, 1);
+                        merged = true;
                     }
                 }
                 while (col.length < 4) col.push(0);
@@ -999,11 +1055,22 @@
                     board[i][j] = col[i];
                 }
             }
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
+                }
+            }
+            
             return moved;
         }
 
         function moveDown() {
             let moved = false;
+            let merged = false;
             for (let j = 0; j < 4; j++) {
                 let col = [];
                 for (let i = 0; i < 4; i++) {
@@ -1015,6 +1082,7 @@
                         score += col[i];
                         col.splice(i - 1, 1);
                         i--;
+                        merged = true;
                     }
                 }
                 while (col.length < 4) col.unshift(0);
@@ -1023,6 +1091,16 @@
                     board[i][j] = col[i];
                 }
             }
+            
+            // 진동 피드백
+            if ('vibrate' in navigator) {
+                if (merged) {
+                    navigator.vibrate(50); // 머지 시 강한 진동
+                } else if (moved) {
+                    navigator.vibrate(20); // 이동만 할 때 약한 진동
+                }
+            }
+            
             return moved;
         }
 
