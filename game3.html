@@ -133,25 +133,27 @@
             padding: 20px;
             box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
             width: 95vw;
-            max-width: 600px;
+            max-width: 500px;  /* 600px → 500px */
+            max-height: 90vh;  /* 추가: 화면 높이의 90%로 제한 */
+            overflow-y: auto;  /* 추가: 필요시 스크롤 */
             z-index: 10;
             position: relative;
             border: 3px solid rgba(147, 197, 253, 0.5);
         }
         .score-board {
             text-align: center;
-            margin-bottom: 15px;
-            font-size: 18px;
+            margin-bottom: 10px;  /* 15px → 10px */
+            font-size: 16px;  /* 18px → 16px */
             font-weight: 700;
             color: #0284c7;
             background: rgba(240, 249, 255, 0.8);
-            padding: 15px 20px;
+            padding: 10px 15px;  /* 15px 20px → 10px 15px */
             border-radius: 15px;
             box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
             border: 2px solid rgba(147, 197, 253, 0.3);
             display: flex;
             justify-content: space-around;
-            gap: 15px;
+            gap: 10px;  /* 15px → 10px */
             flex-wrap: wrap;
         }
         .score-item {
@@ -160,27 +162,27 @@
             align-items: center;
         }
         .score-label {
-            font-size: 14px;
+            font-size: 12px;
             color: #0369a1;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         .score-value {
-            font-size: 24px;
+            font-size: 20px;
             color: #7c3aed;
         }
         .battle-arena {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             border: 3px solid rgba(147, 197, 253, 0.5);
             border-radius: 20px;
-            padding: 12px;
-            margin-bottom: 15px;
+            padding: 10px;
+            margin-bottom: 10px;
             box-shadow: inset 0 2px 8px rgba(56, 189, 248, 0.1), 0 4px 12px rgba(56, 189, 248, 0.2);
         }
         .combatants {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
         .character {
             flex: 1;
@@ -275,25 +277,25 @@
         #game-board {
             background: linear-gradient(135deg, #bae6fd 0%, #c4b5fd 100%);
             border-radius: 20px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 8px;
+            margin-bottom: 10px;
             box-shadow: inset 0 2px 8px rgba(56, 189, 248, 0.2), 0 4px 12px rgba(56, 189, 248, 0.2);
             border: 3px solid rgba(147, 197, 253, 0.5);
         }
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 6px;
             max-width: 100%;
         }
         .cell {
             background: rgba(240, 249, 255, 0.8);
-            border-radius: 10px;
+            border-radius: 8px;
             aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(24px, 5vw, 36px);
+            font-size: clamp(20px, 4.5vw, 32px);
             font-weight: bold;
             color: #0284c7;
             transition: all 0.15s ease;
@@ -305,26 +307,26 @@
         .cell[data-value="16"] { background: linear-gradient(135deg, #38bdf8, #60a5fa); color: #fff; }
         .cell[data-value="32"] { background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: #fff; }
         .cell[data-value="64"] { background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; }
-        .cell[data-value="128"] { background: linear-gradient(135deg, #0369a1, #1d4ed8); color: #fff; font-size: clamp(20px, 4vw, 32px); }
-        .cell[data-value="256"] { background: linear-gradient(135deg, #075985, #1e40af); color: #fff; font-size: clamp(20px, 4vw, 32px); }
-        .cell[data-value="512"] { background: linear-gradient(135deg, #0c4a6e, #1e3a8a); color: #fff; font-size: clamp(20px, 4vw, 32px); }
-        .cell[data-value="1024"] { background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-size: clamp(18px, 3.5vw, 28px); }
-        .cell[data-value="2048"] { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-size: clamp(18px, 3.5vw, 28px); }
+        .cell[data-value="128"] { background: linear-gradient(135deg, #0369a1, #1d4ed8); color: #fff; font-size: clamp(18px, 3.5vw, 28px); }
+        .cell[data-value="256"] { background: linear-gradient(135deg, #075985, #1e40af); color: #fff; font-size: clamp(18px, 3.5vw, 28px); }
+        .cell[data-value="512"] { background: linear-gradient(135deg, #0c4a6e, #1e3a8a); color: #fff; font-size: clamp(18px, 3.5vw, 28px); }
+        .cell[data-value="1024"] { background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-size: clamp(16px, 3vw, 24px); }
+        .cell[data-value="2048"] { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-size: clamp(16px, 3vw, 24px); }
         .game-controls {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 6px;
+            margin-top: 10px;
         }
         .btn {
             flex: 1;
             color: #fff;
             border: none;
-            padding: 12px 20px;
+            padding: 10px 16px;
             border-radius: 12px;
             background: linear-gradient(145deg, #38bdf8, #818cf8);
             font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
         }
@@ -557,7 +559,7 @@
                 gap: 8px;
             }
             .cell {
-                font-size: clamp(20px, 4.5vw, 32px);
+                font-size: clamp(18px, 4vw, 28px);
             }
             .btn {
                 padding: 10px 16px;
@@ -594,11 +596,11 @@
                 font-size: 16px;
             }
             .game-container {
-                padding: 12px;
+                padding: 10px;
                 width: 95vw;
             }
             .score-board {
-                padding: 10px 12px;
+                padding: 8px 10px;
                 gap: 8px;
                 font-size: 16px;
             }
@@ -641,24 +643,24 @@
                 gap: 8px;
             }
             #game-board {
-                padding: 12px;
-                margin-bottom: 12px;
+                padding: 8px;
+                margin-bottom: 10px;
             }
             .grid {
-                gap: 6px;
+                gap: 5px;
             }
             .cell {
-                font-size: clamp(18px, 4vw, 28px);
-                border-radius: 8px;
+                font-size: clamp(16px, 3.8vw, 26px);
+                border-radius: 6px;
             }
             .cell[data-value="128"],
             .cell[data-value="256"],
             .cell[data-value="512"] {
-                font-size: clamp(16px, 3.5vw, 24px);
+                font-size: clamp(14px, 3.3vw, 22px);
             }
             .cell[data-value="1024"],
             .cell[data-value="2048"] {
-                font-size: clamp(14px, 3vw, 22px);
+                font-size: clamp(13px, 2.8vw, 20px);
             }
             .game-controls {
                 gap: 8px;
@@ -711,12 +713,12 @@
                 font-size: 14px;
             }
             .game-container {
-                padding: 10px;
+                padding: 8px;  /* 10px → 8px */
+                max-height: 96vh;  /* 거의 전체 화면 사용 */
             }
             .score-board {
-                padding: 8px 10px;
-                gap: 6px;
-                font-size: 14px;
+                padding: 6px 8px;
+                margin-bottom: 6px;
             }
             .score-label {
                 font-size: 10px;
@@ -759,28 +761,29 @@
                 gap: 6px;
             }
             #game-board {
-                padding: 10px;
-                margin-bottom: 10px;
+                padding: 8px;
+                margin-bottom: 8px;
             }
             .grid {
-                gap: 5px;
+                gap: 4px;
             }
             .cell {
-                font-size: clamp(16px, 3.5vw, 24px);
-                border-radius: 6px;
+                font-size: clamp(14px, 3.5vw, 22px);
+                border-radius: 5px;
             }
             .cell[data-value="128"],
             .cell[data-value="256"],
             .cell[data-value="512"] {
-                font-size: clamp(14px, 3vw, 20px);
+                font-size: clamp(13px, 3vw, 18px);
             }
             .cell[data-value="1024"],
             .cell[data-value="2048"] {
-                font-size: clamp(12px, 2.5vw, 18px);
+                font-size: clamp(11px, 2.5vw, 16px);
             }
             .game-controls {
-                gap: 6px;
-                margin-top: 10px;
+                display: flex;
+                gap: 8px;  /* 10px → 8px */
+                margin-top: 12px;  /* 15px → 12px */
             }
             .btn {
                 padding: 8px 14px;
@@ -819,7 +822,6 @@
             <p>• 같은 숫자를 합쳐서 점수 획득</p>
             <p>• 점수가 높을수록 강한 공격!</p>
             <p>• 보스를 물리치고 다음 스테이지로!</p>
-            <p style="margin-top: 10px; color: #7c3aed; font-weight: 700;">✨ v16: Firebase 연동 최적화</p>
         </div>
         
         <button class="intro-btn" id="startGameBtn">🚀 게임 시작</button>

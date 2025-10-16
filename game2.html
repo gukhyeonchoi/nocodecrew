@@ -1292,21 +1292,23 @@
             requestAnimationFrame(loop);
         }
 
-        function goHome() {
-  if (parent.resetIframe) {
-    parent.resetIframe();  // 부모의 iframe 초기화 호출
+function goHome() {
+  const parentDoc = window.parent.document;
+  const frame = parentDoc.getElementById('game-frame');
+  if (frame) {
+    frame.src = 'about:blank';  // iframe 초기화
+    frame.style.display = 'none';
   }
-  parent.document.querySelector('h1').style.display = 'block';
-  parent.document.getElementById('carousel').style.display = 'block';
-  parent.document.getElementById('user-info').style.display = 'flex';
-  if (parent.playBGM) {
-    parent.playBGM(false);  // BGM 유지
+  parentDoc.querySelector('h1').style.display = 'block';
+  parentDoc.getElementById('carousel').style.display = 'block';
+  parentDoc.getElementById('user-info').style.display = 'flex';
+  if (window.parent.playBGM) {
+    window.parent.playBGM(false);  // BGM 유지
   }
   if ('vibrate' in navigator) {
     navigator.vibrate(50);
   }
 }
-
         document.getElementById('startGameBtn').addEventListener('click', startGame);
         document.getElementById('goHomeBtn').addEventListener('click', goHome);
         document.getElementById('resetGameBtn').addEventListener('click', restartGame);
