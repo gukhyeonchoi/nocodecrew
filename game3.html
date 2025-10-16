@@ -434,6 +434,55 @@
         .modal button.secondary:hover {
             background: rgba(203, 213, 225, 0.9);
         }
+        .modal input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border: 2px solid rgba(147, 197, 253, 0.5);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Pretendard', sans-serif;
+            background: rgba(240, 249, 255, 0.8);
+            color: #0c4a6e;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .modal input:focus {
+            border-color: #38bdf8;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        }
+        .ranking-in-modal {
+            margin: 20px 0;
+            text-align: left;
+            font-size: 14px;
+            color: #0284c7;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .ranking-in-modal h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            text-align: center;
+            color: #0284c7;
+        }
+        .ranking-in-modal p {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(147, 197, 253, 0.15);
+            border-radius: 8px;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .ranking-in-modal .rank {
+            font-weight: 800;
+            color: #0284c7;
+        }
+        .ranking-in-modal .score {
+            font-weight: 700;
+            color: #7c3aed;
+        }
         .damage-text {
             position: fixed;
             font-weight: bold;
@@ -550,16 +599,21 @@
             <h2>🎮 게임 오버</h2>
             <p>최종 점수: <span class="score-highlight" id="final-score">0</span></p>
             <p>처치한 보스: <span class="score-highlight" id="final-boss-kills">0</span></p>
+            
+            <input type="text" id="playerNameInput" placeholder="이름을 입력하세요 (최대 12자)" maxlength="12">
+            
+            <div class="ranking-in-modal" id="rankingInModal"></div>
+            
             <div class="button-group">
-                <button class="secondary" onclick="newGame()">🔄 재도전</button>
-                <button class="primary" onclick="goHome()">🏠 홈으로</button>
+                <button class="secondary" onclick="restartGame()">🔄 재도전</button>
+                <button class="primary" id="saveScoreBtn">💾 저장하고 홈으로</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+        import { getDatabase, ref, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-M1czGNwh3-xMLHgmEdVmfbHZAmQioiQ",
@@ -576,6 +630,7 @@
         const db = getDatabase(app);
 
         let playerName = localStorage.getItem('playerName') || 'Guest';
+        let scoreSaved = false;
 
         function createBackgroundEffects() {
             for (let i = 0; i < 30; i++) {
@@ -745,22 +800,85 @@
         async function endGame() {
             gameOver = true;
             if (combatInterval) clearInterval(combatInterval);
-            setTimeout(() => {
-                document.getElementById('final-score').textContent = score;
-                document.getElementById('final-boss-kills').textContent = bossKills;
-                document.getElementById('gameOverModal').classList.add('show');
-            }, 500);
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-boss-kills').textContent = bossKills;
+            document.getElementById('playerNameInput').value = localStorage.getItem('playerName') || '';
+            
+            const rankings = await loadHighScores();
+            const rankingDiv = document.getElementById('rankingInModal');
+            const medals = ['🥇', '🥈', '🥉'];
+            rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+            if (rankings.length === 0) {
+                rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
+            } else {
+                rankings.slice(0, 5).forEach((entry, index) => {
+                    const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                    rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+                });
+            }
+            
+            document.getElementById('gameOverModal').classList.add('show');
+            scoreSaved = false;
+        }
+
+        async function loadHighScores() {
+            try {
+                const scoresRef = ref(db, 'scores/game3');
+                const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
+                const snapshot = await get(topScoresQuery);
+                const rankings = [];
+                snapshot.forEach((child) => {
+                    rankings.unshift(child.val());
+                });
+                return rankings;
+            } catch (error) {
+                console.error('Error loading rankings:', error);
+                return [];
+            }
+        }
+
+        async function saveHighScore(name, score) {
             try {
                 const scoreData = {
-                    name: playerName || '익명',
-                    score: Number(score),
-                    bossKills: Number(bossKills),
+                    name: (name || 'Player').trim().slice(0, 12) || 'Player',
+                    score: +score || 0,
+                    bossKills: +bossKills || 0,
                     timestamp: Date.now()
                 };
                 await push(ref(db, 'scores/game3'), scoreData);
+                localStorage.setItem('playerName', scoreData.name);
+                playerName = scoreData.name;
+                return await loadHighScores();
             } catch (error) {
                 console.error('Score save error:', error);
+                return [];
             }
+        }
+
+        function fetchRankings() {
+            return loadHighScores();
+        }
+
+        function showRankingsInModal(rankings) {
+            const rankingDiv = document.getElementById('rankingInModal');
+            const medals = ['🥇', '🥈', '🥉'];
+            rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+            
+            if (rankings.length === 0) {
+                rankingDiv.innerHTML += '<p style="text-align: center; color: #94a3b8;">랭킹 데이터 없음</p>';
+            } else {
+                rankings.forEach((entry, index) => {
+                    const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                    rankingDiv.innerHTML += `<p><span class="rank">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+                });
+            }
+        }
+
+        window.restartGame = function() {
+            document.getElementById('gameOverModal').classList.remove('show');
+            initGame();
+            startGame();
         }
 
         function addNewTile() {
@@ -989,6 +1107,22 @@
         document.getElementById('startGameBtn').addEventListener('click', startGame);
         document.getElementById('goHomeBtn').addEventListener('click', goHome);
         document.getElementById('goHomeBtn2').addEventListener('click', goHome);
+        
+        document.getElementById('saveScoreBtn').addEventListener('click', async () => {
+            if (scoreSaved) {
+                goHome();
+                return;
+            }
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) {
+                alert('이름을 입력해주세요 😊');
+                return;
+            }
+            await saveHighScore(name, score);
+            scoreSaved = true;
+            document.getElementById('saveScoreBtn').textContent = '✅ 저장 완료';
+            setTimeout(goHome, 1000);
+        });
     </script>
 </body>
 </html>
