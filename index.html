@@ -142,7 +142,7 @@
       z-index: 10;
       margin: 2vh 0 2vh 0;
       position: absolute;
-      top: 20px;
+      top: 60px;
       left: 50%;
       transform: translateX(-50%);
       animation: titleFloat 3s ease-in-out infinite;
@@ -321,18 +321,18 @@
 
     /* 랭킹 리스트 - 가시성 개선 */
     .ranking-list {
-      margin-top: 10px;
-      font-size: clamp(0.75rem, 1.6vw, 0.95rem);
-      color: #0369a1;
-      text-align: left;
-      width: 100%;
-      padding: 0 8px;
-      line-height: 1.3;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
+  margin-top: 10px;
+  font-size: clamp(0.5rem, 1.2vw, 0.7rem);
+  color: #0369a1;
+  text-align: left;
+  width: 100%;
+  padding: 0 8px;
+  line-height: 1.3;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
     .ranking-list p {
       margin: 0;
@@ -589,7 +589,7 @@
   <!-- 3D 도넛 컨테이너 -->
   <div class="btn-container" id="carousel">
     <div class="game-card" data-game="game1" data-angle="0">
-      <div class="game-title">게임 1</div>
+      <div class="game-title">컬러 슈터</div>
       <div class="game-number">1</div>
       <button class="game-btn" data-game="game1">게임 시작</button>
       <div class="ranking-list" id="ranking-game1">
@@ -599,7 +599,7 @@
       </div>
     </div>
     <div class="game-card" data-game="game2" data-angle="72">
-      <div class="game-title">게임 2</div>
+      <div class="game-title">탕탕 특공대</div>
       <div class="game-number">2</div>
       <button class="game-btn" data-game="game2">게임 시작</button>
       <div class="ranking-list" id="ranking-game2">
@@ -609,7 +609,7 @@
       </div>
     </div>
     <div class="game-card" data-game="game3" data-angle="144">
-      <div class="game-title">게임 3</div>
+      <div class="game-title">전투형 2048</div>
       <div class="game-number">3</div>
       <button class="game-btn" data-game="game3">게임 시작</button>
       <div class="ranking-list" id="ranking-game3">
@@ -619,7 +619,7 @@
       </div>
     </div>
     <div class="game-card" data-game="game4" data-angle="216">
-      <div class="game-title">게임 4</div>
+      <div class="game-title">기억력 카드게임</div>
       <div class="game-number">4</div>
       <button class="game-btn" data-game="game4">게임 시작</button>
       <div class="ranking-list" id="ranking-game4">
@@ -629,7 +629,7 @@
       </div>
     </div>
     <div class="game-card" data-game="game5" data-angle="288">
-      <div class="game-title">게임 5</div>
+      <div class="game-title">사과 게임</div>
       <div class="game-number">5</div>
       <button class="game-btn" data-game="game5">게임 시작</button>
       <div class="ranking-list" id="ranking-game5">
