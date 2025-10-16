@@ -1671,8 +1671,20 @@
             if (game) game.resetGame();
         }
         function goHome() {
-            window.location.href = 'index.html';
-        }
+    parent.document.getElementById('game-frame').style.display = 'none';
+    parent.document.querySelector('h1').style.display = 'block';
+    parent.document.getElementById('carousel').style.display = 'block';
+    parent.document.getElementById('user-info').style.display = 'flex';
+    
+    // BGM 재생 보장 (부모 창의 playBGM 호출)
+    if (parent.playBGM) {
+        parent.playBGM();  // index의 playBGM 함수 호출
+    }
+    
+    if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+    }
+}
         document.addEventListener('DOMContentLoaded', function() {
             createBackgroundEffects();
             document.getElementById('intro').style.display = 'flex';

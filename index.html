@@ -642,6 +642,14 @@
   border: 1px solid rgba(147, 197, 253, 0.2);
   font-size: 0.9rem;
 }
+
+#game-frame {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 0;  /* 초기 숨김 */
+}
+#game-frame[style*="display: block"] {
+  opacity: 1;
+}
   </style>
 </head>
 <body>
@@ -1088,25 +1096,38 @@ function saveName() {
       input.value = window.playerName || '';
     });
 
-        document.querySelectorAll('.game-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const gameId = btn.getAttribute('data-game');
-        if (!window.playerName) {
-          showNameModal(false);
-          return;
-        }
-        if ('vibrate' in navigator) {
-          navigator.vibrate(50);
-        }
-        const frame = document.getElementById('game-frame');
-        frame.src = `${gameId}.html`;
-        frame.style.display = 'block';
-        document.querySelector('h1').style.display = 'none';
-        document.getElementById('carousel').style.display = 'none';
-        document.getElementById('user-info').style.display = 'none';
-      });
-    });
+        // iframe 내용 비우기 함수 추가 (스크립트 상단에)
+function resetIframe() {
+  const frame = document.getElementById('game-frame');
+  frame.src = 'about:blank';  // 이전 콘텐츠 초기화
+  frame.style.visibility = 'hidden';  // 깜빡임 방지
+  setTimeout(() => {  // 지연으로 안정화
+    frame.style.display = 'none';
+  }, 100);
+}
+
+// 게임 버튼 이벤트 수정 (resetIframe 호출 추가)
+document.querySelectorAll('.game-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const gameId = btn.getAttribute('data-game');
+    if (!window.playerName) {
+      showNameModal(false);
+      return;
+    }
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+    resetIframe();  // iframe 초기화 호출
+    const frame = document.getElementById('game-frame');
+    frame.src = `${gameId}.html`;
+    frame.style.display = 'block';
+    frame.style.visibility = 'visible';  // 보이게 함
+    document.querySelector('h1').style.display = 'none';
+    document.getElementById('carousel').style.display = 'none';
+    document.getElementById('user-info').style.display = 'none';
+  });
+});
 
     // 페이지 로드 시 초기화
     window.addEventListener('load', () => {
