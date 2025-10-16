@@ -615,29 +615,29 @@
                 max-height: 95vh;
                 overflow-y: auto;
             }
-            h1 { font-size: 1.6em; margin-bottom: 8px; }
+            h1 { font-size: 1.4em; margin-bottom: 5px; }
             .stage-info { 
-                font-size: 0.95em; 
-                padding: 10px;
-                margin-bottom: 12px;
+                font-size: 0.9em; 
+                padding: 8px;
+                margin-bottom: 10px;
             }
-            .timer-text { font-size: 0.95em; margin-bottom: 8px; }
+            .timer-text { font-size: 0.9em; margin-bottom: 6px; }
             .timer-bar-container { 
-                height: 16px;
-                margin-bottom: 12px;
+                height: 14px;
+                margin-bottom: 10px;
             }
             .score-board { 
-                padding: 10px; 
-                gap: 8px;
-                margin-bottom: 15px;
+                padding: 8px; 
+                gap: 6px;
+                margin-bottom: 12px;
             }
-            .score-label { font-size: 0.75em; }
-            .score-value { font-size: 1.4em; }
+            .score-label { font-size: 0.7em; }
+            .score-value { font-size: 1.3em; }
             .game-board { 
                 grid-template-columns: repeat(6, 1fr);
                 padding: 10px;
                 gap: 4px;
-                margin-bottom: 15px;
+                margin-bottom: 10px;
             }
             .tile, .empty-slot { 
                 width: 38px; 
@@ -649,15 +649,18 @@
                 width: 24px; 
                 height: 24px; 
             }
-            .controls { gap: 8px; }
+            .controls {
+                gap: 6px;
+                margin-bottom: 5px; }
             .btn { 
-                padding: 8px 15px; 
-                font-size: 0.85em; 
+                padding: 7px 12px; 
+                font-size: 0.8em; 
             }
             .message { 
-                font-size: 0.9em; 
-                padding: 10px;
-                margin-top: 12px;
+                font-size: 0.85em; 
+                margin-top: 8px;  /* 12px → 8px */
+                min-height: 45px;  /* 54px → 45px */
+                height: 45px;
             }
             .popup-content { 
                 padding: 20px 15px; 
@@ -669,20 +672,20 @@
 
         /* 아주 작은 모바일 (360px 이하) */
         @media (max-width: 360px) {
-            body { padding: 10px; }
-            .game-container { padding: 10px; width: 90%; }
-            h1 { font-size: 1.4em; margin-bottom: 6px; }
-            .stage-info { font-size: 0.9em; padding: 8px; margin-bottom: 10px; }
-            .timer-text { font-size: 0.9em; margin-bottom: 6px; }
-            .timer-bar-container { height: 14px; margin-bottom: 10px; }
-            .score-board { padding: 8px; gap: 6px; margin-bottom: 12px; }
-            .score-label { font-size: 0.7em; }
-            .score-value { font-size: 1.2em; }
+            body { padding: 5px; }
+            .game-container { padding: 8px; width: 90%; }
+            h1 { font-size: 1.2em; margin-bottom: 4px; }
+            .stage-info { font-size: 0.85em; padding: 6px; margin-bottom: 8px; }
+            .timer-text { font-size: 0.85em; margin-bottom: 5px; }
+            .timer-bar-container { height: 12px; margin-bottom: 8px; }
+            .score-board { padding: 6px; gap: 4px; margin-bottom: 10px; }
+            .score-label { font-size: 0.65em; }
+            .score-value { font-size: 1.1em; }
             .game-board { 
                 grid-template-columns: repeat(6, 1fr);
                 gap: 3px;
                 padding: 8px;
-                margin-bottom: 12px;
+                margin-bottom: 8px;
             }
             .tile, .empty-slot { 
                 width: 34px; 
@@ -690,19 +693,24 @@
             }
             .tile::before { font-size: 28px; }
             .tile .number { 
-                font-size: 1.1em; 
-                width: 22px; 
-                height: 22px; 
+                font-size: 1em; 
+                width: 20px; 
+                height: 20px; 
             }
-            .controls { gap: 6px; }
+            .controls {         
+                gap: 5px;  
+                margin-bottom: 5px; }
+
             .btn { 
-                padding: 7px 12px; 
-                font-size: 0.8em; 
+                padding: 6px 10px; 
+                font-size: 0.75em; 
             }
             .message { 
-                font-size: 0.85em; 
-                padding: 8px;
-                margin-top: 10px;
+                font-size: 0.8em; 
+                padding: 6px;  /* 8px → 6px */
+                margin-top: 6px;  /* 10px → 6px */
+                min-height: 40px;  /* 추가 */
+                height: 40px;
             }
             .welcome-title { font-size: 1.4em; }
             .welcome-content { padding: 18px 12px; width: 90%; }
