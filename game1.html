@@ -524,16 +524,16 @@
             border: 2px solid rgba(147, 197, 253, 0.3);
         }
         .btn {
-    color: #fff;
-    border: none;
-    padding: 8px 30px;
-    margin: 5px;
-    border-radius: 8px;
-    background: linear-gradient(145deg, #60a5fa, #93c5fd);
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-}
+            color: #fff;
+            border: none;
+            padding: 8px 30px;
+            margin: 5px;
+            border-radius: 8px;
+            background: linear-gradient(145deg, #60a5fa, #93c5fd);
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
         .btn-home {
             background: linear-gradient(135deg, #94a3b8, #64748b);
         }
@@ -630,10 +630,10 @@
             line-height: 1.5;
         }
         .modal-actions {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-}
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
         @media (max-width: 768px) {
             #intro {
                 padding: 30px 20px;
@@ -998,7 +998,7 @@
                 this.colors = this.fullColorPool.slice(0, config.colors);
                 this.targetNumbers = config.numberRange;
                 this.stackNumbers = config.numberRange;
-                this.targetLanes = Array(config.lanes).fill().fill().map(() => []);
+                this.targetLanes = Array(config.lanes).fill().map(() => []);
                 this.stacks = Array(config.lanes).fill().map(() => []);
                 this.attackQueue = Array(config.queueSlots).fill(null);
                 this.clearAllParticles();

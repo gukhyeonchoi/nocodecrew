@@ -1128,6 +1128,42 @@ function saveName() {
         radius = newRadius;
         updateCarousel();
       }
+      // BGM 관리 함수
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.3;  // 낮은 볼륨으로 파스텔 느낌 유지
+
+function playBGM() {
+  if (bgm.paused) {
+    bgm.play().catch(err => console.warn('BGM play failed:', err));  // 정책 오류 방지
+  }
+}
+
+// 사용자 상호작용 후 BGM 시작 (예: 게임 버튼 클릭 시)
+document.querySelectorAll('.game-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    // 기존 코드 유지
+    // ...
+    playBGM();  // BGM 재생 보장
+  });
+});
+
+// 페이지 visibility 변경 시 BGM 유지 (백그라운드/포커스 아웃 방지)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    playBGM();
+  } else {
+    bgm.pause();  // 배터리/데이터 절약 (선택적)
+  }
+});
+
+// 로드 시 BGM 준비 (autoplay 대신 첫 상호작용 대기)
+window.addEventListener('load', () => {
+  // 기존 코드
+  // ...
+  if (localStorage.getItem('bgmEnabled') !== 'false') {  // 사용자 설정 저장 예시
+    playBGM();
+  }
+});
     });
   </script>
     <div id="full-ranking-modal" class="modal">
@@ -1137,7 +1173,7 @@ function saveName() {
     <button id="close-full-ranking" class="primary" style="margin-top: 15px; width: 100%;">닫기</button>
   </div>
 </div>
-  <audio id="bgm" src="assets/bgm_background.mp3" autoplay loop style="display:none;"></audio>
+  <audio id="bgm" src="assets/bgm_background.mp3" loop style="display:none;"></audio>  <!-- autoplay 제거: 정책 준수 -->
   <iframe id="game-frame" style="display:none; width:100%; height:100vh; border:none; position:fixed; top:0; left:0; z-index:9999;"></iframe>
 </body>
 </html>
