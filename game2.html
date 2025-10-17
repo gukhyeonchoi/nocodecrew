@@ -630,20 +630,20 @@
     </div>
 
     <div id="gameOverModal" class="modal-backdrop">
-        <div class="modal">
-            <h2>🎮 게임 오버</h2>
-            <p>최종 점수: <span id="finalScore" style="color: #7c3aed; font-weight: 800; font-size: 24px;">0</span></p>
-            <p style="color: #10b981; font-weight: 700;">랭킹에 등록되었습니다!</p>
-            <div class="ranking-in-modal" id="rankingInModal">
-                <h3>🏆 랭킹</h3>
-            </div>
-            <div class="button-group">
-                <button class="secondary" onclick="restartGame()">🔄 재도전</button>
-                <button class="secondary" onclick="goHome()">🏠 홈으로</button>
-                <button class="primary" id="showStatusBtn">📊 최종 상태</button> <!-- 추가: 최종 상태 버튼 -->
-            </div>
+    <div class="modal">
+        <h2>🎮 게임 오버</h2>
+        <p>최종 점수: <span id="finalScore" style="color: #7c3aed; font-weight: 800; font-size: 24px;">0</span></p>
+        <p style="color: #10b981; font-weight: 700;">랭킹에 등록되었습니다!</p>
+        <div class="ranking-in-modal" id="rankingInModal">
+            <h3>🏆 랭킹</h3>
+        </div>
+        <div class="button-group">
+            <button class="secondary" id="restartBtn">🔄 재도전</button>
+            <button class="secondary" id="goHomeModalBtn">🏠 홈으로</button>
+            <button class="primary" id="showStatusBtn">📊 최종 상태</button>
         </div>
     </div>
+</div>
     <!-- 추가: 최종 상태 팝업창 -->
     <div id="statusModal" class="modal-backdrop">
         <div class="modal">
@@ -1523,6 +1523,16 @@
         modal.style.justifyContent = 'center';
         modal.style.gap = '15px';
     }
+    // 모달 표시 후 버튼 이벤트 재등록 (동적 문제 방지)
+    document.getElementById('restartBtn').addEventListener('click', restartGame);
+    document.getElementById('goHomeModalBtn').addEventListener('click', goHome);
+    document.getElementById('showStatusBtn').addEventListener('click', showStatusModal);
+    // backdrop 클릭으로 모달 닫기 추가 (빈 공간 클릭 시 닫기)
+    document.getElementById('gameOverModal').addEventListener('click', (e) => {
+        if (!e.target.closest('.modal')) {
+            document.getElementById('gameOverModal').classList.remove('show');
+        }
+    });
 }
 
         window.restartGame = function() {
@@ -1628,6 +1638,8 @@
             document.getElementById('startGameBtn').addEventListener('click', startGame);
             document.getElementById('goHomeBtn').addEventListener('click', goHome); // 추가
             document.getElementById('resetGameBtn').addEventListener('click', restartGame);
+            document.getElementById('restartBtn').addEventListener('click', restartGame);
+            document.getElementById('goHomeModalBtn').addEventListener('click', goHome);
             document.getElementById('goHomeBtn2').addEventListener('click', goHome); // 추가
             document.getElementById('continueAdBtn').addEventListener('click', showAdModal);
             document.getElementById('showStatusBtn').addEventListener('click', showStatusModal);
