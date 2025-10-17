@@ -373,11 +373,16 @@
             background: #fff;
             box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
         }
-        .modal .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+        .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%; /* 버튼 가로 길게 */
+}
+.modal button {
+    width: 100%; /* 각 버튼 가로 전체 채우기 */
+}
         .modal button {
             flex: 1;
             padding: 12px 20px;
@@ -634,7 +639,6 @@
             </div>
             <div class="button-group">
                 <button class="secondary" onclick="restartGame()">🔄 재도전</button>
-                <button class="primary" id="continueAdBtn">📺 광고 보고 이어하기</button>
                 <button class="secondary" onclick="goHome()">🏠 홈으로</button>
                 <button class="primary" id="showStatusBtn">📊 최종 상태</button> <!-- 추가: 최종 상태 버튼 -->
             </div>
@@ -1474,43 +1478,52 @@
         }
 
         async function endGame() {
-            gameState.gameOver = true;
-            document.getElementById('finalScore').textContent = gameState.score;
-            try {
-                console.log('Saving final score:', gameState.score, 'for player:', playerName);
-                const scoreData = {
-                    name: playerName || '익명',
-                    score: Number(gameState.score),
-                    timestamp: Date.now()
-                };
-                await push(ref(db, 'scores/game2'), scoreData);
-                console.log('Score saved successfully');
-                const rankings = await loadHighScores();
-                const rankingDiv = document.getElementById('rankingInModal');
-                const medals = ['🥇', '🥈', '🥉'];
-                rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
-                if (rankings.length === 0) {
-                    rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
-                } else {
-                    rankings.slice(0, 5).forEach((entry, index) => {
-                        const medal = index < 3 ? medals[index] : `${index + 1}위`;
-                        rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
-                    });
-                }
-                document.getElementById('gameOverModal').classList.add('show');
-                if ('vibrate' in navigator) {
-                    navigator.vibrate([200, 100, 200]);
-                }
-            } catch (error) {
-                console.error('Score save error:', error);
-                const rankingDiv = document.getElementById('rankingInModal');
-                rankingDiv.innerHTML = '<h3>🏆 랭킹</h3><p style="text-align: center;">⚠️ 랭킹 등록 실패: ' + error.message + '</p>';
-                document.getElementById('gameOverModal').classList.add('show');
-                if ('vibrate' in navigator) {
-                    navigator.vibrate([200, 100, 200]);
-                }
-            }
+    gameState.gameOver = true;
+    document.getElementById('finalScore').textContent = gameState.score;
+    try {
+        console.log('Saving final score:', gameState.score, 'for player:', playerName);
+        const scoreData = {
+            name: playerName || '익명',
+            score: Number(gameState.score),
+            timestamp: Date.now()
+        };
+        await push(ref(db, 'scores/game2'), scoreData);
+        console.log('Score saved successfully');
+        const rankings = await loadHighScores();
+        const rankingDiv = document.getElementById('rankingInModal');
+        const medals = ['🥇', '🥈', '🥉'];
+        rankingDiv.innerHTML = '<h3>🏆 랭킹</h3>';
+        if (rankings.length === 0) {
+            rankingDiv.innerHTML += '<p style="text-align: center;">랭킹 데이터 없음</p>';
+        } else {
+            rankings.slice(0, 5).forEach((entry, index) => {
+                const medal = index < 3 ? medals[index] : `${index + 1}위`;
+                rankingDiv.innerHTML += `<p><span style="font-weight: 600;">${medal}</span> <span>${entry.name || '익명'} - ${entry.score}점</span></p>`;
+            });
         }
+        document.getElementById('gameOverModal').classList.add('show');
+        if ('vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200]);
+        }
+    } catch (error) {
+        console.error('Score save error:', error);
+        const rankingDiv = document.getElementById('rankingInModal');
+        rankingDiv.innerHTML = '<h3>🏆 랭킹</h3><p style="text-align: center;">⚠️ 랭킹 등록 실패: ' + error.message + '</p>';
+        document.getElementById('gameOverModal').classList.add('show');
+        if ('vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200]);
+        }
+    }
+    // 세로 UI 통일을 위한 스타일 추가 (game1.html 스타일 참고)
+    const modal = document.querySelector('.modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.gap = '15px';
+    }
+}
 
         window.restartGame = function() {
             gameState = { 
@@ -1576,37 +1589,24 @@
         }
 
         function goHome(event) {
-            if (event) event.stopPropagation(); // 이벤트 전파 차단
-            try {
-                const parentDoc = window.parent && window.parent.document;
-                if (parentDoc) {
-                    const frame = parentDoc.getElementById('game-frame');
-                    if (frame) {
-                        frame.src = 'about:blank';
-                        frame.style.display = 'none';
-                    }
-                    const h1 = parentDoc.querySelector('h1');
-                    if (h1) h1.style.display = 'block';
-                    const carousel = parentDoc.getElementById('carousel');
-                    if (carousel) carousel.style.display = 'block';
-                    const userInfo = parentDoc.getElementById('user-info');
-                    if (userInfo) userInfo.style.display = 'flex';
-                    if (window.parent.playBGM) {
-                        window.parent.playBGM(false);
-                    }
-                } else {
-                    // iframe 외 환경: 단순히 intro 화면으로 전환
-                    document.getElementById('gameOverModal').classList.remove('show');
-                    document.getElementById('gameContainer').style.display = 'none';
-                    document.getElementById('intro').style.display = 'flex';
-                }
-                if ('vibrate' in navigator) {
-                    navigator.vibrate(50);
-                }
-            } catch (error) {
-                console.error('Error in goHome:', error);
-            }
+    if (event) event.stopPropagation(); // 이벤트 전파 차단
+    try {
+        if (window.parent && window.parent !== window) {
+            // iframe 내부: 부모에게 goHome 메시지 전송
+            window.parent.postMessage('goHome', '*');
+        } else {
+            // iframe 외 환경: 직접 처리
+            document.getElementById('gameOverModal').classList.remove('show');
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('intro').style.display = 'flex';
         }
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+    } catch (error) {
+        console.error('Error in goHome:', error);
+    }
+}
 
         document.getElementById('startGameBtn').addEventListener('click', startGame);
         document.getElementById('goHomeBtn').addEventListener('click', goHome);
