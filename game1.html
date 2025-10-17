@@ -1176,64 +1176,75 @@
                 let shotsFired = 0;
                 let lastShotTime = performance.now();
                 const fireLoop = (now) => {
-                    if (!this.gameRunning) {
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-                        this.scheduleUpdate();
-                        return;
-                    }
-                    const lane = this.targetLanes[laneIndex];
-                    if (!lane || lane.length === 0 || lane[0].color !== queued.color) {
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-                        this.scheduleUpdate();
-                        return;
-                    }
-                    const currentBottom = lane[0];
-                    if (!currentBottom) {
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-                        this.scheduleUpdate();
-                        return;
-                    }
-                    if (now - lastShotTime >= shotInterval) {
-                        if (this._particleCount < this._maxParticles) {
-                            this.createSingleParticle(queueIndex, laneIndex, queued.color);
-                            this._particleCount++;
-                        }
-                        currentBottom.number -= 1;
-                        if ('vibrate' in navigator) {
-                            navigator.vibrate(30);
-                        }
-                        queued.number -= 1;
-                        shotsFired++;
-                        this.score += 1;
-                        this.updateDisplay();
-                        lastShotTime = now;
-                        this.updateTargetLanes();
-                        this.updateQueue();
-                        if (currentBottom.number <= 0) {
-                            this.targetLanes[laneIndex].shift();
-                            if (lane.length > 0 && lane[0].color === queued.color) {
-                                this.updateTargetLanes();
-                            }
-                        }
-                    }
-                    if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
-                        requestAnimationFrame(fireLoop);
-                    } else {
-                        this.showDamageText(laneIndex, shotsFired);
-                        this.showMessage(`🎯 매칭 성공! +${shotsFired}점`, 'success');
-                        console.log(`매칭 성공! +${shotsFired}점`);
-                        if (queued.number > 0) {
-                            console.log(`잔여값 ${queued.number} 남음`);
-                        } else {
-                            this.attackQueue[queueIndex] = null;
-                        }
-                        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
-                        this.updateTargetLanes();
-                        this.scheduleUpdate(() => {
-                            this.checkStageClear();
-                        });
-                    }
-                };
+    if (!this.gameRunning) {
+        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+        this.scheduleUpdate();
+        return;
+    }
+    const lane = this.targetLanes[laneIndex];
+    if (!lane || lane.length === 0 || lane[0].color !== queued.color) {
+        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+        this.scheduleUpdate();
+        return;
+    }
+    const currentBottom = lane[0];
+    if (!currentBottom) {
+        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+        this.scheduleUpdate();
+        return;
+    }
+    
+    // 한 프레임에 여러 발을 쏠 수 있도록 while 루프 추가
+    while (now - lastShotTime >= shotInterval && queued.number > 0 && currentBottom.number > 0) {
+        if (this._particleCount < this._maxParticles) {
+            this.createSingleParticle(queueIndex, laneIndex, queued.color);
+            this._particleCount++;
+        }
+        currentBottom.number -= 1;
+        queued.number -= 1;
+        shotsFired++;
+        this.score += 1;
+        lastShotTime += shotInterval; // now가 아닌 shotInterval을 더해서 정확한 간격 유지
+        
+        if (currentBottom.number <= 0) {
+            this.targetLanes[laneIndex].shift();
+            if (lane.length > 0 && lane[0].color === queued.color) {
+                // 다음 블록으로 전환
+                break;
+            } else {
+                // 더 이상 매칭되는 블록이 없음
+                break;
+            }
+        }
+    }
+    
+    // 진동은 프레임당 한 번만
+    if (shotsFired > 0 && 'vibrate' in navigator) {
+        navigator.vibrate(30);
+    }
+    
+    this.updateDisplay();
+    this.updateTargetLanes();
+    this.updateQueue();
+    
+    if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
+        requestAnimationFrame(fireLoop);
+    } else {
+        this.showDamageText(laneIndex, shotsFired);
+        this.showMessage(`🎯 매칭 성공! +${shotsFired}점`, 'success');
+        console.log(`매칭 성공! +${shotsFired}점`);
+        if (queued.number > 0) {
+            console.log(`잔여값 ${queued.number} 남음`);
+        } else {
+            this.attackQueue[queueIndex] = null;
+        }
+        if (this.attackQueue[queueIndex]) this.attackQueue[queueIndex].isFiring = false;
+        this.updateTargetLanes();
+        this.scheduleUpdate(() => {
+            this.checkStageClear();
+        });
+    }
+};
                 requestAnimationFrame(fireLoop);
             }
             createSingleParticle(queueIndex, laneIndex, color) {
