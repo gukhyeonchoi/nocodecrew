@@ -26,6 +26,12 @@
       width: 100%;
       min-height: 100vh;
       position: relative;
+      padding-top: env(safe-area-inset-top); /* iOS 상단 Notch */
+      padding-bottom: env(safe-area-inset-bottom); /* iOS/Android 하단 바 */
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      overflow-y: auto; /* 전체 스크롤 부드럽게 */
+      -webkit-overflow-scrolling: touch; /* iOS 스크롤 모멘텀 */
     }
 
     /* 배경 효과 */
@@ -316,6 +322,9 @@
   -webkit-font-smoothing: antialiased; /* 폰트 스무딩 */
   transform: rotateX(45deg) scaleY(1.414) translateZ(0.01px); /* 3D 왜곡 보정 */
   backface-visibility: hidden; /* 뒷면 숨김으로 왜곡 최소화 */
+  height: 100px; /* 고정 높이: 8개 항목 들어갈 공간 (약 12.5px * 8) */
+  overflow-y: auto; /* 스크롤 가능 */
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
 }
 
 .ranking-list p {
@@ -331,6 +340,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 12px; /* 각 항목 최소 높이 */
 }
 
 .ranking-list span:nth-child(2) { /* 이름 부분에만 최대 너비 적용 */
@@ -360,6 +370,22 @@
     .ranking-list span.score {
       font-weight: 700;
       color: #7c3aed;
+    }
+
+    .ranking-list:empty::before {
+      content: "아직 랭킹이 없습니다! 🎮 첫 번째 플레이어가 되어보세요.";
+      display: block;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.5rem;
+      color: #94a3b8;
+      background: linear-gradient(135deg, rgba(240, 249, 255, 0.3), transparent);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* 모달 */
@@ -624,6 +650,12 @@
   visibility: visible;
   display: block;
 }
+
+@media (max-height: 600px) {
+  .full-ranking-modal .modal-content {
+    max-height: 70vh;
+  }
+}
   </style>
 </head>
 <body>
@@ -771,14 +803,58 @@
         circle.style.animationDelay = `${Math.random() * 2}s`;
         body.appendChild(circle);
       }
-      setInterval(() => {
-        const drop = document.createElement('div');
-        drop.className = 'water-drop';
-        drop.style.left = `${Math.random() * 100}%`;
-        drop.style.setProperty('--duration', `${Math.random() * 1.2 + 1.5}s`);
-        body.appendChild(drop);
-        setTimeout(() => drop.remove(), 3000);
-      }, 1200);
+      function createBackgroundEffects() {
+  const body = document.body;
+  for (let i = 0; i < 5; i++) {
+    const cloud = document.createElement('div');
+    cloud.className = 'cloud';
+    cloud.style.width = `${Math.random() * 50 + 30}px`;
+    cloud.style.height = `${Math.random() * 15 + 10}px`;
+    cloud.style.left = `${Math.random() * 100}%`;
+    cloud.style.top = `${Math.random() * 80}%`;
+    cloud.style.setProperty('--duration', `${Math.random() * 6 + 8}s`);
+    cloud.style.animationDelay = `${Math.random() * 3}s`;
+    body.appendChild(cloud);
+  }
+  for (let i = 0; i < 15; i++) {
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle';
+    sparkle.style.left = `${Math.random() * 100}%`;
+    sparkle.style.top = `${Math.random() * 100}%`;
+    sparkle.style.setProperty('--duration', `${Math.random() * 1.5 + 1}s`);
+    sparkle.style.animationDelay = `${Math.random() * 1.5}s`;
+    body.appendChild(sparkle);
+  }
+  for (let i = 0; i < 6; i++) {
+    const circle = document.createElement('div');
+    circle.className = 'floating-circle';
+    const size = Math.random() * 50 + 20;
+    circle.style.width = `${size}px`;
+    circle.style.height = `${size}px`;
+    circle.style.left = `${Math.random() * 100}%`;
+    circle.style.top = `${Math.random() * 100}%`;
+    circle.style.setProperty('--duration', `${Math.random() * 5 + 4}s`);
+    circle.style.setProperty('--tx', `${Math.random() * 30 - 15}px`);
+    circle.style.setProperty('--ty', `${Math.random() * 30 - 15}px`);
+    circle.style.animationDelay = `${Math.random() * 2}s`;
+    body.appendChild(circle);
+  }
+  // water-drop: setInterval 대신 requestAnimationFrame으로 부드럽게
+  let lastDropTime = 0;
+  function createDrop(timestamp) {
+    if (timestamp - lastDropTime >= 1200) {  // 1.2초 간격 유지
+      const drop = document.createElement('div');
+      drop.className = 'water-drop';
+      drop.style.left = `${Math.random() * 100}%`;
+      drop.style.setProperty('--duration', `${Math.random() * 1.2 + 1.5}s`);
+      body.appendChild(drop);
+      setTimeout(() => drop.remove(), 3000);
+      lastDropTime = timestamp;
+    }
+    requestAnimationFrame(createDrop);
+  }
+  requestAnimationFrame(createDrop);
+}
     }
 
     // 랭킹 로드
@@ -814,15 +890,15 @@ function loadRankings(gameId) {
       }
     });
     
-    const top10 = allRankings.slice(0, 9);  // ✅ 8위까지
-if (top10.length === 0) {
+    const top8 = allRankings.slice(0, 8);  // ✅ 최대 8개 제한
+if (top8.length === 0) {
   const emptyMsg = document.createElement('p');
   emptyMsg.style.textAlign = 'center';
   emptyMsg.style.color = '#94a3b8';
   emptyMsg.textContent = '아직 기록이 없어요';
   rankingDiv.insertBefore(emptyMsg, myRankElem);
 } else {
-  top10.forEach((entry, index) => {  // ✅ 8위까지 표시
+  top8.forEach((entry, index) => {  // ✅ 8위까지 표시
     const p = document.createElement('p');
     const medal = index < 3 ? medals[index] : '';  // ✅ 4위부터는 메달 없음
     const rankText = medal ? `${medal} ${index + 1}위` : `${index + 1}위`;
@@ -832,6 +908,14 @@ if (top10.length === 0) {
     // 내 등수 요소 앞에 삽입
     rankingDiv.insertBefore(p, myRankElem);
   });
+  // 빈 공간 채우기: 8개 미만 시 플레이스홀더 추가
+  for (let i = top8.length; i < 8; i++) {
+    const placeholder = document.createElement('p');
+    placeholder.className = 'placeholder';
+    placeholder.innerHTML = `<span class="rank">---</span> <span>---</span> <span class="score">0점</span>`;
+    placeholder.style.opacity = 0.5;
+    rankingDiv.insertBefore(placeholder, myRankElem);
+  }
 }
 
     // 내 등수 계산 및 표시
@@ -873,7 +957,7 @@ const closeFullRankingBtn = document.getElementById('close-full-ranking');
 function showFullRanking(gameId) {
   fullRankingTitle.textContent = `전체 랭킹 - ${document.querySelector(`[data-game="${gameId}"] .game-title`).textContent}`;
   const scoresRef = ref(db, 'scores/' + gameId);
-  const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(9)); // 최대 8위
+  const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(8)); // 최대 8위
   onValue(topScoresQuery, (snapshot) => {
   const playerBestScores = {};
   
