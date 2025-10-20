@@ -1194,6 +1194,8 @@
         return;
     }
     
+    let needsUpdate = false;
+    
     // 한 프레임에 여러 발을 쏠 수 있도록 while 루프 추가
     while (now - lastShotTime >= shotInterval && queued.number > 0 && currentBottom.number > 0) {
         if (this._particleCount < this._maxParticles) {
@@ -1204,15 +1206,14 @@
         queued.number -= 1;
         shotsFired++;
         this.score += 1;
-        lastShotTime += shotInterval; // now가 아닌 shotInterval을 더해서 정확한 간격 유지
+        lastShotTime += shotInterval;
+        needsUpdate = true;
         
         if (currentBottom.number <= 0) {
             this.targetLanes[laneIndex].shift();
             if (lane.length > 0 && lane[0].color === queued.color) {
-                // 다음 블록으로 전환
                 break;
             } else {
-                // 더 이상 매칭되는 블록이 없음
                 break;
             }
         }
@@ -1223,10 +1224,26 @@
         navigator.vibrate(30);
     }
     
-    this.updateDisplay();
-    this.updateTargetLanes();
-    this.updateQueue();
+    // 변경사항이 있을 때만 UI 업데이트
+    if (needsUpdate) {
+        this.updateDisplay();
+        this.updateTargetLanes();
+        this.updateQueue();
+    }
     
+    // 진동은 프레임당 한 번만
+    if (shotsFired > 0 && 'vibrate' in navigator) {
+        navigator.vibrate(30);
+    }
+    
+    // 변경사항이 있을 때만 UI 업데이트
+    if (needsUpdate) {
+        this.updateDisplay();
+        this.updateTargetLanes();
+        this.updateQueue();
+    }
+    
+    // 계속 발사할지 확인
     if (queued.number > 0 && lane.length > 0 && lane[0].color === queued.color) {
         requestAnimationFrame(fireLoop);
     } else {
@@ -1291,15 +1308,14 @@
                     return 1 - Math.pow(1 - t, 3);
                 }
                 const frame = (now) => {
-                    const t = Math.min(1, (now - start) / duration);
-                    const eased = easeOutCubic(t);
-                    const curX = startX + (targetX - startX) * eased + (Math.random() - 0.5) * 2;
-                    const curY = startY + (targetY - startY) * eased + (Math.random() - 0.5) * 2;
-                    p.style.left = curX + 'px';
-                    p.style.top = curY + 'px';
-                    p.style.opacity = String(1 - eased * 0.3);
-                    const scale = 1 - 0.4 * eased;
-                    p.style.transform = `translate(-50%,-50%) scale(${scale})`;
+    const t = Math.min(1, (now - start) / duration);
+    const eased = easeOutCubic(t);
+    const curX = startX + (targetX - startX) * eased;
+    const curY = startY + (targetY - startY) * eased;
+    const scale = 1 - 0.4 * eased;
+    // transform을 한 번에 적용하여 리플로우 최소화
+    p.style.transform = `translate(${curX - startX}px, ${curY - startY}px) translate(-50%,-50%) scale(${scale})`;
+    p.style.opacity = String(1 - eased * 0.3);
                     if (t < 1) {
                         requestAnimationFrame(frame);
                     } else {
@@ -1707,15 +1723,47 @@
             if (game) game.resetGame();
         }
         function goHome() {
-  if (parent.resetIframe) {
-    parent.resetIframe(); // 부모의 iframe 초기화 호출
+  // iframe 내부에 있는지 확인
+  if (window.parent !== window) {
+    // iframe 내부인 경우
+    try {
+      // 게임을 완전히 정리
+      if (game) {
+        game.stopQueueScanLoop();
+        game.clearAllParticles();
+        game.gameRunning = false;
+      }
+      
+      // 부모의 iframe을 숨기거나 제거
+      const iframe = parent.document.getElementById('game-frame');
+      if (iframe) {
+        iframe.style.display = 'none';
+        // 또는 완전히 제거: iframe.remove();
+      }
+      
+      // 부모 페이지 요소들 보이기
+      parent.document.querySelector('h1').style.display = 'block';
+      parent.document.getElementById('carousel').style.display = 'block';
+      parent.document.getElementById('user-info').style.display = 'flex';
+      
+      if (parent.playBGM) {
+        parent.playBGM(false);
+      }
+      
+      // resetIframe이 있다면 호출
+      if (parent.resetIframe) {
+        parent.resetIframe();
+      }
+    } catch (e) {
+      console.log('Parent access error:', e);
+      // 에러 발생시 그냥 index.html로 이동
+      window.location.href = 'index.html';
+    }
+  } else {
+    // 직접 접근한 경우 index.html로 이동
+    window.location.href = 'index.html';
   }
-  parent.document.querySelector('h1').style.display = 'block';
-  parent.document.getElementById('carousel').style.display = 'block';
-  parent.document.getElementById('user-info').style.display = 'flex';
-  if (parent.playBGM) {
-    parent.playBGM(false); // BGM 유지
-  }
+  
   if ('vibrate' in navigator) {
     navigator.vibrate(50);
   }
