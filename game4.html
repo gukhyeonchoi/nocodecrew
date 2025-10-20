@@ -7,18 +7,29 @@
   <title>기억력 카드 게임</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css">
   <style>
-    body {
+/* iOS Safari 최적화 */
+html {
+  height: -webkit-fill-available;
+}
+
+/* 뷰포트 높이 계산을 위한 CSS 변수 */
+:root {
+  --app-height: 100vh;
+}
+  /* ... 기존 코드 계속 ... */
+  <style>
+body {
   font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
   text-align: center;
   background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
   min-height: 100vh;
+  min-height: -webkit-fill-available; /* iOS Safari 지원 */
   margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  padding: env(safe-area-inset-top, 10px) env(safe-area-inset-right, 10px) env(safe-area-inset-bottom, 10px) env(safe-area-inset-left, 10px);
   color: #2d3748;
   position: relative;
   overflow: hidden;
@@ -44,42 +55,43 @@
       100% { transform: scale(1); }
     }
 
-    #game-board {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      grid-gap: 10px;
-      justify-content: center;
-      margin: 20px auto;
-      perspective: 1000px;
-      position: relative;
-      background: rgba(255,255,255,0.1);
-      padding: 15px;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-      transition: opacity 0.5s;
-      max-width: 100%;
-      width: 300px;
-    }
+#game-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  grid-gap: 10px;
+  justify-content: center;
+  margin: 20px auto;
+  perspective: 1000px;
+  position: relative;
+  background: rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  transition: opacity 0.5s;
+  max-width: 100%;
+  width: 300px;
+  will-change: opacity;
+  transform: translateZ(0); /* 하드웨어 가속 */
+  contain: layout style paint; /* 렌더링 최적화 */
+}
 
-    .card {
-      width: 80px;
-      height: 120px;
-      position: relative;
-      cursor: pointer;
-      transform-style: preserve-3d;
-      transition: transform 0.4s ease-in-out;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      background: linear-gradient(45deg, #ffffff, #f0f0f0);
-      animation: reflect 3s infinite linear;
-    }
+.card {
+  width: 80px;
+  height: 120px;
+  position: relative;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease-in-out;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  will-change: transform; /* GPU 가속 활성화 */
+  backface-visibility: hidden; /* 깜빡임 방지 */
+  -webkit-backface-visibility: hidden;
+  /* reflect 애니메이션 제거 - 성능 개선 */
+}
 
-    @keyframes reflect {
-      0% { box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.3); }
-      50% { box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 20px 0 20px rgba(255,255,255,0.5); }
-      100% { box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.3); }
-    }
 
     .card:hover {
       transform: scale(1.05) translateZ(10px);
@@ -89,17 +101,21 @@
       transform: rotateY(180deg);
     }
 
-    .card .front, .card .back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-    }
+.card .front, .card .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  will-change: transform;
+  transform: translateZ(0); /* 하드웨어 가속 강제 */
+  -webkit-transform: translateZ(0);
+}
 
     .card .back {
       background: linear-gradient(45deg, #667eea, #764ba2);
@@ -199,14 +215,16 @@
       color: white;
     }
 
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.9;
-      pointer-events: none;
-      animation: particle-burst 0.7s ease-out forwards;
-      box-shadow: 0 0 10px rgba(255,255,255,0.5);
-    }
+.particle {
+  position: fixed; /* absolute에서 fixed로 변경 */
+  border-radius: 50%;
+  opacity: 0.9;
+  pointer-events: none;
+  animation: particle-burst 0.7s ease-out forwards;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  /* box-shadow 제거 - 성능 개선 */
+}
 
     @keyframes particle-burst {
       0% { transform: scale(0) translate(0, 0); opacity: 1; }
@@ -372,15 +390,19 @@
       border-radius: 8px;
     }
 
-    #hint-button {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      margin: 0;
-      padding: 8px 15px;
-      font-size: 14px;
-      z-index: 15;
-    }
+#hint-button {
+  padding: 8px 15px;
+  font-size: 14px;
+  margin: 0;
+}
+
+#home-button-game {
+  padding: 8px 15px;
+  font-size: 14px;
+  margin: 0;
+  background: linear-gradient(135deg, #6c757d, #545b62);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
 
     #progress-bar {
       width: 250px;
@@ -550,15 +572,38 @@
     }
 
     @media (max-width: 600px) {
-      body {
-        padding-bottom: 80px;
-      }
-      #game-board {
-        width: 240px;
-        grid-gap: 6px;
-        padding: 8px;
-        border-radius: 10px;
-      }
+  body {
+    padding: env(safe-area-inset-top, 5px) env(safe-area-inset-right, 5px) env(safe-area-inset-bottom, 5px) env(safe-area-inset-left, 5px);
+  }
+  
+  .game-container {
+    max-height: 100vh;
+    height: 100vh;
+    height: -webkit-fill-available;
+    padding: 5px;
+    padding-bottom: calc(5px + env(safe-area-inset-bottom, 20px));
+    gap: 5px;
+  }
+  
+  #game-board {
+    width: 240px;
+    grid-gap: 6px;
+    padding: 8px;
+    border-radius: 10px;
+    margin: 10px auto;
+  }
+  
+  .button-container {
+    padding: 8px;
+    gap: 8px;
+    margin: 5px 0;
+  }
+  
+  .button-container button {
+    min-width: 100px;
+    padding: 10px 15px;
+    font-size: 13px;
+  }
       #game-board.stage-5 {
         width: 300px;
       }
@@ -621,6 +666,30 @@
     * {
       box-sizing: border-box;
     }
+
+.button-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+  position: sticky;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.button-container button {
+  flex: 1 1 auto;
+  min-width: 120px;
+  max-width: 200px;
+}
 
     .sparkle {
       position: absolute;
@@ -728,27 +797,34 @@
       box-shadow: 0 8px 20px rgba(100, 116, 139, 0.3);
     }
 
-    .game-container {
-      display: none;
-      background: transparent; /* Or rgba(255, 255, 255, 0.1) for a subtle tint */
-  backdrop-filter: none; /* Remove blur if not needed, or reduce to blur(5px) */
-      border-radius: 25px;
-      padding: 8px;
-      box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
-      width: 100vw;
-      max-width: 95vw;
-      height: 100vh;
-      max-height: 95vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-evenly;
-      align-items: center;
-      overflow: hidden;
-      touch-action: manipulation;
-      z-index: 10;
-      position: relative;
-      border: 3px solid rgba(147, 197, 253, 0.5);
-    }
+.game-container {
+  display: none;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 25px;
+  padding: 8px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 20px));
+  box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
+  width: 100vw;
+  max-width: 95vw;
+  height: var(--app-height); /* CSS 변수 사용 */
+  max-height: var(--app-height);
+  height: 100vh;
+  height: -webkit-fill-available; /* iOS Safari */
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* space-evenly에서 변경 */
+  gap: 8px;
+  align-items: center;
+  overflow-y: auto; /* 스크롤 가능하게 */
+  overflow-x: hidden;
+  touch-action: pan-y; /* 세로 스크롤 허용 */
+  z-index: 10;
+  position: relative;
+  border: 3px solid rgba(147, 197, 253, 0.5);
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+}
 
     @media (max-width: 768px) {
       #intro {
@@ -807,6 +883,7 @@
     <button id="restart-button">다시 시작</button>
     <button id="continue-ad-btn">📺 광고 보고 이어하기</button>
     <button id="show-ranking-gameover" class="btn-ranking">🏆 랭킹 보기</button>
+    <button id="home-button-gameover" class="btn-home">🏠 홈으로</button>
   </div>
   <div id="name-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); align-items:center; justify-content:center; z-index:4000;">
     <div style="background:linear-gradient(135deg, #fff 0%, #f8f9fa 100%); padding:24px; border-radius:16px; width:88%; max-width:360px; text-align:center; font-family: 'Pretendard', Arial, sans-serif; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.2);">
@@ -819,7 +896,7 @@
     </div>
   </div>
   <div id="modal-root"></div>
-  <div class="game-container" id="gameContainer" style="display: none;">
+<div class="game-container" id="gameContainer" style="display: none;">
     <h1>기억력 카드 게임</h1>
     <div id="score">점수: 0</div>
     <div id="timer">남은 시간: 60초</div>
@@ -828,7 +905,10 @@
     <div id="hearts"></div>
     <div id="game-board"></div>
     <div id="message"></div>
-    <button id="hint-button">힌트 (하트 2개)</button>
+    <div class="button-container">
+      <button id="hint-button">💡 힌트</button>
+      <button id="home-button-game" class="btn-home">🏠 홈</button>
+    </div>
   </div>
 
   <script type="module">
@@ -856,23 +936,23 @@
       console.error("Firebase initialization failed:", error);
     }
 
-    const CONFIG = {
-      MAX_STAGES: 5,
-      HEARTS_PER_STAGE: [10, 8, 6, 6, 5],
-      TIME_LIMITS: [60, 50, 40, 35, 30],
-      CARD_PAIRS: [6, 6, 6, 8, 8],
-      CARD_FLIP_DURATION: 400,
-      WRONG_CARD_RESET_DELAY: 400,
-      SHAKE_ANIMATION_DURATION: 300,
-      GLOW_ANIMATION_DURATION: 800,
-      MESSAGE_DISPLAY_DURATION: 1500,
-      STAGE_TRANSITION_DELAY: 2500,
-      HEART_GAIN_ANIMATION: 300,
-      HEART_LOSE_ANIMATION: 500,
-      PARTICLE_COUNT: 40,
-      PARTICLE_DISTANCE: { MIN: 20, MAX: 120 },
-      CONFETTI_COUNT: 80,
-      VICTORY_PARTICLE_COUNT: 150,
+const CONFIG = {
+  MAX_STAGES: 5,
+  HEARTS_PER_STAGE: [10, 8, 6, 6, 5],
+  TIME_LIMITS: [60, 50, 40, 35, 30],
+  CARD_PAIRS: [6, 6, 6, 8, 8],
+  CARD_FLIP_DURATION: 400,
+  WRONG_CARD_RESET_DELAY: 400,
+  SHAKE_ANIMATION_DURATION: 300,
+  GLOW_ANIMATION_DURATION: 800,
+  MESSAGE_DISPLAY_DURATION: 1500,
+  STAGE_TRANSITION_DELAY: 2500,
+  HEART_GAIN_ANIMATION: 300,
+  HEART_LOSE_ANIMATION: 500,
+  PARTICLE_COUNT: 20, // 40에서 20으로 감소
+  PARTICLE_DISTANCE: { MIN: 20, MAX: 120 },
+  CONFETTI_COUNT: 40, // 80에서 40으로 감소
+  VICTORY_PARTICLE_COUNT: 80, // 150에서 80으로 감소
       VICTORY_PARTICLE_DISTANCE: { MIN: 50, MAX: 250 },
       PARTICLE_COLORS: ['#ffcccb', '#b2fefa', '#b5f5ec', '#fefcbf', '#fed7aa', '#f5d0fe'],
       SCORE_PER_MATCH: 100,
@@ -1026,11 +1106,41 @@ window.goHome = function() {
     if ('vibrate' in navigator) {
         navigator.vibrate(50);
     }
-    
+    // 게임 정리
+    if (timerInterval) clearInterval(timerInterval);
+    if (sounds.bgm) sounds.bgm.pause();
+
     // iframe 내부에서 실행 중인지 확인 
     if (window.parent && window.parent !== window) {
-        // iframe 안에서 실행 중이면 부모에게 메시지 전송
-        window.parent.postMessage('goHome', '*');
+        try {
+            // iframe 자체를 숨기기
+            const iframes = window.parent.document.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                if (iframe.contentWindow === window) {
+                    iframe.style.display = 'none';
+                }
+            });
+            
+            // 부모 페이지 요소들 보이기
+            const h1 = window.parent.document.querySelector('h1');
+            const carousel = window.parent.document.getElementById('carousel');
+            const userInfo = window.parent.document.getElementById('user-info');
+            
+            if (h1) h1.style.display = 'block';
+            if (carousel) carousel.style.display = 'block';
+            if (userInfo) userInfo.style.display = 'flex';
+            
+            if (window.parent.playBGM) {
+                window.parent.playBGM(false);
+            }
+            
+            if (window.parent.resetIframe) {
+                window.parent.resetIframe();
+            }
+        } catch (e) {
+            console.log('Parent access error:', e);
+            window.location.href = 'index.html';
+        }
     } else {
         // 직접 실행 중이면 바로 이동
         window.location.href = 'index.html';
@@ -1274,26 +1384,34 @@ window.goHome = function() {
       }
     }
 
-    function createMatchParticles(x, y) {
-      for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        const size = Math.random() * 10 + 5;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
-        const angle = Math.random() * 2 * Math.PI;
-        const distance = Math.random() * (CONFIG.PARTICLE_DISTANCE.MAX - CONFIG.PARTICLE_DISTANCE.MIN) + CONFIG.PARTICLE_DISTANCE.MIN;
-        const dx = Math.cos(angle) * distance;
-        const dy = Math.sin(angle) * distance;
-        particle.style.setProperty('--dx', `${dx}px`);
-        particle.style.setProperty('--dy', `${dy}px`);
-        particle.style.left = `${x}px`;
-        particle.style.top = `${y}px`;
-        if (board) board.appendChild(particle);
-        setTimeout(() => particle.remove(), 700);
-      }
-    }
+function createMatchParticles(x, y) {
+  // 파티클 수를 줄여서 성능 향상
+  const particleCount = Math.min(20, CONFIG.PARTICLE_COUNT);
+  
+  // board가 아닌 body에 추가하여 깜빡임 방지
+  const boardRect = board ? board.getBoundingClientRect() : { left: 0, top: 0 };
+  
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    const size = Math.random() * 10 + 5;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    particle.style.background = CONFIG.PARTICLE_COLORS[Math.floor(Math.random() * CONFIG.PARTICLE_COLORS.length)];
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = Math.random() * (CONFIG.PARTICLE_DISTANCE.MAX - CONFIG.PARTICLE_DISTANCE.MIN) + CONFIG.PARTICLE_DISTANCE.MIN;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+    particle.style.setProperty('--dx', `${dx}px`);
+    particle.style.setProperty('--dy', `${dy}px`);
+    // board 기준 좌표를 화면 전체 좌표로 변환
+    particle.style.left = `${boardRect.left + x}px`;
+    particle.style.top = `${boardRect.top + y}px`;
+    particle.style.position = 'fixed'; // absolute 대신 fixed 사용
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 700);
+  }
+}
 
     function createConfetti() {
       for (let i = 0; i < CONFIG.CONFETTI_COUNT; i++) {
@@ -1596,7 +1714,18 @@ window.goHome = function() {
         });
       });
       document.getElementById('goHomeBtn').addEventListener('click', window.goHome);
-      if (restartButton) {
+      // 게임 중 홈 버튼
+  const homeButtonGame = document.getElementById('home-button-game');
+  if (homeButtonGame) {
+    homeButtonGame.addEventListener('click', window.goHome);
+  }
+  
+  // 게임 오버 홈 버튼
+  const homeButtonGameOver = document.getElementById('home-button-gameover');
+  if (homeButtonGameOver) {
+    homeButtonGameOver.addEventListener('click', window.goHome);
+  }
+  if (restartButton) {
         restartButton.removeEventListener('click', restartGame);
         restartButton.addEventListener('click', restartGame);
         restartButton.removeEventListener('touchstart', handleRestartTouch);
@@ -1685,9 +1814,19 @@ window.goHome = function() {
       });
     }
 
-        document.addEventListener('DOMContentLoaded', () => {
-      console.log("DOM fully loaded");
-      initializeSounds().then(() => {
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("DOM fully loaded");
+  
+  // 모바일 뷰포트 높이 계산 (주소창 고려)
+  function setAppHeight() {
+    const doc = document.documentElement;
+    doc.style.setProperty('--app-height', `${window.innerHeight}px`);
+  }
+  window.addEventListener('resize', setAppHeight);
+  window.addEventListener('orientationchange', setAppHeight);
+  setAppHeight();
+  
+  initializeSounds().then(() => {
         console.log("All sounds initialized");
       }).catch(err => {
         console.warn("Sound initialization failed:", err);
