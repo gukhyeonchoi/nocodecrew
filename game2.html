@@ -304,8 +304,10 @@
             z-index: 3000; /* 명시적 z-index */
         }
         #statusModal {
-            cursor: pointer;
             z-index: 3100; /* gameOverModal보다 높음 */
+        }
+        #statusModal .modal {
+            cursor: default; /* 모달 내부는 일반 커서 */
         }
         #statusModal.show {
             display: flex;
@@ -1380,7 +1382,18 @@
         function showStatusModal() {
             const modal = document.getElementById('statusModal');
             modal.classList.add('show');
-            switchTab('status'); // 초기 탭을 상태로 설정
+            
+            // 탭 초기화
+            const statusTab = document.getElementById('statusTab');
+            const highScoreTab = document.getElementById('highScoreTab');
+            const statusBtn = document.getElementById('statusTabBtn');
+            const highScoreBtn = document.getElementById('highScoreTabBtn');
+            
+            statusTab.style.display = 'block';
+            highScoreTab.style.display = 'none';
+            statusBtn.classList.add('active');
+            highScoreBtn.classList.remove('active');
+            
             updateUI();
             if ('vibrate' in navigator) {
                 navigator.vibrate([50]);
@@ -1397,8 +1410,7 @@
         }
 
         // 추가: 탭 전환
-        function switchTab(event, tab) {
-            event.stopPropagation(); // 상위 이벤트 전파 차단
+        function switchTab(tab) {
             const statusTab = document.getElementById('statusTab');
             const highScoreTab = document.getElementById('highScoreTab');
             const statusBtn = document.getElementById('statusTabBtn');
@@ -1623,9 +1635,6 @@
         document.getElementById('resetGameBtn').addEventListener('click', restartGame);
         document.getElementById('goHomeBtn2').addEventListener('click', goHome);
 
-        document.getElementById('continueAdBtn').addEventListener('click', () => {
-            showAdModal();
-        });
 
         document.addEventListener('DOMContentLoaded', () => {
             createBackgroundEffects();
@@ -1635,36 +1644,65 @@
             nameDisplay.style.fontWeight = '700';
             nameDisplay.textContent = `👤 플레이어: ${playerName}`;
             document.getElementById('intro').insertBefore(nameDisplay, document.getElementById('startGameBtn'));
+            
+            // 기본 버튼 이벤트
             document.getElementById('startGameBtn').addEventListener('click', startGame);
-            document.getElementById('goHomeBtn').addEventListener('click', goHome); // 추가
+            document.getElementById('goHomeBtn').addEventListener('click', goHome);
             document.getElementById('resetGameBtn').addEventListener('click', restartGame);
-            document.getElementById('restartBtn').addEventListener('click', restartGame);
-            document.getElementById('goHomeModalBtn').addEventListener('click', goHome);
-            document.getElementById('goHomeBtn2').addEventListener('click', goHome); // 추가
-            document.getElementById('continueAdBtn').addEventListener('click', showAdModal);
-            document.getElementById('showStatusBtn').addEventListener('click', showStatusModal);
-            document.getElementById('statusModal').addEventListener('click', (e) => {
-                if (e.target.closest('.tab-group, .tab-content')) return;
-                hideStatusModal();
+            document.getElementById('goHomeBtn2').addEventListener('click', goHome);
+            
+            // 게임오버 모달 버튼들
+            document.getElementById('restartBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                restartGame();
             });
-            document.getElementById('statusModal').addEventListener('touchstart', (e) => {
-                if (e.target.closest('.tab-group, .tab-content')) return;
+            document.getElementById('goHomeModalBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                goHome(e);
+            });
+            document.getElementById('showStatusBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                showStatusModal();
+            });
+            
+            // 탭 전환 버튼 이벤트
+            document.getElementById('statusTabBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                switchTab('status');
+            });
+            document.getElementById('highScoreTabBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                switchTab('highScore');
+            });
+            
+            // 터치 이벤트 (모바일용)
+            document.getElementById('statusTabBtn').addEventListener('touchend', (e) => {
+                e.stopPropagation();
                 e.preventDefault();
-                hideStatusModal();
+                switchTab('status');
             }, { passive: false });
-            document.getElementById('statusTabBtn').addEventListener('click', (e) => switchTab(e, 'status'));
-            document.getElementById('highScoreTabBtn').addEventListener('click', (e) => switchTab(e, 'highScore'));
-            document.getElementById('statusTabBtn').addEventListener('touchstart', (e) => {
+            
+            document.getElementById('highScoreTabBtn').addEventListener('touchend', (e) => {
                 e.stopPropagation();
-                switchTab(e, 'status');
+                e.preventDefault();
+                switchTab('highScore');
             }, { passive: false });
-            document.getElementById('highScoreTabBtn').addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-                switchTab(e, 'highScore');
-            }, { passive: false });
-            document.getElementById('gameOverModal').addEventListener('click', (e) => {
-                if (e.target.closest('.modal, .button-group, button')) return; // 버튼/모달 콘텐츠 클릭 시 무시
+            
+            // 최종 상태 모달 닫기 (모달 외부 클릭/터치)
+            document.getElementById('statusModal').addEventListener('click', (e) => {
+                // 모달 내부 클릭은 무시
+                if (e.target.id === 'statusModal') {
+                    hideStatusModal();
+                }
             });
+            
+            document.getElementById('statusModal').addEventListener('touchend', (e) => {
+                // 모달 외부 터치만 닫기
+                if (e.target.id === 'statusModal') {
+                    e.preventDefault();
+                    hideStatusModal();
+                }
+            }, { passive: false });
         });
 
     </script>
