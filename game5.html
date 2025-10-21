@@ -764,9 +764,8 @@
 
         <div class="controls">
             <button class="btn btn-next" id="nextStageBtn" style="display: none;">다음 스테이지</button>
-            <button class="btn btn-reset" id="resetStageBtn">스테이지 재시작</button>
-            <button class="btn btn-new" id="newGameBtn">게임 재시작</button>
-            <button class="btn btn-main" id="mainBtn">나가기</button>
+            <button class="btn btn-new" id="newGameBtn">🔄 다시 시작</button>
+            <button class="btn btn-main" id="mainBtn">🏠 홈으로</button>
         </div>
 
         <div class="message" id="message"></div>
@@ -885,7 +884,6 @@ class AppleNumberGame {
         this.totalScoreEl = document.getElementById('totalScore');
         this.messageEl = document.getElementById('message');
         this.nextStageBtn = document.getElementById('nextStageBtn');
-        this.resetStageBtn = document.getElementById('resetStageBtn');
         this.newGameBtn = document.getElementById('newGameBtn');
         this.mainBtn = document.getElementById('mainBtn');
     }
@@ -893,9 +891,8 @@ class AppleNumberGame {
     bindEvents() {
         const self = this;
         this.nextStageBtn.addEventListener('click', function() { self.nextStage(); });
-        this.resetStageBtn.addEventListener('click', function() { self.resetStage(); });
         this.newGameBtn.addEventListener('click', function() { self.newGame(); });
-        this.mainBtn.addEventListener('click', function() { self.goToMain(); });
+        this.mainBtn.addEventListener('click', function() { window.location.href = 'index.html'; });
 
         this.gameBoard.addEventListener('mousedown', function(e) { self.startDrag(e); });
         document.addEventListener('mousemove', function(e) { self.moveDrag(e); });
@@ -1161,11 +1158,10 @@ class AppleNumberGame {
             this.timerInterval = null;
         }
         this.stageActive = false;
-        document.getElementById('gameContainer').style.display = 'none';
-        document.getElementById('welcomeScreen').style.display = 'flex';
-        gameInstance = null;
+         window.location.href = 'index.html';
     }
 
+    
     nextStage() {
         if (this.currentStage < 3) {
             this.currentStage++;
@@ -1173,11 +1169,6 @@ class AppleNumberGame {
         }
     }
 
-    resetStage() {
-        this.startStage(this.currentStage);
-        const msg = this.isInfiniteMode ? '무한 모드를 재시작했습니다.' : '스테이지를 재시작했습니다.';
-        this.showMessage(msg, 'success');
-    }
 
     startStage(stage) {
         const self = this;
@@ -1337,7 +1328,7 @@ class AppleNumberGame {
         
         const popup = document.createElement('div');
         popup.className = 'modal-backdrop';
-        popup.innerHTML = '<div class="popup-content"><div class="popup-title">스테이지 ' + this.currentStage + ' 완료!</div><div class="popup-score">' + scoreText + '</div><div class="popup-buttons"><button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.nextStage();">다음 스테이지</button><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.resetStage();">다시 도전</button></div></div>';
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">스테이지 ' + this.currentStage + ' 완료!</div><div class="popup-score">' + scoreText + '</div><div class="popup-buttons"><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGameBtn();">🔄 다시 시작</button><button class="btn btn-next" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.nextStage();">다음 스테이지</button></div></div>';
         document.body.appendChild(popup);
     }
 
@@ -1378,7 +1369,7 @@ class AppleNumberGame {
         
         const popup = document.createElement('div');
         popup.className = 'modal-backdrop';
-        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🌟 스테이지 3 완료!</div><div class="popup-score">전체 누적 점수: ' + totalScore.toLocaleString() + '점<br>최대 콤보: x' + this.combo + '<br><br>🎉 모든 스테이지 완주!<br>' + saveMessage + '</div><div class="popup-buttons"><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.goToMain();">나가기</button><button class="btn btn-new" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGame();">새 게임</button></div></div>';
+        popup.innerHTML = '<div class="popup-content"><div class="popup-title">🌟 스테이지 3 완료!</div><div class="popup-score">전체 누적 점수: ' + totalScore.toLocaleString() + '점<br>최대 콤보: x' + this.combo + '<br><br>🎉 모든 스테이지 완주!<br>' + saveMessage + '</div><div class="popup-buttons"><button class="btn btn-new" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.newGame();">🔄 다시 시작</button><button class="btn btn-reset" onclick="this.closest(\'.modal-backdrop\').remove(); gameInstance.goToMain();">🏠 홈으로</button></div></div>';
         document.body.appendChild(popup);
     }
 
