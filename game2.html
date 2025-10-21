@@ -9,6 +9,69 @@
         * {
             box-sizing: border-box;
         }
+
+        /* 액티브 스킬 슬롯 스타일 */
+        #active-skills {
+            position: fixed;
+            top: 220px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .skill-slot {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(147, 197, 253, 0.5);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+            touch-action: manipulation;
+            position: relative;
+        }
+        
+        .skill-slot.active {
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+            animation: skillPulse 1.5s ease-in-out infinite;
+        }
+        
+        .skill-slot.cooldown {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #94a3b8;
+        }
+        
+        .skill-slot:active:not(.cooldown) {
+            transform: scale(0.9);
+        }
+        
+        @keyframes skillPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .skill-icon {
+            font-size: 24px;
+        }
+        
+        .skill-cooldown {
+            position: absolute;
+            bottom: 2px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -545,6 +608,17 @@
             font-weight: 700;
         }
         @media (max-width: 768px) {
+            #active-skills {
+                top: 180px;
+                right: 10px;
+            }
+            .skill-slot {
+                width: 50px;
+                height: 50px;
+            }
+            .skill-icon {
+                font-size: 20px;
+            }
             #intro {
                 padding: 30px 20px;
             }
@@ -604,6 +678,7 @@
             <div class="item-count">🛡️ 보호막: <span id="shieldCount">0</span></div>
             <div class="item-count">🚀 이알 속도: <span id="bulletSpeedCount">0</span></div>
         </div>
+        <div id="active-skills"></div>
         <canvas id="gameCanvas" width="400" height="736"></canvas>
         <div class="game-ui">
             <div>🎯 점수: <span id="score">0</span></div>
@@ -843,7 +918,9 @@
                 SPEED_UP: 0,
                 SHIELD: 0,
                 BULLET_SPEED: 0
-            }
+            },
+            totalItemsCollected: 0,  // 👈 이 줄 추가
+            freezeTimer: 0            // 👈 이 줄 추가
         };
 
         const player = {
@@ -864,6 +941,7 @@
         let enemies = [];
         let particles = [];
         let items = [];
+        let activeSkills = [];
 
         const images = {
             player: new Image(),
@@ -1096,6 +1174,74 @@
             BULLET_SPEED: { color: '#ff66ff', symbol: 'B', name: '이알 속도' }
         };
 
+        const skillTypes = {
+            FREEZE: {
+                icon: '❄️',
+                name: '얼음',
+                duration: 5,
+                cooldown: 20,
+                effect: () => {
+                    gameState.freezeTimer = 5;
+                    createExplosion(canvas.width / 2, canvas.height / 2, '#60a5fa', 30);
+                }
+            },
+            NUKE: {
+                icon: '💣',
+                name: '핵폭탄',
+                duration: 0,
+                cooldown: 25,
+                effect: () => {
+                    enemies.forEach(e => {
+                        createExplosion(e.x + e.width / 2, e.y + e.height / 2, '#ff4444', 15);
+                        gameState.score += 50;
+                    });
+                    enemies = [];
+                    gameState.enemyCount = 0;
+                    createExplosion(canvas.width / 2, canvas.height / 2, '#fbbf24', 50);
+                }
+            },
+            INVINCIBLE: {
+                icon: '✨',
+                name: '무적',
+                duration: 6,
+                cooldown: 30,
+                effect: () => {
+                    player.invuln = 6;
+                    createExplosion(player.x + player.width / 2, player.y + player.height / 2, '#a78bfa', 20);
+                }
+            },
+            HEAL: {
+                icon: '💖',
+                name: '체력회복',
+                duration: 0,
+                cooldown: 35,
+                effect: () => {
+                    gameState.lives = Math.min(5, gameState.lives + 2);
+                    createExplosion(player.x + player.width / 2, player.y + player.height / 2, '#f43f5e', 15);
+                }
+            },
+            MEGA_POWER: {
+                icon: '⚡',
+                name: '메가파워',
+                duration: 10,
+                cooldown: 22,
+                effect: () => {
+                    const tempMulti = player.multiShot;
+                    const tempFire = player.fireRate;
+                    player.multiShot = Math.min(10, player.multiShot + 5);
+                    player.fireRate = Math.min(5, player.fireRate + 2);
+                    setTimeout(() => {
+                        if (!gameState.gameOver) {
+                            player.multiShot = tempMulti;
+                            player.fireRate = tempFire;
+                            updateUI();
+                        }
+                    }, 10000);
+                    createExplosion(player.x + player.width / 2, player.y + player.height / 2, '#fbbf24', 15);
+                }
+            }
+        };
+
         function spawnItem(x, y) {
             if (Math.random() < 0.3) {
                 const types = Object.keys(itemTypes);
@@ -1108,6 +1254,12 @@
             const type = item.type;
             createExplosion(item.x + 10, item.y + 10, itemTypes[type].color, 8);
             gameState.itemCounts[type]++; // Increment the counter for the specific item type
+            gameState.totalItemsCollected++;  // 👈 이 줄 추가
+            
+            // 👈 아래 3줄 추가
+            if (gameState.totalItemsCollected % 20 === 0 && activeSkills.length < 3) {
+                grantRandomSkill();
+            }
             switch (type) {
                 case 'FIRE_RATE': player.fireRate = Math.min(3.0, player.fireRate + 0.3); player.powerUpTimer = 15; break;
                 case 'MULTI_SHOT': player.multiShot = Math.min(5, player.multiShot + 1); player.powerUpTimer = 15; break;
@@ -1121,6 +1273,98 @@
             }
             updateUI();
         }
+
+        function grantRandomSkill() {
+            const availableSkills = Object.keys(skillTypes);
+            const randomSkill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+            
+            const newSkill = {
+                type: randomSkill,
+                cooldownRemaining: 0,
+                active: false
+            };
+            
+            activeSkills.push(newSkill);
+            renderActiveSkills();
+            
+            createExplosion(canvas.width / 2, canvas.height / 2, '#a78bfa', 25);
+            if ('vibrate' in navigator) {
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+        
+        function renderActiveSkills() {
+            const container = document.getElementById('active-skills');
+            container.innerHTML = '';
+            
+            activeSkills.forEach((skill, index) => {
+                const skillData = skillTypes[skill.type];
+                const slot = document.createElement('div');
+                slot.className = 'skill-slot';
+                
+                if (skill.cooldownRemaining > 0) {
+                    slot.classList.add('cooldown');
+                } else {
+                    slot.classList.add('active');
+                }
+                
+                const icon = document.createElement('div');
+                icon.className = 'skill-icon';
+                icon.textContent = skillData.icon;
+                slot.appendChild(icon);
+                
+                if (skill.cooldownRemaining > 0) {
+                    const cooldownText = document.createElement('div');
+                    cooldownText.className = 'skill-cooldown';
+                    cooldownText.textContent = Math.ceil(skill.cooldownRemaining) + 's';
+                    slot.appendChild(cooldownText);
+                }
+                
+                slot.addEventListener('click', () => useSkill(index));
+                slot.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    useSkill(index);
+                });
+                
+                container.appendChild(slot);
+            });
+        }
+        
+        function useSkill(index) {
+            const skill = activeSkills[index];
+            if (!skill || skill.cooldownRemaining > 0 || gameState.gameOver) return;
+            
+            const skillData = skillTypes[skill.type];
+            skillData.effect();
+            skill.cooldownRemaining = skillData.cooldown;
+            
+            renderActiveSkills();
+            
+            if ('vibrate' in navigator) {
+                navigator.vibrate(100);
+            }
+        }
+        
+        function updateSkills(dt) {
+            let needsRender = false;
+            
+            activeSkills.forEach(skill => {
+                if (skill.cooldownRemaining > 0) {
+                    skill.cooldownRemaining = Math.max(0, skill.cooldownRemaining - dt);
+                    needsRender = true;
+                }
+            });
+            
+            if (gameState.freezeTimer > 0) {
+                gameState.freezeTimer = Math.max(0, gameState.freezeTimer - dt);
+            }
+            
+            if (needsRender) {
+                renderActiveSkills();
+            }
+        }
+
 
         function createExplosion(x, y, color = '#ffff00', count = 12) {
             for (let i = 0; i < count; i++) {
@@ -1137,6 +1381,7 @@
         function update(dt) {
             if (gameState.gameOver || gameState.paused) return;
             gameState.time += dt;
+            updateSkills(dt);  // 👈 이 줄 추가
             if (player.invuln > 0) player.invuln = Math.max(0, player.invuln - dt);
             if (player.powerUpTimer > 0) {
                 player.powerUpTimer = Math.max(0, player.powerUpTimer - dt);
@@ -1155,8 +1400,17 @@
                 const dx = (player.x + player.width / 2) - (e.x + e.width / 2);
                 const dy = (player.y + player.height / 2) - (e.y + e.height / 2);
                 const v = vecNorm(dx, dy);
-                e.vx = v.x * e.speed; e.vy = v.y * e.speed;
-                e.x += e.vx * dt; e.y += e.vy * dt;
+                
+                // 👈 얼음 스킬 적용
+                if (gameState.freezeTimer > 0) {
+                    e.vx = 0;
+                    e.vy = 0;
+                } else {
+                    e.vx = v.x * e.speed;
+                    e.vy = v.y * e.speed;
+                    e.x += e.vx * dt;
+                    e.y += e.vy * dt;
+                }
             }
             enemies = enemies.filter(e => {
                 const inBounds = e.x > -60 && e.x < canvas.width + 60 && e.y > -60 && e.y < canvas.height + 60;
@@ -1237,6 +1491,11 @@
                 ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
             } else {
                 ctx.fillStyle = 'rgba(0,17,34,0.35)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            // 👈 아래 4줄 추가
+            if (gameState.freezeTimer > 0) {
+                ctx.fillStyle = 'rgba(96, 165, 250, 0.2)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             const blink = player.invuln > 0 ? Math.floor(gameState.time * 10) % 2 === 0 : true;
@@ -1571,6 +1830,10 @@
             player.x = 200; player.y = 368; player.lastDir = {x: 0, y: -1}; player.invuln = 0;
             player.fireRate = 1.0; player.bulletSpeed = 1.0; player.multiShot = 1; player.shield = 0; player.powerUpTimer = 0; player.speed = 220;
             bullets = []; enemies = []; particles = []; items = [];
+            activeSkills = [];  // 👈 추가
+            gameState.totalItemsCollected = 0;  // 👈 추가
+            gameState.freezeTimer = 0;  // 👈 추가
+            renderActiveSkills();  //
             document.getElementById('gameOverModal').classList.remove('show');
             document.getElementById('statusModal').classList.remove('show'); // 추가
             updateUI();
@@ -1605,6 +1868,10 @@
                 SHIELD: 0,
                 BULLET_SPEED: 0
             };
+            gameState.totalItemsCollected = 0;  // 👈 추가
+            gameState.freezeTimer = 0;  // 👈 추가
+            activeSkills = [];  // 👈 추가
+            renderActiveSkills();  // 👈 추가
             loadHighScores();
             updateUI();
             requestAnimationFrame(loop);
