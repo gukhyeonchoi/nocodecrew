@@ -824,7 +824,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('startButton').addEventListener('click', startGame);
     document.getElementById('homeButton').addEventListener('click', function() {
-        window.location.href = 'index.html';
+        // iframe 내부에서 실행 중인지 확인
+        if (window.parent && window.parent !== window) {
+            // iframe 안에서 실행 중이면 부모에게 메시지 전송
+            window.parent.postMessage('goHome', '*');
+        } else {
+            // 직접 실행 중이면 바로 이동
+            window.location.href = 'index.html';
+        }
     });
 });
 
@@ -892,7 +899,16 @@ class AppleNumberGame {
         const self = this;
         this.nextStageBtn.addEventListener('click', function() { self.nextStage(); });
         this.newGameBtn.addEventListener('click', function() { self.newGame(); });
-        this.mainBtn.addEventListener('click', function() { window.location.href = 'index.html'; });
+        this.mainBtn.addEventListener('click', function() { 
+            // iframe 내부에서 실행 중인지 확인
+            if (window.parent && window.parent !== window) {
+                // iframe 안에서 실행 중이면 부모에게 메시지 전송
+                window.parent.postMessage('goHome', '*');
+            } else {
+                // 직접 실행 중이면 바로 이동
+                window.location.href = 'index.html';
+            }
+        });
 
         this.gameBoard.addEventListener('mousedown', function(e) { self.startDrag(e); });
         document.addEventListener('mousemove', function(e) { self.moveDrag(e); });
@@ -1158,7 +1174,15 @@ class AppleNumberGame {
             this.timerInterval = null;
         }
         this.stageActive = false;
-         window.location.href = 'index.html';
+        
+        // iframe 내부에서 실행 중인지 확인
+        if (window.parent && window.parent !== window) {
+            // iframe 안에서 실행 중이면 부모에게 메시지 전송
+            window.parent.postMessage('goHome', '*');
+        } else {
+            // 직접 실행 중이면 바로 이동
+            window.location.href = 'index.html';
+        }
     }
 
     
